@@ -1,19 +1,19 @@
 #!/bin/sh
 #
-#  makeEuropheno.sh
+#  makeSanger.sh
 ###########################################################################
 #
 #  Purpose:
 #
-#      This script is a wrapper around the process that creates the Europhenome HTMP file
+#      This script is a wrapper around the process that creates the Sanger Allele file
 #
 #  Usage:
 #
-#      makeEuropheno.sh
+#      makeSanger.sh
 #
 #  Env Vars:
 #
-#      See the configuration file (europhenompload.config)
+#      See the configuration file (sanger.config)
 #
 #  Inputs:  None
 #
@@ -35,7 +35,7 @@
 #      1) Source the configuration file to establish the environment.
 #      2) Verify that the input file exists.
 #      3) Establish the log file.
-#      4) Call makeEuropheno.py to create the association file.
+#      4) Call makeSanger.py to create the association file.
 #
 #  Notes:  None
 #
@@ -62,16 +62,16 @@ fi
 LOG=${LOG_DIAG}
 
 #
-# Create the Europhenome/HTMP input file
+# Create the Sanger/Allele input file
 #
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Create the Europhenome/HTMP input file (makeEuropheno.sh)" | tee -a ${LOG}
-./makeEuropheno.py 2>&1 >> ${LOG}
+echo "Create the Sanger/Allele input file (makeSanger.sh)" | tee -a ${LOG}
+./makeSanger.py 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: Create the Europhenome/HTMP input file (makeEuropheno.sh)" | tee -a ${LOG}
+    echo "Error: Create the Sanger/Allele input file (makeSanger.sh)" | tee -a ${LOG}
     exit 1
 fi
 
