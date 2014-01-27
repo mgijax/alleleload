@@ -71,18 +71,14 @@
 #      0:  Successful completion
 #      1:  An exception occurred
 #
-#  Assumes:  Nothing
-#
 #  Implementation:
 #
 #      This script will perform following steps:
 #
 #      1) Initialize variables.
 #      2) Open files.
-#      3) Morph the Sangerme input file into a Hight-Throughput MP input file
+#      3) Morph the Sangerme input file into a general-Allele input file
 #      4) Close files.
-#
-#  Notes:  None
 #
 #  01/27/2014	lec
 #	- TR11515/Sanger/allele derivation load
@@ -190,17 +186,13 @@ def closeFiles():
 
 
 #
-# Purpose: Read the Sanger file and re-format it to create a High-Throughpug MP input file
+# Purpose: Read the Sanger file and re-format it to create a general-Allele input file
 # Returns: 1 if file does not exist or is not readable, else 0
 # Assumes: Nothing
 # Effects: Nothing
 # Throws: Nothing
 #
 def createAlleleFile():
-
-    phenotypingCenter = 'Sangerme'
-    annotationCenter = 'Sangerme'
-    evidenceCode = 'EXP'
 
     for line in fpSanger.readlines():
 
