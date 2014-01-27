@@ -43,7 +43,8 @@ export FILEDIR ARCHIVEDIR INPUTDIR OUTPUTDIR LOGDIR RPTDIR QCOUTPUTDIR
 
 # input file from the BioMart
 #
-INPUTFILE=${DATADOWNLOADS}/www.mousephenotype.org/imits/v2/reports/mgi_modification_allele.reports.tsv
+#INPUTFILE=${DATADOWNLOADS}/www.mousephenotype.org/imits/v2/reports/mgi_modification_allele.reports.tsv
+INPUTFILE=/mgi/all/wts_projects/11500/11515/alleleload/mgi_modification_allele_report-2014-01-27.tsv
 
 export INPUTFILE
 
