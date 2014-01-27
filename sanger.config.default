@@ -1,0 +1,84 @@
+#format: sh
+###########################################################################
+#
+# Configuration.default
+#
+###########################################################################
+
+###########################################################################
+#
+#  If the MGICONFIG environment variable does not have a local override,
+#  use the default "live" settings.
+#
+###########################################################################
+if [ "${MGICONFIG}" = "" ]
+then
+    MGICONFIG=/usr/local/mgi/live/mgiconfig
+    export MGICONFIG
+fi
+
+. ${MGICONFIG}/master.config.sh
+
+###########################################################################
+#
+# Directory paths
+#
+###########################################################################
+
+FILEDIR=${DATALOADSOUTPUT}/mgi/alleleload/sanger
+ARCHIVEDIR=${FILEDIR}/archive
+INPUTDIR=${FILEDIR}/input
+OUTPUTDIR=${FILEDIR}/output
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+QCOUTPUTDIR=${RPTDIR}
+
+export FILEDIR ARCHIVEDIR INPUTDIR OUTPUTDIR LOGDIR RPTDIR QCOUTPUTDIR 
+
+###########################################################################
+#
+# Input/Output files
+#
+###########################################################################
+
+# input file from the BioMart
+#
+INPUTFILE=${DATADOWNLOADS}/www.mousephenotype.org/imits/v2/reports/mgi_modification_allele.reports.tsv
+
+export INPUTFILE
+
+# Log files
+#
+LOG_PROC=${LOGDIR}/sanger.proc.log
+LOG_DIAG=${LOGDIR}/sanger.diag.log
+LOG_CUR=${LOGDIR}/sanger.cur.log
+LOG_VAL=${LOGDIR}/sanger.val.log
+LOG_TEST=${LOGDIR}/sanger.test.log
+
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_TEST
+
+CREATEDBY=alleleload
+JNUMBER=J:23000
+export CREATEDBY JNUMBER
+
+###########################################################################
+#
+#  MISCELLANEOUS SETTINGS
+#
+###########################################################################
+
+#  The name of the job stream for the load
+JOBSTREAM=alleleload
+export JOBSTREAM
+
+#  The name of the load for the subject of an email notification
+MAIL_LOADNAME="Sanger-Allele Load"
+
+#  Recipient list for mailing the log files (comma-separated)
+MAIL_LOG_CUR="mgiadmin@jax.org"
+
+export MAIL_LOADNAME MAIL_LOG_PROC MAIL_LOG_CUR
+
+INSTALLDIR=${ALLELELOAD}
+export INSTALLDIR
+
