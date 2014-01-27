@@ -1,20 +1,19 @@
 #!/bin/sh
 #
-#  makeAlleleFiles.sh
+#  makeEuropheno.sh
 ###########################################################################
 #
 #  Purpose:
 #
-#      This script is a wrapper around the process that generates
-#      the Allele bcp files.
+#      This script is a wrapper around the process that creates the Europhenome HTMP file
 #
 #  Usage:
 #
-#      makeAlleleFiles.sh
+#      makeEuropheno.sh
 #
 #  Env Vars:
 #
-#      See the configuration file (alleleload.config)
+#      See the configuration file (europhenompload.config)
 #
 #  Inputs:  None
 #
@@ -34,9 +33,9 @@
 #      This script will perform following steps:
 #
 #      1) Source the configuration file to establish the environment.
-#      2) Verify that the input files exist.
+#      2) Verify that the input file exists.
 #      3) Establish the log file.
-#      4) Call makeAlleleFiles.py to generate the Allele bcp files.
+#      4) Call makeEuropheno.py to create the association file.
 #
 #  Notes:  None
 #
@@ -44,14 +43,14 @@
 
 cd `dirname $0`
 
-CONFIG=${1}
+CONFIG=$1
 
 #
 # Make sure the configuration file exists and source it.
 #
-if [ -f ../${CONFIG} ]
+if [ -f ${CONFIG} ]
 then
-    . ../${CONFIG}
+    . ${CONFIG}
 else
     echo "Missing configuration file: ${CONFIG}"
     exit 1
@@ -63,16 +62,16 @@ fi
 LOG=${LOG_DIAG}
 
 #
-# Call the Python script to generate the Allele bcp files.
+# Create the Europhenome/HTMP input file
 #
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Make the Allele bcp files (makeAlleleFiles.sh)" | tee -a ${LOG}
-./makeAlleleFiles.py 2>&1 >> ${LOG}
+echo "Create the Europhenome/HTMP input file (makeEuropheno.sh)" | tee -a ${LOG}
+./makeEuropheno.py 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: Make Allele files (makeAlleleFiles.sh)" | tee -a ${LOG}
+    echo "Error: Create the Europhenome/HTMP input file (makeEuropheno.sh)" | tee -a ${LOG}
     exit 1
 fi
 
