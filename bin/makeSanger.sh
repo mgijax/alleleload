@@ -43,14 +43,14 @@
 
 cd `dirname $0`
 
-CONFIG=$1
+CONFIG=${1}
 
 #
 # Make sure the configuration file exists and source it.
 #
-if [ -f ${CONFIG} ]
+if [ -f ../${CONFIG} ]
 then
-    . ${CONFIG}
+    . ../${CONFIG}
 else
     echo "Missing configuration file: ${CONFIG}"
     exit 1
@@ -60,6 +60,8 @@ fi
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
+rm -rf ${LOG}
+touch ${LOG}
 
 #
 # Create the Sanger/Allele input file
@@ -67,7 +69,8 @@ LOG=${LOG_DIAG}
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create the Sanger/Allele input file (makeSanger.sh)" | tee -a ${LOG}
-./makeSanger.py 2>&1 >> ${LOG}
+#./makeSanger.py 2>&1 >> ${LOG}
+./makeSanger.py
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then

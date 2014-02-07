@@ -58,19 +58,6 @@ else
     exit 1
 fi
 
-NOMENCONFIG=$1
-
-#
-# Make sure the nomen configuration file exists and source it.
-#
-if [ -f ../${NOMENCONFIG} ]
-then
-    . ../${NOMENCONFIG}
-else
-    echo "Missing configuration file: ${NOMENCONFIG}"
-    exit 1
-fi
-
 #
 #  Source the DLA library functions.
 #
@@ -102,44 +89,52 @@ rm -rf ${LOG}
 touch ${LOG}
 
 #
-# Create the Marker input file
+# sanger input file
 #
-echo "" >> ${LOG}
-date >> ${LOG}
-echo "Call makeNomenFile.csh (nomenload/bin/)" | tee -a ${LOG}
-${NOMENLOAD}/bin/makeNomenFile.sh ${NOMENCONFIG} 2>&1 >> ${LOG}
-STAT=$?
-checkStatus ${STAT} "makeNomenFile.sh (nomenload/bin/)"
+
+if [ ${FILEDIR} = ${DATALOADSOUTPUT}/mgi/alleleload/sanger ]
+then
 
 #
-# Load the Marker input file
+# copy input file into working directory
+#
+echo "coping input file..." >> ${LOG}
+date >> ${LOG}
+rm -rf ${SANGER_COPY_INPUT_FILE}
+cp ${SANGER_INPUT_FILE} ${SANGER_COPY_INPUT_FILE}
+STAT=$?
+checkStatus ${STAT} "copying input file completed"
+
+#
+# Create the allele input file from the sanger input file
 #
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Run nomenload.py (nomenload/bin/)" | tee -a ${LOG}
-${NOMENLOAD}/bin/nomenload.py 2>&1 >> ${LOG}
+echo "Call makeEuropheno.sh" | tee -a ${LOG}
+./makeSanger.sh ${CONFIG} 2>&1 >> ${LOG}
 STAT=$?
-checkStatus ${STAT} "loadNomen.sh (nomenload/bin/)"
+checkStatus ${STAT} "makeSanger.sh ${CONFIG}"
+fi
 
 #
 # Create the Allele files.
 #
-#echo "" >> ${LOG}
-#date >> ${LOG}
-#echo "Call makeAlleleFile.sh (alleleload.sh)" | tee -a ${LOG}
-#./makeAlleleFile.sh 2>&1 >> ${LOG}
-#STAT=$?
-#checkStatus ${STAT} "makeAlleleFile.sh (alleleload.sh)"
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Call makeAlleleFile.sh (alleleload.sh)" | tee -a ${LOG}
+./makeAlleleFile.sh 2>&1 >> ${LOG}
+STAT=$?
+checkStatus ${STAT} "makeAlleleFile.sh (alleleload.sh)"
 
 #
 # Load Allele files
 #
-#echo "" >> ${LOG}
-##date >> ${LOG}
-#echo "Call loadAllele.sh (alleleload.sh)" | tee -a ${LOG}
-#./loadAllele.sh ${JOBKEY} 2>&1 >> ${LOG}
-#STAT=$?
-#checkStatus ${STAT} "loadAllele.sh (alleleload.sh)"
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Call loadAllele.sh (alleleload.sh)" | tee -a ${LOG}
+./loadAllele.sh ${JOBKEY} 2>&1 >> ${LOG}
+STAT=$?
+checkStatus ${STAT} "loadAllele.sh (alleleload.sh)"
 
 #
 # run postload cleanup and email logs

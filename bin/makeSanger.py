@@ -87,6 +87,8 @@
 
 import sys 
 import os
+import db
+from sets import Set
 
 # SANGER_COPY_INPUT_FILE
 sangerFile = None
@@ -98,6 +100,9 @@ alleleFile = None
 fpSanger = None
 fpAllele = None
 
+alleleLookup = {}
+markerLookup = []
+
 #
 # Purpose: Initialization
 # Returns: 1 if file does not exist or is not readable, else 0
@@ -108,6 +113,7 @@ fpAllele = None
 def initialize():
     global sangerFile, alleleFile
     global fpSanger, fpAllele
+    global alleleLookup
 
     sangerFile = os.getenv('SANGER_COPY_INPUT_FILE')
     alleleFile = os.getenv('INPUTFILE')
@@ -132,6 +138,28 @@ def initialize():
     #
     fpSanger = None
     fpAllele = None
+
+    #
+    # Allele Accession ID/Key/Symbol
+    #
+    results = db.sql('''
+	select aa.accID, a._Allele_key, a.symbol, am.accID as markerID
+	from ALL_Allele a, ACC_Accession aa, ACC_Accession am
+	where a.symbol like "%<tm%"
+	and a._Allele_Status_key in (847114, 3983021)
+	and a._Allele_key = aa._Object_key
+	and aa._MGIType_key = 11
+	and aa.prefixPart = "MGI:"
+	and aa.preferred = 1
+	and a._Marker_key = am._Object_key
+	and am._MGIType_key = 2
+	and am.prefixPart = "MGI:"
+	and am.preferred = 1
+	''', 'auto')
+    for r in results:
+	alleleLookup[r['accID']] = []
+	alleleLookup[r['accID']].append(r)
+	markerLookup.append(r['markerID'])
 
     return rc
 
@@ -194,52 +222,62 @@ def closeFiles():
 #
 def createAlleleFile():
 
+    lineNum = 1
+
     for line in fpSanger.readlines():
+
+	if lineNum == 1:
+		lineNum += 1
+		continue
 
         tokens = line[:-1].split('\t')
 
+
 #       field 1: Marker Symbol
-#       field 2: MGI Marker ID
 #	field 6: Mi Attempt Allele Symbol        
 #	field 7: Mi Attempt Es Cell Allele Symbol        
-#	field 8: Mi Attempt Es Cell MGI Allele Accession 
-#	field 9: Mi Attempt Es Cell Name 
 #	field 11: Colony Name     
 #	field 12: Excision Type   
 #	field 13: Tat Cre Phenotype Attempt Deleter Strain        
 #	field 16: Phenotype Attempt Production Centre     
-#	field 17: MGI Allele Accession    
 
-	sgr_marker_symbol = tokens[0]
-        sgr_marker_id = tokens[1]
-	sgr_allele_symbol = tokens[5]
-	sgr_allele_escell_symbol = tokens[6]
-	sgr_allele_id = tokens[7]
-	sgr_iscre = tokens[11]
-	mgi_allele_id = tokens[16]
+	sgr_marker_symbol_1 = tokens[0]
+        sgr_marker_id_2 = tokens[1]
+	sgr_allele_symbol_6 = tokens[5]
+	sgr_allele_escell_symbol_7 = tokens[6]
+	sgr_allele_id_8 = tokens[7]
+	sgr_escell_name_9 = tokens[8]
+	sgr_iscre_12 = tokens[11]
+	mgi_allele_id_17 = tokens[16]
 
-	mgi_allele_symbol = 'create this'
-	mgi_allele_name = 'create this'
-	mgi_allele_status = 'Autoload'
+	symbol = 'create this'
+	name = 'create this'
+	status = 'Autoload'
+	inheritance = ''
+	mixed = ''
+	extinct = ''
+	creator = ''
 
-#       field 5:  Allele Generate-Type
-#       field 6:  Allele Attribute/SubType
-#       field 7:  Germ Line Transmission
-#       field 8:  Reference Type/J#
-#       field 9:  Strain of Origin
-#       field 10  Mutant Cell Line ID
-#       field 11: Molecular Notes
-#       field 12: Driver Notes
-#       field 13: Molecular Mutation
-#       field 14: Inheritance
-#       field 15: Mixed
-#       field 16: Extinct
-#       field 17: Creation Date
+	print ''
 
-        fpAllele.write(sgr_marker_id + '\t' + \
-                     mgi_allele_symbol + '\t' + \
-                     mgi_allele_name + '\t' + \
-		     test2 + '\n')
+	if len(mgi_allele_id_17) > 0:
+		print 'we have already processed this row'
+
+	print 'field 1:', sgr_marker_symbol_1
+	print 'field 2:', sgr_marker_id_2
+	print 'field 6:', sgr_allele_symbol_6
+	print 'field 7:', sgr_allele_escell_symbol_7
+	print 'field 8:', sgr_allele_id_8
+	print 'field 9:', sgr_escell_name_9
+	print 'field 12:', sgr_iscre_12
+	print 'field 17:', mgi_allele_id_17
+
+        #fpAllele.write(sgr_marker_id + '\t' + \
+        #             mgi_allele_symbol + '\t' + \
+        #             mgi_allele_name + '\t' + \
+	#	     test2 + '\n')
+
+	lineNum += 1
 
     return 0
 
