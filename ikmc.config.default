@@ -43,11 +43,11 @@ export FILEDIR ARCHIVEDIR INPUTDIR OUTPUTDIR LOGDIR RPTDIR QCOUTPUTDIR
 
 # input file from the BioMart
 #
-SANGER_INPUT_FILE=${DATADOWNLOADS}/www.mousephenotype.org/mgi_modification_allele_report.tsv
-SANGER_COPY_INPUT_FILE=${INPUTDIR}/mgi_modification_allele_report.tsv
+IKMC_INPUT_FILE=${DATADOWNLOADS}/www.mousephenotype.org/mgi_modification_allele_report.tsv
+IKMC_COPY_INPUT_FILE=${INPUTDIR}/mgi_modification_allele_report.tsv
 INPUTFILE=${INPUTDIR}/mgi_allele_ikmc.txt
 
-export SANGER_INPUT_FILE SANGER_COPY_INPUT_FILE INPUTFILE
+export IKMC_INPUT_FILE IKMC_COPY_INPUT_FILE INPUTFILE
 
 # Log files
 #
@@ -59,7 +59,7 @@ LOG_TEST=${LOGDIR}/ikmc.test.log
 
 export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_TEST
 
-CREATEDBY=alleleload
+CREATEDBY=ikmc_alleleload
 JNUMBER=J:23000
 export CREATEDBY JNUMBER
 
@@ -74,7 +74,7 @@ JOBSTREAM=alleleload
 export JOBSTREAM
 
 #  The name of the load for the subject of an email notification
-MAIL_LOADNAME="Sanger-Allele Load"
+MAIL_LOADNAME="IKMC-Allele Load"
 
 #  Recipient list for mailing the log files (comma-separated)
 MAIL_LOG_CUR="mgiadmin@jax.org"
