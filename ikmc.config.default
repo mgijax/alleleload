@@ -56,11 +56,13 @@ LOG_DIAG=${LOGDIR}/ikmc.diag.log
 LOG_CUR=${LOGDIR}/ikmc.cur.log
 LOG_VAL=${LOGDIR}/ikmc.val.log
 LOG_TEST=${LOGDIR}/ikmc.test.log
+SKIP_DIAG=${LOGDIR}/ikmc.skip.log
+EXISTS_DIAG=${LOGDIR}/ikmc.exist.log
 
-export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_TEST
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_TEST SKIP_DIAG EXISTS_DIAG
 
 CREATEDBY=ikmc_alleleload
-JNUMBER=J:23000
+JNUMBER=J:204739
 export CREATEDBY JNUMBER
 
 ###########################################################################
