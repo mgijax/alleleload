@@ -381,7 +381,7 @@ def createAlleleFile():
 	ikmc_allele_id_8 = tokens[7]
 	ikmc_escell_name_9 = tokens[8]
 	ikmc_colony_11 = tokens[10]
-	ikmc_iscre_12 = tokens[11]
+	ikmc_iscre_12 = tokens[11].lower()
 	ikmc_tatcre_13 = tokens[12]
 	mgi_allele_id_17 = tokens[16]
 
