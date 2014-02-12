@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  makeAlleleFiles.sh
+#  makeAllele.sh
 ###########################################################################
 #
 #  Purpose:
@@ -10,7 +10,7 @@
 #
 #  Usage:
 #
-#      makeAlleleFiles.sh
+#      makeAllele.sh
 #
 #  Env Vars:
 #
@@ -36,7 +36,7 @@
 #      1) Source the configuration file to establish the environment.
 #      2) Verify that the input files exist.
 #      3) Establish the log file.
-#      4) Call makeAlleleFiles.py to generate the Allele bcp files.
+#      4) Call makeAllele.py to generate the Allele bcp files.
 #
 #  Notes:  None
 #
@@ -69,12 +69,12 @@ touch ${LOG}
 #
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Make the Allele bcp files (makeAlleleFiles.sh)" | tee -a ${LOG}
-./makeAlleleFiles.py 2>&1 >> ${LOG}
+echo "Make the Allele bcp files (makeAllele.sh)" | tee -a ${LOG}
+./makeAllele.py 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: Make Allele files (makeAlleleFiles.sh)" | tee -a ${LOG}
+    echo "Error: Make Allele files (makeAllele.sh)" | tee -a ${LOG}
     exit 1
 fi
 

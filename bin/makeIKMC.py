@@ -48,23 +48,25 @@
 #
 #	Allele file ($INPUTFILE):
 #
-#       field 1:  MGI Marker ID
-#       field 2:  Allele Symbol
-#       field 3:  Allele Name
-#       field 4:  Allele Status
-#       field 5:  Allele Generate-Type
-#       field 6:  Allele Attribute/SubType
-#       field 7:  Germ Line Transmission
-#       field 8:  Reference Type/J#
-#       field 9:  Strain of Origin
-#       field 10  Mutant Cell Line ID
-#       field 11: Molecular Notes
-#       field 12: Driver Notes
-#       field 13: Molecular Mutation
-#       field 14: Inheritance
-#       field 15: Mixed
-#       field 16: Extinct
-#       field 17: Creation Date
+#	field 1:  MGI Marker ID
+#	field 2:  Allele Symbol
+#	field 3:  Allele Name
+#	field 4:  Allele Status
+#	field 5:  Allele Generation (Type)
+#	field 6:  Allele Subtype (currently not used)
+#	field 7:  Allele Collection (currently not used)
+#	field 8:  Germ Line Transmission
+#	field 9:  Reference Type/J#
+#	field 10: Strain of Origin
+#	field 11: Mutant Cell Line ID
+#	field 12: Molecular Notes (_NoteType_key = 1021)
+#	field 13: Driver Notes (_NoteType_key = 1034)
+#	field 14: IKMC Colony Name (_NoteType_key = 1041)
+#	field 15: Molecular Mutation
+#	field 16: Inheritance Mode
+#	field 17: Mixed
+#	field 18: Extinct
+#	field 19: Creation Date
 #
 #  Exit Codes:
 #
@@ -116,6 +118,7 @@ alleleLookup = {}
 childAlleleLookup = {}
 markerLookup = []
 cellLineLookup = {}
+allelesAdded = []
 
 jnumber = ''
 createdBy = ''
@@ -445,7 +448,8 @@ def createAlleleFile():
 		 	mgi_allele_id_17 + '\n')
 		continue
 
-	# Allele Symbol # Allele will be 'tmXa', 'tmX', 'tmXe' isA = 0		# tm1a, tm2a, etc.
+	# Allele Symbol # Allele will be 'tmXa', 'tmX', 'tmXe'
+	isA = 0		# tm1a, tm2a, etc.
 	isX = 0		# tm1, tm2, etc.
 	isE = 0		# tm1e, tm2e, etc.
 	isCre = 0
@@ -461,22 +465,17 @@ def createAlleleFile():
 	newAlleleSym1 = alleleSym.replace(tokens2[0], tokens2[0] + '.1')
 	newAlleleSym2 = alleleSym.replace(tokens2[0], tokens2[0] + '.2')
 
-	#tokens3 = alleleName.split('targeted mutation ')
-	#tokens4 = tokens3.split(',')
-	#newAlleleName1 = alleleSym.replace(tokens4[0], tokens4[0] + '.1')
-	#newAlleleName2 = alleleSym.replace(tokens4[0], tokens4[0] + '.2')
-	newAlleleName1 = alleleName
-	newAlleleName2 = alleleName
+	tokens3 = alleleName.split('targeted mutation')
+	tokens4 = tokens3[1].split(',')
+	newAlleleName1 = alleleName.replace(tokens4[0], tokens4[0] + '.1')
+	newAlleleName2 = alleleName.replace(tokens4[0], tokens4[0] + '.2')
 
 	if alleleSym.find('a(') != -1:
 		isA = 1
-		#fpAllele.write('isA\n')
 	elif alleleSym.find('e(') != -1:
 		isE = 1
-		#fpAllele.write('isE\n')
 	else:
 		isX = 1
-		#fpAllele.write('isX\n')
 
 	if ikmc_iscre_12 == 'cre':
 		isCre = 1
@@ -492,7 +491,7 @@ def createAlleleFile():
 	#
 
 	if isX and isCre and childAlleleLookup.has_key(newAlleleSym1):
-		logit = 'This child already exists in MGI as Cre/tmX.1'
+		logit = 'Child already exists in MGI as Cre/tmX.1'
 		fpExistsDiag.write(logit + '\t' + \
 			ikmc_marker_symbol_1 + '\t' + \
 			ikmc_marker_id_2 + '\t' + \
@@ -511,7 +510,7 @@ def createAlleleFile():
 	#
 
 	elif isX and isFlp and childAlleleLookup.has_key(newAlleleSym2):
-		logit = 'This child already exists in MGI as Flp/tmX.2\n'
+		logit = 'Child already exists in MGI as Flp/tmX.2\n'
 		fpExistsDiag.write(logit + '\t' + \
 			ikmc_marker_symbol_1 + '\t' + \
 			ikmc_marker_id_2 + '\t' + \
@@ -536,6 +535,23 @@ def createAlleleFile():
 		newAlleleSym = newAlleleSym2
 		newAlleleName = newAlleleName2
 
+	if newAlleleSym in allelesAdded:
+		logit = 'Duplicate: child already added by this load\n'
+		fpExistsDiag.write(logit + '\t' + \
+			ikmc_marker_symbol_1 + '\t' + \
+			ikmc_marker_id_2 + '\t' + \
+		 	ikmc_allele_symbol_6 + '\t' + \
+		 	ikmc_allele_escell_symbol_7 + '\t' + \
+		 	ikmc_allele_id_8 + '\t' + \
+		 	ikmc_escell_name_9 + '\t' + \
+		 	ikmc_iscre_12 + '\t' + \
+		 	ikmc_tatcre_13 + '\t' + \
+		 	mgi_allele_id_17 + '\t' + \
+			alleleSym + '\t' + newAlleleSym2 + '\n')
+		continue
+
+	allelesAdded.append(newAlleleSym)
+
 	#
 	# if we made it this far, then we can create an Allele input row
 	#
@@ -547,7 +563,7 @@ def createAlleleFile():
 	fpAllele.write(newAlleleSym + '\t')
 
 	# Allele Name
-	#fpAllele.write(mgi_allele_name + '\t')
+	fpAllele.write(newAlleleName + '\t')
 
 	# Allele Status
 	fpAllele.write('Approvied' + '\t')
@@ -585,7 +601,7 @@ def createAlleleFile():
 	# Molecular Mutation
 	fpAllele.write(molecularMutation + '\t')
 
-	# Inheritance
+	# Inheritance Mode
 	# Mixed
 	# Exitinct
 	# Created By

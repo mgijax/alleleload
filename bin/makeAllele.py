@@ -24,19 +24,21 @@
 #	field 2:  Allele Symbol
 #	field 3:  Allele Name
 #	field 4:  Allele Status
-#	field 5:  Allele Type
-#	field 6:  Allele Attribute/SubType
-#	field 7:  Germ Line Transmission
-#	field 8:  Reference Type/J#
-#	field 9:  Strain of Origin
-#	field 10: Mutant Cell Line ID
-#	field 11: Molecular Notes
-#	field 12: Driver Notes
-#	field 13: Molecular Mutation
-#	field 14: Inheritance
-#	field 15: Mixed
-#	field 16: Extinct
-#	field 17: Creation Date
+#	field 5:  Allele Generation (Type)
+#	field 6:  Allele Subtype (currently not used)
+#	field 7:  Allele Collection (currently not used)
+#	field 8:  Germ Line Transmission
+#	field 9:  Reference Type/J#
+#	field 10: Strain of Origin
+#	field 11: Mutant Cell Line ID
+#	field 12: Molecular Notes (_NoteType_key = 1021)
+#	field 13: Driver Notes (_NoteType_key = 1034)
+#	field 14: IKMC Colony Name (_NoteType_key = 1041)
+#	field 15: Molecular Mutation
+#	field 16: Inheritance Mode
+#	field 17: Mixed
+#	field 18: Extinct
+#	field 19: Creation Date
 #
 # Outputs:
 #
@@ -69,7 +71,7 @@
 # History
 #
 # 01/27/2014	lec
-#	- TR11515/Sanger
+#	- TR11515/IKMC
 #
 # 11/24/2010	lec
 #	- TR10267/Gensat Transgene Alleles
@@ -81,6 +83,7 @@ import accessionlib
 import db
 import mgi_utils
 import loadlib
+import sourceloadlib
 
 #globals
 
@@ -89,12 +92,11 @@ import loadlib
 #
 user = os.environ['MGD_DBUSER']
 passwordFileName = os.environ['MGD_DBPASSWORDFILE']
-mode = os.environ['ALLELEMODE']
-inputFileName = os.environ['ALLELEDATAFILE']
-outputDir = os.environ['ALLELEDATADIR']
-jnum = os.environ['NOMENREFERENCE']
+inputFileName = os.environ['INPUTFILE']
+outputDir = os.environ['OUTPUTDIR']
+jnum = os.environ['JNUMBER']
 
-DEBUG = 0		# if 0, not in debug mode
+DEBUG = 1		# if 0, not in debug mode
 TAB = '\t'		# tab
 CRT = '\n'		# carriage return/newline
 
@@ -149,6 +151,7 @@ mgiNoteObjectKey = 11   # MGI_Note._MGIType_key
 mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
 mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
+mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
 
 NA = -2			# for Not Applicable fields
 mgiTypeKey = 11		# Allele
@@ -191,7 +194,7 @@ def exit(
 
 def init():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
-    global alleleFile, markerFile, mutationFile, mutantFile, refFile, 
+    global alleleFile, markerFile, mutationFile, mutantFile, refFile
     global accFile, accRefFile, noteFile, noteChunkFile
     global newAlleleFile
  
@@ -282,23 +285,6 @@ def init():
     errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
 
     return
-
-# Purpose: verify processing mode
-# Returns: nothing
-# Assumes: nothing
-# Effects: if the processing mode is not valid, exits.
-#	   else, sets global variables
-# Throws:  nothing
-
-def verifyMode():
-
-    global DEBUG
-
-    if mode == 'preview':
-        DEBUG = 1
-        bcpon = 0
-    elif mode != 'load':
-        exit(1, 'Invalid Processing Mode:  %s\n' % (mode))
 
 # Purpose:  sets global primary key variables
 # Returns:  nothing
@@ -392,19 +378,25 @@ def processFile():
         # Split the line into tokens
         tokens = line[:-1].split('\t')
 
-	#	field 1:  MGI Marker ID
-	#	field 2:  Allele Symbol
-	#	field 3:  Allele Name
-	#	field 4:  Allele Status
-	#	field 5:  Allele Type
-	#	field 6:  Germ Line Transmission
-	#	field 7:  Reference Type/J#
-	#	field 8:  Strain of Origin
-	#	field 9:  Mutant Cell Line ID
-	#	field 10: Molecular Notes
-	#	field 11: Driver Notes
-	#	field 12: Molecular Mutation
-	#	field 13: Creation Date
+#	field 1:  MGI Marker ID
+#	field 2:  Allele Symbol
+#	field 3:  Allele Name
+#	field 4:  Allele Status
+#	field 5:  Allele Generation (Type)
+#	field 6:  Allele Subtype (currently not used)
+#	field 7:  Allele Collection (currently not used)
+#	field 8:  Germ Line Transmission
+#	field 9:  Reference Type/J#
+#	field 10: Strain of Origin
+#	field 11: Mutant Cell Line ID
+#	field 12: Molecular Notes (_NoteType_key = 1021)
+#	field 13: Driver Notes (_NoteType_key = 1034)
+#	field 14: IKMC Colony Name (_NoteType_key = 1041)
+#	field 15: Molecular Mutation
+#	field 16: Inheritance Mode
+#	field 17: Mixed
+#	field 18: Extinct
+#	field 19: Creation Date
 
         try:
 	    markerID = tokens[0]
@@ -412,14 +404,20 @@ def processFile():
 	    name = tokens[2]
 	    alleleStatus = tokens[3]
 	    alleleType = tokens[4]
-	    germLine = tokens[5]
-	    references = tokens[6]
-	    strainOfOrigin = tokens[7]
-	    mutantCellLine = tokens[8]
-	    molecularNotes = tokens[9]
-	    driverNotes = tokens[10]
-	    mutation = tokens[11]
-	    createdBy = tokens[12]
+	    alleleSubtype = tokens[5]
+	    collection = tokens[6]
+	    germLine = tokens[7]
+	    references = tokens[8]
+	    strainOfOrigin = tokens[9]
+	    mutantCellLine = tokens[10]
+	    molecularNotes = tokens[11]
+	    driverNotes = tokens[12]
+	    ikmcNotes = tokens[13]
+	    mutation = tokens[14]
+	    inheritanceMode = tokens[15]
+	    isMixed = tokens[16]
+	    isExtinct = tokens[17]
+	    createdBy = tokens[18]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -436,11 +434,6 @@ def processFile():
 	# _term_key = 4268545 (Curated)
 	markerStatusKey = 4268545
 
-	# hard-coded
-	# _vocab_key = 35 (Allele Inheritance Mode)
-	# _term_key = 847095 (Not Applicable)
-	modeKey = 847095
-
 	#
 	# select * from MGI_RefAssocType 
 	# where _MGIType_key = 11
@@ -452,7 +445,7 @@ def processFile():
 	refAssocTypeKey = 1011
 
 	# _vocab_key = 37 (Allele Status)
-	alleleStatusKey loadlib.verifyTerm('', 37, alleleStatus, lineNum, errorFile)
+	alleleStatusKey = loadlib.verifyTerm('', 37, alleleStatus, lineNum, errorFile)
 
 	# _vocab_key = 38 (Allele Type)
 	alleleTypeKey = loadlib.verifyTerm('', 38, alleleType, lineNum, errorFile)
@@ -463,6 +456,12 @@ def processFile():
 	# _vocab_key = 36 (Allele Molecular Mutation)
 	mutationKey = loadlib.verifyTerm('', 36, mutation, lineNum, errorFile)
 
+	# _vocab_key = 35 (Allele Status)
+	inheritanceModeKey = loadlib.verifyTerm('', 35, inheritanceMode, lineNum, errorFile)
+
+	# strains
+	strainOfOriginKey = sourceloadlib.verifyStrain(strainOfOrigin, lineNum, errorFile)
+
 	createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
 
         # if errors, continue to next record
@@ -471,9 +470,10 @@ def processFile():
 
         # if no errors, process the allele
 
-        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s||0|0|0|%s|%s|%s|%s|%s|%s\n' \
-            % (alleleKey, markerKey, strainOfOriginKey, modeKey, alleleTypeKey, \
+        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+            % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
 	    alleleStatusKey, germLineKey, symbol, name, \
+	    isExtinct, isMixed, \
 	    createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
 
         markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
@@ -490,7 +490,7 @@ def processFile():
         #
         # mutant cell line
         #
-        if len(mutantCellLine) > 0):
+        if len(mutantCellLine) > 0:
             addMutantCellLine(alleleKey, mutantCellLine, createdByKey)
 
         # MGI Accession ID for the allelearker
@@ -541,20 +541,49 @@ def processFile():
 
 	    noteKey = noteKey + 1
 
+	# ikmc notes
+	mgiNoteSeqNum = 1
+	if len(ikmcNotes) > 0:
+
+	    noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+		% (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
+		   createdByKey, createdByKey, loaddate, loaddate))
+
+	    while len(ikmcNotes) > 255:
+	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		    % (noteKey, mgiNoteSeqNum, ikmcNotes[:255], createdByKey, createdByKey, loaddate, loaddate))
+		ikmcNotes = ikmcNotes[255:]
+		mgiNoteSeqNum = mgiNoteSeqNum + 1
+
+	    if len(ikmcNotes) > 0:
+	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		    % (noteKey, mgiNoteSeqNum, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+
+	    noteKey = noteKey + 1
+
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
-        newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\n' \
-	    % (markerID, \
-	    symbol, \
-	    name, \
-	    alleleStatus, \
-	    alleleType, \
-	    mgi_utils.prvalue(germLine), \
-	    references, \
-	    mgi_utils.prvalue(strainOfOrigin), \
-	    mgi_utils.prvalue(molecularNotes), \
-	    mgi_utils.prvalue(driverNotes), \
-	    createdBy, mgiPrefix, mgiKey))
+        newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n') \
+	    % (str(markerID), \
+	       str(symbol), \
+	       str(name), \
+	       str(alleleStatus), \
+	       str(alleleType), \
+	       str(alleleSubtype), \
+	       str(collection), \
+	       str(germLine), \
+	       str(references), \
+	       str(strainOfOrigin), \
+	       str(mutantCellLine), \
+	       str(molecularNotes), \
+	       str(driverNotes), \
+	       str(ikmcNotes), \
+	       str(mutation), \
+	       str(inheritanceMode), \
+	       str(isMixed), \
+	       str(isExtinct), \
+	       str(createdBy), \
+	       str(mgiPrefix), str(mgiKey))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
@@ -599,7 +628,6 @@ def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
 #
 
 init()
-verifyMode()
 setPrimaryKeys()
 processFile()
 bcpFiles()
