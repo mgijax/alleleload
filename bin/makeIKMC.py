@@ -566,7 +566,7 @@ def createAlleleFile():
 	fpAllele.write(newAlleleName + '\t')
 
 	# Allele Status
-	fpAllele.write('Approvied' + '\t')
+	fpAllele.write('Approved' + '\t')
 
 	# Allele Type
 	fpAllele.write(alleleType + '\t')

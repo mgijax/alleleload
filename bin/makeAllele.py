@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 
 #
-# Program: makeAlleleFile.py
+# Program: makeAllele.py
 #
 # Original Author: Lori Corbani
 #
@@ -12,7 +12,7 @@
 # Requirements Satisfied by This Program:
 #
 # Usage:
-#	makeAlleleFile.py
+#	makeAllele.py
 #
 # Envvars:
 #
@@ -96,7 +96,7 @@ inputFileName = os.environ['INPUTFILE']
 outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
 
-DEBUG = 1		# if 0, not in debug mode
+DEBUG = 0		# if 0, not in debug mode
 TAB = '\t'		# tab
 CRT = '\n'		# carriage return/newline
 
@@ -114,6 +114,7 @@ accFile = ''            # file descriptor
 accRefFile = ''         # file descriptor
 noteFile = ''		# file descriptor
 noteChunkFile = ''	# file descriptor
+newAlleleFile = ''      # file descriptor
 
 alleleTable = 'ALL_Allele'
 markerTable = 'ALL_Marker_Assoc'
@@ -124,7 +125,6 @@ accTable = 'ACC_Accession'
 accRefTable = 'ACC_AccessionReference'
 noteTable = 'MGI_Note'
 noteChunkTable = 'MGI_NoteChunk'
-newAlleleFile = 'newAllele.txt'
 
 alleleFileName = outputDir + '/' + alleleTable + '.bcp'
 markerFileName = outputDir + '/' + markerTable + '.bcp'
@@ -135,10 +135,10 @@ accFileName = outputDir + '/' + accTable + '.bcp'
 accRefFileName = outputDir + '/' + accRefTable + '.bcp'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
 noteChunkFileName = outputDir + '/' + noteChunkTable + '.bcp'
-newAlleleFileName = outputDir + '/' + newAlleleFile
 
 diagFileName = ''	# diagnostic file name
 errorFileName = ''	# error file name
+newAlleleFileName = ''	# output file with new accession ids
 
 alleleKey = 0           # ALL_Allele._Allele_key
 assocKey =  0		# ALL_Marker_Assoc._Assoc_key
@@ -179,6 +179,7 @@ def exit(
         diagFile.close()
         errorFile.close()
 	inputFile.close()
+	newAlleleFile.close()
     except:
         pass
 
@@ -206,6 +207,7 @@ def init():
 
     diagFileName = outputDir + '/' + tail + '.diagnostics'
     errorFileName = outputDir + '/' + tail + '.error'
+    newAlleleFileName = outputDir + '/' + tail + '.new'
 
     try:
         diagFile = open(diagFileName, 'w')
@@ -217,6 +219,11 @@ def init():
     except:
         exit(1, 'Could not open file %s\n' % errorFileName)
 		
+    try:
+        newAlleleFile = open(newAlleleFileName, 'w')
+    except:
+        exit(1, 'Could not open file %s\n' % newAlleleFileName)
+
     try:
         inputFile = open(inputFileName, 'r')
     except:
@@ -267,11 +274,6 @@ def init():
     except:
         exit(1, 'Could not open file %s\n' % noteChunkFileName)
 
-    try:
-        newAlleleFile = open(newAlleleFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % newAlleleFileName)
-
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)
 
@@ -294,7 +296,7 @@ def init():
 
 def setPrimaryKeys():
 
-    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey
+    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey
 
     results = db.sql('select maxKey = max(_Allele_key) + 1 from ALL_Allele', 'auto')
     alleleKey = results[0]['maxKey']
@@ -314,6 +316,9 @@ def setPrimaryKeys():
     results = db.sql('select maxKey = maxNumericPart + 1 from ACC_AccessionMax ' + \
         'where prefixPart = "%s"' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
+
+    results = db.sql('select maxKey = max(_Assoc_key) + 1 from ALL_Allele_CellLine', 'auto')
+    mutantKey = results[0]['maxKey']
 
 # Purpose:  BCPs the data into the database
 # Returns:  nothing
@@ -432,7 +437,8 @@ def processFile():
 	# hard-coded
 	# _vocab_key = 73 (Marker-Allele Association Status)
 	# _term_key = 4268545 (Curated)
-	markerStatusKey = 4268545
+	# _term_key = 4268544 (Loaded)
+	markerStatusKey = 4268544
 
 	#
 	# select * from MGI_RefAssocType 
@@ -563,27 +569,27 @@ def processFile():
 
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
-        newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n') \
-	    % (str(markerID), \
-	       str(symbol), \
-	       str(name), \
-	       str(alleleStatus), \
-	       str(alleleType), \
-	       str(alleleSubtype), \
-	       str(collection), \
-	       str(germLine), \
-	       str(references), \
-	       str(strainOfOrigin), \
-	       str(mutantCellLine), \
-	       str(molecularNotes), \
-	       str(driverNotes), \
-	       str(ikmcNotes), \
-	       str(mutation), \
-	       str(inheritanceMode), \
-	       str(isMixed), \
-	       str(isExtinct), \
-	       str(createdBy), \
-	       str(mgiPrefix), str(mgiKey))
+        newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
+	    % (mgi_utils.prvalue(markerID), \
+	       mgi_utils.prvalue(symbol), \
+	       mgi_utils.prvalue(name), \
+	       mgi_utils.prvalue(alleleStatus), \
+	       mgi_utils.prvalue(alleleType), \
+	       mgi_utils.prvalue(alleleSubtype), \
+	       mgi_utils.prvalue(collection), \
+	       mgi_utils.prvalue(germLine), \
+	       mgi_utils.prvalue(references), \
+	       mgi_utils.prvalue(strainOfOrigin), \
+	       mgi_utils.prvalue(mutantCellLine), \
+	       mgi_utils.prvalue(molecularNotes), \
+	       mgi_utils.prvalue(driverNotes), \
+	       mgi_utils.prvalue(ikmcNotes), \
+	       mgi_utils.prvalue(mutation), \
+	       mgi_utils.prvalue(inheritanceMode), \
+	       mgi_utils.prvalue(isMixed), \
+	       mgi_utils.prvalue(isExtinct), \
+	       mgi_utils.prvalue(createdBy), \
+	       mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
