@@ -57,6 +57,7 @@
 #
 #       Diagnostics file of all input parameters and SQL commands
 #       Error file
+#	New file (input + new accession ids)
 #
 # Exit Codes:
 #
@@ -79,7 +80,6 @@
 
 import sys
 import os
-import accessionlib
 import db
 import mgi_utils
 import loadlib
@@ -97,8 +97,6 @@ outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
 
 DEBUG = 0		# if 0, not in debug mode
-TAB = '\t'		# tab
-CRT = '\n'		# carriage return/newline
 
 bcpon = 1		# can the bcp files be bcp-ed into the database?  default is yes.
 
@@ -153,18 +151,14 @@ mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
 mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
 mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
 
-NA = -2			# for Not Applicable fields
 mgiTypeKey = 11		# Allele
 mgiPrefix = "MGI:"
 
 loaddate = loadlib.loaddate
 
+#
 # Purpose: prints error message and exits
-# Returns: nothing
-# Assumes: nothing
-# Effects: exits with exit status
-# Throws: nothing
-
+#
 def exit(
     status,          # numeric exit status (integer)
     message = None   # exit message (string)
@@ -186,13 +180,9 @@ def exit(
     db.useOneConnection(0)
     sys.exit(status)
  
+#
 # Purpose: process command line options
-# Returns: nothing
-# Assumes: nothing
-# Effects: initializes global variables
-#          exits if files cannot be opened
-# Throws: nothing
-
+#
 def init():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global alleleFile, markerFile, mutationFile, mutantFile, refFile
@@ -288,12 +278,9 @@ def init():
 
     return
 
+#
 # Purpose:  sets global primary key variables
-# Returns:  nothing
-# Assumes:  nothing
-# Effects:  sets global primary key variables
-# Throws:   nothing
-
+#
 def setPrimaryKeys():
 
     global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey
@@ -320,12 +307,9 @@ def setPrimaryKeys():
     results = db.sql('select maxKey = max(_Assoc_key) + 1 from ALL_Allele_CellLine', 'auto')
     mutantKey = results[0]['maxKey']
 
+#
 # Purpose:  BCPs the data into the database
-# Returns:  nothing
-# Assumes:  nothing
-# Effects:  BCPs the data into the database
-# Throws:   nothing
-
+#
 def bcpFiles():
 
     bcpdelim = "|"
@@ -362,12 +346,9 @@ def bcpFiles():
 
     return
 
+#
 # Purpose:  processes data
-# Returns:  nothing
-# Assumes:  nothing
-# Effects:  verifies and processes each line in the input file
-# Throws:   nothing
-
+#
 def processFile():
 
     global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey
@@ -382,26 +363,6 @@ def processFile():
 
         # Split the line into tokens
         tokens = line[:-1].split('\t')
-
-#	field 1:  MGI Marker ID
-#	field 2:  Allele Symbol
-#	field 3:  Allele Name
-#	field 4:  Allele Status
-#	field 5:  Allele Generation (Type)
-#	field 6:  Allele Subtype (currently not used)
-#	field 7:  Allele Collection (currently not used)
-#	field 8:  Germ Line Transmission
-#	field 9:  Reference Type/J#
-#	field 10: Strain of Origin
-#	field 11: Mutant Cell Line ID
-#	field 12: Molecular Notes (_NoteType_key = 1021)
-#	field 13: Driver Notes (_NoteType_key = 1034)
-#	field 14: IKMC Colony Name (_NoteType_key = 1041)
-#	field 15: Molecular Mutation
-#	field 16: Inheritance Mode
-#	field 17: Mixed
-#	field 18: Extinct
-#	field 19: Creation Date
 
         try:
 	    markerID = tokens[0]
@@ -475,21 +436,25 @@ def processFile():
 
         # if no errors, process the allele
 
+	# allele (master)
         alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
 	    alleleStatusKey, germLineKey, symbol, name, \
 	    isExtinct, isMixed, \
 	    createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
 
+	# allele/marker
         markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
 	    % (assocKey, alleleKey, markerKey, qualifierKey, refKey, markerStatusKey, \
 	       createdByKey, createdByKey, loaddate, loaddate))
 
+	# molecular mutation
 	for mutation in allMutations:
 		mutationKey = loadlib.verifyTerm('', 36, mutation, lineNum, errorFile)
         	mutationFile.write('%s|%s|%s|%s\n' \
 	    	% (alleleKey, mutationKey, loaddate, loaddate))
 
+	# references
         refFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
 	    % (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \
 	       createdByKey, createdByKey, loaddate, loaddate))
@@ -607,6 +572,9 @@ def processFile():
     if not DEBUG:
         db.sql('exec ACC_setMax %d' % (lineNum), None)
 
+#
+# Purpose: write 1 or more mutation cell line associations to bcp file
+#
 def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
 
     global mutantKey
