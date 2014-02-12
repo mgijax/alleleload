@@ -69,7 +69,8 @@ touch ${LOG}
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create the Test/Allele input file (makeTest.sh)" | tee -a ${LOG}
-./makeTest.py 2>&1 >> ${LOG}
+${ALLELELOAD}/bin/makeIKMC.py
+#${ALLELELOAD}/bin/makeIKMC.py 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then

@@ -437,8 +437,7 @@ def processFile():
 	# hard-coded
 	# _vocab_key = 73 (Marker-Allele Association Status)
 	# _term_key = 4268545 (Curated)
-	# _term_key = 4268544 (Loaded)
-	markerStatusKey = 4268544
+	markerStatusKey = 4268545
 
 	#
 	# select * from MGI_RefAssocType 
