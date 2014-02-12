@@ -125,6 +125,10 @@ createdBy = ''
 
 header = 'error\tfield 1\tfield 2\tfield 6\tfield 7\tfield 8\tfield 9\tfield 12\tfield 13\tfield 17\tfull allele symbol\tnew allele symbol\n'
 
+note_tmX1 = 'Cre-mediated excision of the parental (*) allele resulted in the removal of the neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence.  Further information on targeting strategies used for this and other KOMP alleles can be found at <a rel="nofollow" class="external free" href="http://www.knockoutmouse.org/aboutkomps trategies">http://www.knockoutmouse.org/aboutkompstrategies</a>.'
+
+note_tmX2 = 'Flp-mediated excision of the parental (*) allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at <a rel="nofollow" class="external free" href="http://www.knockoutmouse.org/aboutkompstrategies">http://www.knockoutmouse.org/aboutkompstrategies</a>.'
+
 #
 # Purpose: Initialization
 #
@@ -529,11 +533,13 @@ def createAlleleFile():
 		molecularMutation = 'Insertion|Intragenic deletion'
 		newAlleleSym = newAlleleSym1
 		newAlleleName = newAlleleName1
+		molecularNote = note_tmX1
 	elif isX and isFlp:
 		alleleType = 'Targeted (knock-out)'
 		molecularMutation = 'Insertion'
 		newAlleleSym = newAlleleSym2
 		newAlleleName = newAlleleName2
+		molecularNote = note_tmX2
 
 	if newAlleleSym in allelesAdded:
 		logit = 'Duplicate: child already added by this load\n'
@@ -590,7 +596,7 @@ def createAlleleFile():
 	fpAllele.write(ikmc_escell_name_9 + '\t')
 
 	# Molecular Notes
-	fpAllele.write('\t')
+	fpAllele.write(molecularNote + '\t')
 
 	# Drive Note
 	fpAllele.write('\t')
