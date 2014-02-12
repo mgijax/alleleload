@@ -526,12 +526,12 @@ def createAlleleFile():
 
 	if isX and isCre:
 		alleleType = 'Targeted (Reporter)'
-		molecularMutation = 'Insertion'
+		molecularMutation = 'Insertion|Intragenic delettion'
 		newAlleleSym = newAlleleSym1
 		newAlleleName = newAlleleName1
 	elif isX and isFlp:
 		alleleType = 'Targeted (knock-out)'
-		molecularMutation = 'Intragenic deletion'
+		molecularMutation = 'Insertion'
 		newAlleleSym = newAlleleSym2
 		newAlleleName = newAlleleName2
 

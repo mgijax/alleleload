@@ -414,7 +414,7 @@ def processFile():
 	    germLine = tokens[7]
 	    references = tokens[8]
 	    strainOfOrigin = tokens[9]
-	    mutantCellLine = tokens[10]
+	    mutantCellLines = tokens[10]
 	    molecularNotes = tokens[11]
 	    driverNotes = tokens[12]
 	    ikmcNotes = tokens[13]
@@ -496,8 +496,8 @@ def processFile():
         #
         # mutant cell line
         #
-        if len(mutantCellLine) > 0:
-            addMutantCellLine(alleleKey, mutantCellLine, createdByKey)
+        if len(mutantCellLines) > 0:
+            addMutantCellLine(alleleKey, mutantCellLines, createdByKey)
 
         # MGI Accession ID for the allelearker
 
@@ -580,7 +580,7 @@ def processFile():
 	       mgi_utils.prvalue(germLine), \
 	       mgi_utils.prvalue(references), \
 	       mgi_utils.prvalue(strainOfOrigin), \
-	       mgi_utils.prvalue(mutantCellLine), \
+	       mgi_utils.prvalue(mutantCellLines), \
 	       mgi_utils.prvalue(molecularNotes), \
 	       mgi_utils.prvalue(driverNotes), \
 	       mgi_utils.prvalue(ikmcNotes), \
@@ -606,28 +606,30 @@ def processFile():
     if not DEBUG:
         db.sql('exec ACC_setMax %d' % (lineNum), None)
 
-def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
+def addMutantCellLine(alleleKey, mutantCellLines, createdByKey):
 
     global mutantKey
 
     mutantCellLineKey = 0
 
-    results = db.sql('''
-        select c._CellLine_key
-        from ALL_CellLine c, ALL_CellLine_Derivation d
-        where c.isMutant = 1
-        and c._Derivation_key = d._Derivation_key
-	and c.cellLine = '%s'
-        ''' % (mutantCellLine) , 'auto')
+    allCellLines = mutantCellLines.split('|')
 
-    for r in results:
-        mutantCellLineKey = r['_CellLine_key']
+    for cellLine in allCellLines:
 
-    mutantFile.write('%d|%s|%s|%s|%s|%s|%s\n' \
-            % (mutantKey, alleleKey, mutantCellLineKey, \
-               createdByKey, createdByKey, loaddate, loaddate))
+    	results = db.sql('''
+		select _CellLine_key from ALL_CellLine
+		where isMutant = 1 and _Derivation_key is not null
+		and cellLine = '%s'
+        	''' % (cellLine) , 'auto')
 
-    mutantKey = mutantKey + 1
+    	for r in results:
+        	mutantCellLineKey = r['_CellLine_key']
+
+    	mutantFile.write('%d|%s|%s|%s|%s|%s|%s\n' \
+            	% (mutantKey, alleleKey, mutantCellLineKey, \
+               	createdByKey, createdByKey, loaddate, loaddate))
+
+    	mutantKey = mutantKey + 1
 
 #
 # Main

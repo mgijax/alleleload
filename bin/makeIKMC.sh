@@ -76,7 +76,6 @@ then
     echo "Error: Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
     exit 1
 fi
-exit 0
 
 #
 # Create the Alleles
@@ -84,8 +83,7 @@ exit 0
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
-#./makeAllele.sh ${CONFIG} 2>&1 >> ${LOG}
-./makeAllele.sh ${CONFIG}
+./makeAllele.sh ${CONFIG} 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
