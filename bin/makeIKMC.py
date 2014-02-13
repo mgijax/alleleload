@@ -471,13 +471,14 @@ def createAlleleFile():
 	alleleName = alleleLookup[ikmc_allele_id_8][0]['name']
 	strainOfOrigin = alleleLookup[ikmc_allele_id_8][0]['strain']
 	markerSym = alleleLookup[ikmc_allele_id_8][0]['markerSym']
+	alleleSym_6 = ikmc_marker_symbol_1 + '<' + ikmc_allele_symbol_6 + '>'
 
 	tokens1 = alleleSym.split('<')
 	tokens2 = tokens1[1].split('(')
 	newAlleleSym1 = alleleSym.replace(tokens2[0], tokens2[0] + '.1')
 	newAlleleSym2 = alleleSym.replace(tokens2[0], tokens2[0] + '.2')
-	newAlleleSymB = alleleSym.replace('a<', 'b<')
-	newAlleleSymC = alleleSym.replace('a<', 'c<')
+	newAlleleSymB = alleleSym.replace('a(', 'b(')
+	newAlleleSymC = alleleSym.replace('a(', 'c(')
 
 	tokens3 = alleleName.split('targeted mutation')
 	tokens4 = tokens3[1].split(',')
@@ -503,7 +504,7 @@ def createAlleleFile():
 		isFlp = 1
 
 	# skipping for now...
-	#if not (isX or isXe):
+	# sto140/tmX only
 	if not isX:
 		continue
 
@@ -563,24 +564,9 @@ def createAlleleFile():
 			alleleSym + '\t' + newAlleleSym2 + '\n')
 		continue
 
-	elif isXa and alleleSym != ikmc_allele_symbol_6:
+	elif isXa and alleleSym != alleleSym_6:
 		logit = 'Must handle special tmXa/tmXe case\n'
-		fpExistsDiag.write(logit + '\t' + \
-			ikmc_marker_symbol_1 + '\t' + \
-			ikmc_marker_id_2 + '\t' + \
-		 	ikmc_allele_symbol_6 + '\t' + \
-		 	ikmc_allele_escell_symbol_7 + '\t' + \
-		 	ikmc_allele_id_8 + '\t' + \
-		 	ikmc_escell_name_9 + '\t' + \
-		 	ikmc_iscre_12 + '\t' + \
-		 	ikmc_tatcre_13 + '\t' + \
-		 	mgi_allele_id_17 + '\t' + \
-			alleleSym + '\t' + newAlleleSym2 + '\n')
-		continue
-
-	else:
-		logit = 'Something unexpected has happend!\n'
-		fpExistsDiag.write(logit + '\t' + \
+		fpSkipDiag.write(logit + '\t' + \
 			ikmc_marker_symbol_1 + '\t' + \
 			ikmc_marker_id_2 + '\t' + \
 		 	ikmc_allele_symbol_6 + '\t' + \
@@ -637,7 +623,20 @@ def createAlleleFile():
 		n = n.replace('<tm', '<sup>tm')
 		molecularNote = note_tmXc % (n)
 		
-	# else, continue?
+	# else:
+#		logit = 'Something went wrong!\n'
+#		fpExistsDiag.write(logit + '\t' + \
+#			ikmc_marker_symbol_1 + '\t' + \
+#			ikmc_marker_id_2 + '\t' + \
+#		 	ikmc_allele_symbol_6 + '\t' + \
+#		 	ikmc_allele_escell_symbol_7 + '\t' + \
+#		 	ikmc_allele_id_8 + '\t' + \
+#		 	ikmc_escell_name_9 + '\t' + \
+#		 	ikmc_iscre_12 + '\t' + \
+#		 	ikmc_tatcre_13 + '\t' + \
+#		 	mgi_allele_id_17 + '\t' + \
+#			alleleSym + '\t' + newAlleleSym2 + '\n')
+#		continue
 
 	#
 	# if the new Allele has already been created (it's a duplicate)
@@ -661,7 +660,7 @@ def createAlleleFile():
 	allelesAdded.append(newAlleleSym)
 
 	#
-	# if we made it this far, then we can create an Allele input row
+	# ready to create the Allele
 	#
 
 	# Marker ID
@@ -689,7 +688,7 @@ def createAlleleFile():
 	fpAllele.write('Germline' + '\t')
 
 	# Reference
-	fpAllele.write('Original|' + jnumber + '\t')
+	fpAllele.write('Original|' + jnumber + '||Transmission|' + jnumber + '\t')
 
 	# Strain of Origin
 	fpAllele.write(strainOfOrigin + '\t')

@@ -406,10 +406,6 @@ def processFile():
 	# and accType = 'Original'
 	#
 
-	# Original|J:xxxx
-	refKey = loadlib.verifyReference(jnum, lineNum, errorFile)
-	refAssocTypeKey = 1011
-
 	# _vocab_key = 37 (Allele Status)
 	alleleStatusKey = loadlib.verifyTerm('', 37, alleleStatus, lineNum, errorFile)
 
@@ -428,6 +424,10 @@ def processFile():
 	# strains
 	strainOfOriginKey = sourceloadlib.verifyStrain(strainOfOrigin, lineNum, errorFile)
 
+	# reference
+	refKey = loadlib.verifyReference(jnum, lineNum, errorFile)
+
+	# creator
 	createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
 
         # if errors, continue to next record
@@ -454,10 +454,20 @@ def processFile():
         	mutationFile.write('%s|%s|%s|%s\n' \
 	    	% (alleleKey, mutationKey, loaddate, loaddate))
 
-	# references
-        refFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-	    % (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \
-	       createdByKey, createdByKey, loaddate, loaddate))
+	allReferences = references.split('||')
+	for reference in allReferences:
+		refType, refID = reference.split('|')
+		refKey = loadlib.verifyReference(refID, lineNum, errorFile)
+
+		if refType == 'Original':
+			refAssocTypeKey = 1011
+		elif refType == 'Transmission':
+			refAssocTypeKey = 1023
+
+        	refFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+	    		% (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \
+	       		createdByKey, createdByKey, loaddate, loaddate))
+		refAssocKey = refAssocKey + 1
 
         #
         # mutant cell line
@@ -559,7 +569,6 @@ def processFile():
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
-	refAssocKey = refAssocKey + 1
 	assocKey = assocKey + 1
         alleleKey = alleleKey + 1
 

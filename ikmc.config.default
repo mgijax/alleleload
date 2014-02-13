@@ -65,6 +65,9 @@ CREATEDBY=ikmc_alleleload
 JNUMBER=J:204739
 export CREATEDBY JNUMBER
 
+IKMC_FTP=/export/gondor/ftp/pub/IKMC
+export IKMC_FT
+
 ###########################################################################
 #
 #  MISCELLANEOUS SETTINGS
