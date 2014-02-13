@@ -64,6 +64,23 @@ rm -rf ${LOG}
 touch ${LOG}
 
 #
+# find & copy download file to input directory
+#
+if [ ! -r ${IKMC_INPUT_FILE} ]
+then
+    echo "Error: IKMC input file could not be found in download directory." | tee -a ${LOG}
+    exit 1
+fi
+
+cp ${IKMC_INPUT_FILE} ${IKMC_COPY_INPUT_FILE}
+
+if [ ! -r ${IKMC_COPY_INPUT_FILE} ]
+then
+    echo "Error: IKMC input file did not get created proporly." | tee -a ${LOG}
+    exit 1
+fi
+
+#
 # Create the IKMC/Allele input file
 #
 echo "" >> ${LOG}
