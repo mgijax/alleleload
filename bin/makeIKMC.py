@@ -129,6 +129,8 @@ note_tmX1 = 'Cre-mediated excision of the parental %s allele resulted in the rem
 
 note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at <a rel="nofollow" class="external free" href="http://www.knockoutmouse.org/aboutkompstrategies">http://www.knockoutmouse.org/aboutkompstrategies</a>.'
 
+note_tmXe = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other KOMP alleles can be found at <a rel="nofollow" class="external free" href="http://www.knockoutmouse.org/aboutkompstrategies">http://www.knockoutmouse.org/aboutkompstrategies</a>.'
+
 #
 # Purpose: Initialization
 #
@@ -453,9 +455,9 @@ def createAlleleFile():
 		continue
 
 	# Allele Symbol # Allele will be 'tmXa', 'tmX', 'tmXe'
-	isA = 0		# tm1a, tm2a, etc.
+	isXa = 0		# tm1a, tm2a, etc.
 	isX = 0		# tm1, tm2, etc.
-	isE = 0		# tm1e, tm2e, etc.
+	isXe = 0		# tm1e, tm2e, etc.
 	isCre = 0
 	isFlp = 0
 
@@ -474,12 +476,16 @@ def createAlleleFile():
 	newAlleleName1 = alleleName.replace(tokens4[0], tokens4[0] + '.1')
 	newAlleleName2 = alleleName.replace(tokens4[0], tokens4[0] + '.2')
 
+	# determine isXa, isXe, isX
+
 	if alleleSym.find('a(') != -1:
-		isA = 1
+		isXa = 1
 	elif alleleSym.find('e(') != -1:
-		isE = 1
+		isXe = 1
 	else:
 		isX = 1
+
+	# determine cre/flp
 
 	if ikmc_iscre_12 == 'cre':
 		isCre = 1
@@ -487,15 +493,33 @@ def createAlleleFile():
 		isFlp = 1
 
 	# skipping for now...
-	if not isX:
+	if not (isX or isXe):
+		continue
+
+	#
+	# if tmXe is not Cre
+	#
+	if isXe and not isCre:
+		logit = 'This tmXe allele is not Cre.\n'
+		fpExistsDiag.write(logit + '\t' + \
+			ikmc_marker_symbol_1 + '\t' + \
+			ikmc_marker_id_2 + '\t' + \
+		 	ikmc_allele_symbol_6 + '\t' + \
+		 	ikmc_allele_escell_symbol_7 + '\t' + \
+		 	ikmc_allele_id_8 + '\t' + \
+		 	ikmc_escell_name_9 + '\t' + \
+		 	ikmc_iscre_12 + '\t' + \
+		 	ikmc_tatcre_13 + '\t' + \
+		 	mgi_allele_id_17 + '\t' + \
+			alleleSym + '\t' + newAlleleSym2 + '\n')
 		continue
 
 	#
 	# if child:1 already exists
 	#
 
-	if isX and isCre and childAlleleLookup.has_key(newAlleleSym1):
-		logit = 'Child already exists in MGI as Cre/tmX.1'
+	elif (isX or isXe) and isCre and childAlleleLookup.has_key(newAlleleSym1):
+		logit = 'Child already exists in MGI as Cre/tmX.1/tmXe.1'
 		fpExistsDiag.write(logit + '\t' + \
 			ikmc_marker_symbol_1 + '\t' + \
 			ikmc_marker_id_2 + '\t' + \
@@ -528,14 +552,19 @@ def createAlleleFile():
 			alleleSym + '\t' + newAlleleSym2 + '\n')
 		continue
 
-	if isX and isCre:
+	if (isX or isXe) and isCre:
 		alleleType = 'Targeted (Reporter)'
 		molecularMutation = 'Insertion|Intragenic deletion'
 		newAlleleSym = newAlleleSym1
 		newAlleleName = newAlleleName1
 		n = alleleSym.replace('>', '</sup>')
 		n = n.replace('<tm', '<sup>tm')
-		molecularNote = note_tmX1 % (n)
+
+		if isX:
+			molecularNote = note_tmX1 % (n)
+		elif isXe:
+			molecularNote = note_tmXe % (n)
+
 	elif isX and isFlp:
 		alleleType = 'Targeted (knock-out)'
 		molecularMutation = 'Insertion'
@@ -544,6 +573,8 @@ def createAlleleFile():
 		n = alleleSym.replace('>', '</sup>')
 		n = n.replace('<tm', '<sup>tm')
 		molecularNote = note_tmX2 % (n)
+
+	# else, continue?
 
 	if newAlleleSym in allelesAdded:
 		logit = 'Duplicate: child already added by this load\n'
