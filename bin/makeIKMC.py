@@ -125,11 +125,17 @@ createdBy = ''
 
 header = 'error\tfield 1\tfield 2\tfield 6\tfield 7\tfield 8\tfield 9\tfield 12\tfield 13\tfield 17\tfull allele symbol\tnew allele symbol\n'
 
-note_tmX1 = 'Cre-mediated excision of the parental %s allele resulted in the removal of the neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence.  Further information on targeting strategies used for this and other KOMP alleles can be found at <a rel="nofollow" class="external free" href="http://www.knockoutmouse.org/aboutkomps trategies">http://www.knockoutmouse.org/aboutkompstrategies</a>.'
+note_tmX1 = 'Cre-mediated excision of the parental %s allele resulted in the removal of the neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence.  Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
 
-note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at <a rel="nofollow" class="external free" href="http://www.knockoutmouse.org/aboutkompstrategies">http://www.knockoutmouse.org/aboutkompstrategies</a>.'
+note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
 
-note_tmXe = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other KOMP alleles can be found at <a rel="nofollow" class="external free" href="http://www.knockoutmouse.org/aboutkompstrategies">http://www.knockoutmouse.org/aboutkompstrategies</a>.'
+note_tmXe = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+
+note_tmXb = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+
+note_tmXc = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette and the inserted lacZ reporter sequence, leaving behind the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+
+note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
 
 #
 # Purpose: Initialization
@@ -470,11 +476,15 @@ def createAlleleFile():
 	tokens2 = tokens1[1].split('(')
 	newAlleleSym1 = alleleSym.replace(tokens2[0], tokens2[0] + '.1')
 	newAlleleSym2 = alleleSym.replace(tokens2[0], tokens2[0] + '.2')
+	newAlleleSymB = alleleSym.replace('a<', 'b<')
+	newAlleleSymC = alleleSym.replace('a<', 'c<')
 
 	tokens3 = alleleName.split('targeted mutation')
 	tokens4 = tokens3[1].split(',')
 	newAlleleName1 = alleleName.replace(tokens4[0], tokens4[0] + '.1')
 	newAlleleName2 = alleleName.replace(tokens4[0], tokens4[0] + '.2')
+	newAlleleNameB = alleleName.replace('a,', 'b,')
+	newAlleleNameC = alleleName.replace('a,', 'c,')
 
 	# determine isXa, isXe, isX
 
@@ -493,7 +503,8 @@ def createAlleleFile():
 		isFlp = 1
 
 	# skipping for now...
-	if not (isX or isXe):
+	#if not (isX or isXe):
+	if not isX:
 		continue
 
 	#
@@ -552,6 +563,40 @@ def createAlleleFile():
 			alleleSym + '\t' + newAlleleSym2 + '\n')
 		continue
 
+	elif isXa and alleleSym != ikmc_allele_symbol_6:
+		logit = 'Must handle special tmXa/tmXe case\n'
+		fpExistsDiag.write(logit + '\t' + \
+			ikmc_marker_symbol_1 + '\t' + \
+			ikmc_marker_id_2 + '\t' + \
+		 	ikmc_allele_symbol_6 + '\t' + \
+		 	ikmc_allele_escell_symbol_7 + '\t' + \
+		 	ikmc_allele_id_8 + '\t' + \
+		 	ikmc_escell_name_9 + '\t' + \
+		 	ikmc_iscre_12 + '\t' + \
+		 	ikmc_tatcre_13 + '\t' + \
+		 	mgi_allele_id_17 + '\t' + \
+			alleleSym + '\t' + newAlleleSym2 + '\n')
+		continue
+
+	else:
+		logit = 'Something unexpected has happend!\n'
+		fpExistsDiag.write(logit + '\t' + \
+			ikmc_marker_symbol_1 + '\t' + \
+			ikmc_marker_id_2 + '\t' + \
+		 	ikmc_allele_symbol_6 + '\t' + \
+		 	ikmc_allele_escell_symbol_7 + '\t' + \
+		 	ikmc_allele_id_8 + '\t' + \
+		 	ikmc_escell_name_9 + '\t' + \
+		 	ikmc_iscre_12 + '\t' + \
+		 	ikmc_tatcre_13 + '\t' + \
+		 	mgi_allele_id_17 + '\t' + \
+			alleleSym + '\t' + newAlleleSym2 + '\n')
+		continue
+
+	#
+	# new Allele has passed the rules...ready to create the new allele
+	#
+
 	if (isX or isXe) and isCre:
 		alleleType = 'Targeted (Reporter)'
 		molecularMutation = 'Insertion|Intragenic deletion'
@@ -574,7 +619,29 @@ def createAlleleFile():
 		n = n.replace('<tm', '<sup>tm')
 		molecularNote = note_tmX2 % (n)
 
+	elif isXa and isCre:
+		alleleType = 'Targeted (Reporter)'
+		molecularMutation = 'Insertion'
+		newAlleleSym = newAlleleSymB
+		newAlleleName = newAlleleNameB
+		n = alleleSym.replace('>', '</sup>')
+		n = n.replace('<tm', '<sup>tm')
+		molecularNote = note_tmXb % (n)
+
+	elif isXa and isFlp:
+		alleleType = 'Targeted (Flox/Frt)'
+		molecularMutation = 'Insertion'
+		newAlleleSym = newAlleleSymC
+		newAlleleName = newAlleleNameC
+		n = alleleSym.replace('>', '</sup>')
+		n = n.replace('<tm', '<sup>tm')
+		molecularNote = note_tmXc % (n)
+		
 	# else, continue?
+
+	#
+	# if the new Allele has already been created (it's a duplicate)
+	#
 
 	if newAlleleSym in allelesAdded:
 		logit = 'Duplicate: child already added by this load\n'

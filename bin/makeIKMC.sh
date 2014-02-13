@@ -93,6 +93,7 @@ then
     echo "Error: Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
     exit 1
 fi
+exit 0
 
 #
 # Create the Alleles
