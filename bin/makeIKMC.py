@@ -546,7 +546,8 @@ def createAlleleFile():
 
 	#
 	# if the child already exist:
-	# 	add additional mutant cell line and IMKC colony name (to-do)
+	#	if mutant cell line is not attached to child:
+	# 		add additional mutant cell line and IMKC colony name (to-do)
 	#
 
 	else:
@@ -699,13 +700,20 @@ def createAlleleFile():
 	fpAllele.write(molecularMutation + '\t')
 
 	# Inheritance Mode
-	# Mixed
-	# Exitinct
-	# Created By
 	fpAllele.write('Not Applicable' + '\t')
+
+	# Mixed
 	fpAllele.write('0' + '\t')
+
+	# Exitinct
 	fpAllele.write('0' + '\t')
-	fpAllele.write(createdBy + '\n')
+
+	# Created By
+	fpAllele.write(createdBy + '\t')
+
+	# if adding an additional mutant cell line and IKMC Colony to an existing allele
+	# then add the _Allele_key
+	fpAllele.write('\n')
 
 	lineNum += 1
 

@@ -39,6 +39,7 @@
 #	field 17: Mixed
 #	field 18: Extinct
 #	field 19: Creation Date
+#	field 20: Existing Allele key (to add Mutant Cell Line & IKMC Colony Name)
 #
 # Outputs:
 #
@@ -393,6 +394,7 @@ def processFile():
 	    isMixed = tokens[16]
 	    isExtinct = tokens[17]
 	    createdBy = tokens[18]
+	    existingAlleleKey = tokens[19]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -408,12 +410,6 @@ def processFile():
 	# _vocab_key = 73 (Marker-Allele Association Status)
 	# _term_key = 4268545 (Curated)
 	markerStatusKey = 4268545
-
-	#
-	# select * from MGI_RefAssocType 
-	# where _MGIType_key = 11
-	# and accType = 'Original'
-	#
 
 	# _vocab_key = 37 (Allele Status)
 	alleleStatusKey = loadlib.verifyTerm('', 37, alleleStatus, lineNum, errorFile)
@@ -440,7 +436,19 @@ def processFile():
 	createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
 
         # if errors, continue to next record
-        if error:
+	# errors are stored (via loadlib) in the .error log
+
+        if markrKey == 0 \
+		or qualifierKey == 0 \
+		or markrStatusKey == 0 \
+		or alleleStatusKey == 0 \
+		or alleleTypeKey == 0 \
+		or germLineKey == 0 \
+		or allMutations == 0 \
+		or inheritanceModeKey == 0 \
+		or strainOfOriginKey == 0 \
+		or refKey == 0 \
+		or createdByKey == 0:
             continue
 
         # if no errors, process the allele
