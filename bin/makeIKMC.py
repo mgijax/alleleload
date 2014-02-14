@@ -234,7 +234,11 @@ def initialize():
 	select aa.accID, a._Allele_key, a.symbol
 	from ALL_Allele a, ACC_Accession aa
 	where (a.symbol like "%<tm%.%(KOMP%"
+		or a.symbol like "%<tm%b(KOMP%"
+		or a.symbol like "%<tm%c(KOMP%"
 		or a.symbol like "%<tm%.%(EUCOMM%"
+		or a.symbol like "%<tm%b(EUCOMM%"
+		or a.symbol like "%<tm%c(EUCOMM%"
 		)
 	and a._Allele_Status_key in (847114, 3983021)
 	and a._Allele_key = aa._Object_key
@@ -548,7 +552,7 @@ def createAlleleFile():
 	else:
 		childExists = 0
 
-		if (isX or isXe) and isCre and childAlleleLookup.has_key(newAlleleSym1:
+		if (isX or isXe) and isCre and childAlleleLookup.has_key(newAlleleSym1):
 			childExists = 1
 			newAlleleSym = newAlleleSym1
 
@@ -564,7 +568,7 @@ def createAlleleFile():
 			childExists = 1
 			newAlleleSym = newAlleleSymB
 
-		if childExits:
+		if childExists:
 			logit = 'Child already exists in MGI'
 			fpExistsDiag.write(logit + '\t' + \
 				ikmc_marker_symbol_1 + '\t' + \
@@ -593,7 +597,7 @@ def createAlleleFile():
 
 		if isX:
 			molecularNote = note_tmX1 % (n)
-		else::
+		else:
 			molecularNote = note_tmXe % (n)
 
 	elif isX and isFlp:
