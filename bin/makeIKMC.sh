@@ -57,11 +57,40 @@ else
 fi
 
 #
+#  Source the DLA library functions.
+#
+
+if [ "${DLAJOBSTREAMFUNC}" != "" ]
+then
+    if [ -r ${DLAJOBSTREAMFUNC} ]
+    then
+        . ${DLAJOBSTREAMFUNC}
+    else
+        echo "Cannot source DLA functions script: ${DLAJOBSTREAMFUNC}" | tee -a ${LOG}
+        exit 1
+    fi
+else
+    echo "Environment variable DLAJOBSTREAMFUNC has not been defined." | tee -a ${LOG}
+    exit 1
+fi
+
+#
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
 rm -rf ${LOG}
 touch ${LOG}
+
+#
+# createArchive
+#
+echo "archiving..." >> ${LOG}
+date >> ${LOG}
+preload ${OUTPUTDIR}
+rm -rf ${OUTPUTDIR}/*.diagnostics
+rm -rf ${OUTPUTDIR}/*.error
+echo "archiving complete" >> ${LOG}
+date >> ${LOG}
 
 #
 # find & copy download file to input directory
@@ -114,5 +143,16 @@ fi
 #useDate=`date '+%m%d%y'`
 #echo ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
 #cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
+STAT=$?
+if [ ${STAT} -ne 0 ]
+then
+    echo "Error: problem copying output file to ftp site" | tee -a ${LOG}
+    exit 1
+fi
 
+#
+# run postload cleanup and email logs
+#
+shutDown
 exit 0
+
