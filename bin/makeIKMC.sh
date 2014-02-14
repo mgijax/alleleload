@@ -100,8 +100,7 @@ fi
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
-./makeAllele.sh ${CONFIG}
-#./makeAllele.sh ${CONFIG} 2>&1 >> ${LOG}
+./makeAllele.sh ${CONFIG} 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then

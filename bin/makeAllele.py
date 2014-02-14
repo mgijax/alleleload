@@ -463,6 +463,8 @@ def processFile():
 			refAssocTypeKey = 1011
 		elif refType == 'Transmission':
 			refAssocTypeKey = 1023
+		elif refType == 'Molecular':
+			refAssocTypeKey = 1012
 
         	refFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
 	    		% (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \

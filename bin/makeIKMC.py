@@ -503,11 +503,6 @@ def createAlleleFile():
 	else:
 		isFlp = 1
 
-	# skipping for now...
-	# sto140/tmX only
-	if not isX:
-		continue
-
 	#
 	# if tmXe is not Cre
 	#
@@ -564,6 +559,10 @@ def createAlleleFile():
 			alleleSym + '\t' + newAlleleSym2 + '\n')
 		continue
 
+	#
+	# if isXa and field 8 != field 6, then this requires some special handling
+	# 
+
 	elif isXa and alleleSym != alleleSym_6:
 		logit = 'Must handle special tmXa/tmXe case\n'
 		fpSkipDiag.write(logit + '\t' + \
@@ -615,7 +614,7 @@ def createAlleleFile():
 		molecularNote = note_tmXb % (n)
 
 	elif isXa and isFlp:
-		alleleType = 'Targeted (Flox/Frt)'
+		alleleType = 'Targeted (Floxed/Frt)'
 		molecularMutation = 'Insertion'
 		newAlleleSym = newAlleleSymC
 		newAlleleName = newAlleleNameC
@@ -657,6 +656,7 @@ def createAlleleFile():
 			alleleSym + '\t' + newAlleleSym2 + '\n')
 		continue
 
+	# update the new allele list
 	allelesAdded.append(newAlleleSym)
 
 	#
@@ -688,7 +688,7 @@ def createAlleleFile():
 	fpAllele.write('Germline' + '\t')
 
 	# Reference
-	fpAllele.write('Original|' + jnumber + '||Transmission|' + jnumber + '\t')
+	fpAllele.write('Original|' + jnumber + '||Transmission|' + jnumber + '||Molecular|' + jnumber + '\t')
 
 	# Strain of Origin
 	fpAllele.write(strainOfOrigin + '\t')
