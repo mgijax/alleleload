@@ -15,11 +15,7 @@
 #
 #  Env Vars:
 #
-#      The following environment variables are set by the configuration
-#      file that is sourced by the wrapper script:
-#
-#	   IKMC_COPY_INPUT_FILE
-#    	   INPUTFILE
+#      see ikmc.config
 #
 #  Inputs:
 #
@@ -67,6 +63,7 @@
 #	field 17: Mixed
 #	field 18: Extinct
 #	field 19: Creation Date
+#	field 20: Existing Allele key (to add Mutant Cell Line & IKMC Colony Name)
 #
 #  Exit Codes:
 #
@@ -79,7 +76,7 @@
 #
 #      1) Initialize variables.
 #      2) Open files.
-#      3) Morph the IKMCme input file into a general-Allele input file
+#      3) Morph the IKMC input file into a general-Allele input file
 #      4) Close files.
 #
 #  01/27/2014	lec
@@ -90,11 +87,11 @@
 import sys 
 import os
 import db
-from sets import Set
 
 # LOG_DIAG
 # LOG_CUR
-# OUTPUTDIR
+# SKIP_DIAG
+# EXISTS_DIAG
 logDiagFile = None
 logCurFile = None
 skipDiagFile = None
@@ -162,6 +159,34 @@ def initialize():
     #
     # Make sure the environment variables are set.
     #
+    if not logDiagFile:
+        print 'Environment variable not set: LOG_DIAG'
+        rc = 1
+
+    #
+    # Make sure the environment variables are set.
+    #
+    if not logCurFile:
+        print 'Environment variable not set: LOG_CUR'
+        rc = 1
+
+    #
+    # Make sure the environment variables are set.
+    #
+    if not skipDiagFile:
+        print 'Environment variable not set: SKIP_DIAG'
+        rc = 1
+
+    #
+    # Make sure the environment variables are set.
+    #
+    if not existsDiagFile:
+        print 'Environment variable not set: EXISTS_DIAG'
+        rc = 1
+
+    #
+    # Make sure the environment variables are set.
+    #
     if not ikmcFile:
         print 'Environment variable not set: IKMC_COPY_INPUT_FILE'
         rc = 1
@@ -183,7 +208,7 @@ def initialize():
     fpAllele = None
 
     #
-    # Allele Accession ID/Key/Symbol
+    # Allele Accession ID/Key/Symbol/Name/Strain/Marker Acc ID/Marker Symbol
     #
     # KOMP, EUCOMM only : existing parents
     # excluding NCOM (for now)
@@ -277,7 +302,6 @@ def initialize():
 	cellLineLookup[key].append(r)
 
     return rc
-
 
 #
 # Purpose: Open files.
@@ -548,6 +572,7 @@ def createAlleleFile():
 	# if the child already exist:
 	#	if mutant cell line is not attached to child:
 	# 		add additional mutant cell line and IMKC colony name (to-do)
+#			and cellLineLookup.has_key(ikmc_escell_name_9):
 	#
 
 	else:
