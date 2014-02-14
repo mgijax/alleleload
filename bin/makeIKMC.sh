@@ -6,6 +6,7 @@
 #  Purpose:
 #
 #      This script is a wrapper around the process that creates the IKMC Allele file
+#	and loads the Alleles into MGI
 #
 #  Usage:
 #
@@ -13,13 +14,13 @@
 #
 #  Env Vars:
 #
-#      See the configuration file (sanger.config)
+#      See the configuration file (ikmc.config)
 #
-#  Inputs:  None
+#  Inputs:  ikmc.config
 #
 #  Outputs:
 #
-#      - Log file (${LOG_DIAG})
+#      - Log files (${LOG_DIAG}, ${LOG_)
 #
 #  Exit Codes:
 #
@@ -35,7 +36,8 @@
 #      1) Source the configuration file to establish the environment.
 #      2) Verify that the input file exists.
 #      3) Establish the log file.
-#      4) Call makeIKMC.py to create the association file.
+#      4) Call makeIKMC.py to create the allele file.
+#      5) Call makeAllele.csh to create/load the allele file.
 #
 #  Notes:  None
 #
@@ -139,6 +141,7 @@ fi
 
 #
 # copy ${OUTPUTDIR}/mgi_allele_ikmc.txt.new to ${IKMC_FTP} directory
+# add a 'ln -s' to a static ftp file
 #
 #useDate=`date '+%m%d%y'`
 #echo ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
