@@ -522,44 +522,6 @@ def createAlleleFile():
 		continue
 
 	#
-	# if child:1 already exists
-	#
-
-	elif (isX or isXe) and isCre and childAlleleLookup.has_key(newAlleleSym1):
-		logit = 'Child already exists in MGI as Cre/tmX.1/tmXe.1'
-		fpExistsDiag.write(logit + '\t' + \
-			ikmc_marker_symbol_1 + '\t' + \
-			ikmc_marker_id_2 + '\t' + \
-		 	ikmc_allele_symbol_6 + '\t' + \
-		 	ikmc_allele_escell_symbol_7 + '\t' + \
-		 	ikmc_allele_id_8 + '\t' + \
-		 	ikmc_escell_name_9 + '\t' + \
-		 	ikmc_iscre_12 + '\t' + \
-		 	ikmc_tatcre_13 + '\t' + \
-		 	mgi_allele_id_17 + '\t' + \
-			alleleSym + '\t' + newAlleleSym1 + '\n')
-		continue
-
-	#
-	# if child:2 already exists
-	#
-
-	elif isX and isFlp and childAlleleLookup.has_key(newAlleleSym2):
-		logit = 'Child already exists in MGI as Flp/tmX.2\n'
-		fpExistsDiag.write(logit + '\t' + \
-			ikmc_marker_symbol_1 + '\t' + \
-			ikmc_marker_id_2 + '\t' + \
-		 	ikmc_allele_symbol_6 + '\t' + \
-		 	ikmc_allele_escell_symbol_7 + '\t' + \
-		 	ikmc_allele_id_8 + '\t' + \
-		 	ikmc_escell_name_9 + '\t' + \
-		 	ikmc_iscre_12 + '\t' + \
-		 	ikmc_tatcre_13 + '\t' + \
-		 	mgi_allele_id_17 + '\t' + \
-			alleleSym + '\t' + newAlleleSym2 + '\n')
-		continue
-
-	#
 	# if isXa and field 8 != field 6, then this requires some special handling
 	# 
 
@@ -579,6 +541,45 @@ def createAlleleFile():
 		continue
 
 	#
+	# if the child already exist:
+	# 	add additional mutant cell line and IMKC colony name (to-do)
+	#
+
+	else:
+		childExists = 0
+
+		if (isX or isXe) and isCre and childAlleleLookup.has_key(newAlleleSym1:
+			childExists = 1
+			newAlleleSym = newAlleleSym1
+
+		elif isX and isFlp and childAlleleLookup.has_key(newAlleleSym2):
+			childExists = 1
+			newAlleleSym = newAlleleSym2
+
+		elif isXa and isCre and childAlleleLookup.has_key(newAlleleSymB):
+			childExists = 1
+			newAlleleSym = newAlleleSymB
+
+		elif isXa and isFlp and childAlleleLookup.has_key(newAlleleSymC):
+			childExists = 1
+			newAlleleSym = newAlleleSymB
+
+		if childExits:
+			logit = 'Child already exists in MGI'
+			fpExistsDiag.write(logit + '\t' + \
+				ikmc_marker_symbol_1 + '\t' + \
+				ikmc_marker_id_2 + '\t' + \
+		 		ikmc_allele_symbol_6 + '\t' + \
+		 		ikmc_allele_escell_symbol_7 + '\t' + \
+		 		ikmc_allele_id_8 + '\t' + \
+		 		ikmc_escell_name_9 + '\t' + \
+		 		ikmc_iscre_12 + '\t' + \
+		 		ikmc_tatcre_13 + '\t' + \
+		 		mgi_allele_id_17 + '\t' + \
+				alleleSym + '\t' + newAlleleSym + '\n')
+			continue
+
+	#
 	# new Allele has passed the rules...ready to create the new allele
 	#
 
@@ -592,7 +593,7 @@ def createAlleleFile():
 
 		if isX:
 			molecularNote = note_tmX1 % (n)
-		elif isXe:
+		else::
 			molecularNote = note_tmXe % (n)
 
 	elif isX and isFlp:
@@ -622,21 +623,6 @@ def createAlleleFile():
 		n = n.replace('<tm', '<sup>tm')
 		molecularNote = note_tmXc % (n)
 		
-	# else:
-#		logit = 'Something went wrong!\n'
-#		fpExistsDiag.write(logit + '\t' + \
-#			ikmc_marker_symbol_1 + '\t' + \
-#			ikmc_marker_id_2 + '\t' + \
-#		 	ikmc_allele_symbol_6 + '\t' + \
-#		 	ikmc_allele_escell_symbol_7 + '\t' + \
-#		 	ikmc_allele_id_8 + '\t' + \
-#		 	ikmc_escell_name_9 + '\t' + \
-#		 	ikmc_iscre_12 + '\t' + \
-#		 	ikmc_tatcre_13 + '\t' + \
-#		 	mgi_allele_id_17 + '\t' + \
-#			alleleSym + '\t' + newAlleleSym2 + '\n')
-#		continue
-
 	#
 	# if the new Allele has already been created (it's a duplicate)
 	#

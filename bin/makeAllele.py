@@ -183,7 +183,7 @@ def exit(
 #
 # Purpose: process command line options
 #
-def init():
+def initialize():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global alleleFile, markerFile, mutationFile, mutantFile, refFile
     global accFile, accRefFile, noteFile, noteChunkFile
@@ -279,6 +279,23 @@ def init():
     return
 
 #
+# Purpose: Close files.
+#
+def closeFiles():
+
+    alleleFile.close()
+    markerFile.close()
+    mutationFile.close()
+    mutantFile.close()
+    refFile.close()
+    accFile.close()
+    accRefFile.close()
+    noteFile.close()
+    noteChunkFile.close()
+
+    return 0
+
+#
 # Purpose:  sets global primary key variables
 #
 def setPrimaryKeys():
@@ -317,15 +334,7 @@ def bcpFiles():
     if DEBUG or not bcpon:
         return
 
-    alleleFile.close()
-    markerFile.close()
-    mutationFile.close()
-    mutantFile.close()
-    refFile.close()
-    accFile.close()
-    accRefFile.close()
-    noteFile.close()
-    noteChunkFile.close()
+    closeFiles()
 
     bcpI = 'cat %s | bcp %s..' % (passwordFileName, db.get_sqlDatabase())
     bcpII = '-c -t\"|" -S%s -U%s' % (db.get_sqlServer(), db.get_sqlUser())
@@ -611,9 +620,20 @@ def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
 # Main
 #
 
-init()
-setPrimaryKeys()
-processFile()
-bcpFiles()
-exit(0)
+
+if initialize() != 0:
+    sys.exit(1)
+
+if setPrimaryKeys() != 0:
+    sys.exit(1)
+
+if processFile() != 0:
+    sys.exit(1)
+
+if bcpFiles() != 0:
+    closeFiles()
+    sys.exit(1)
+
+closeFiles()
+sys.exit(0)
 
