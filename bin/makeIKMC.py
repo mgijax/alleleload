@@ -555,6 +555,9 @@ def createAlleleFile():
 
 	elif isXa and alleleSym != alleleSym_6:
 		logit = 'Must handle special tmXa/tmXe case\n'
+		# special logging requested by Kim
+		if ikmc_allele_symbol_6 and len(ikmc_allele_symbol_6)>4 and ikmc_allele_symbol_6[3]!="e":
+			logit = "Field 8 and Field 6 symbols do not match"
 		fpSkipDiag.write(logit + '\t' + \
 			ikmc_marker_symbol_1 + '\t' + \
 			ikmc_marker_id_2 + '\t' + \
