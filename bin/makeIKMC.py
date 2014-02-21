@@ -616,18 +616,23 @@ def createAlleleFile():
 	# new Allele has passed the rules...ready to create the new allele
 	#
 
-	if (isX or isXe) and isCre:
+	if isX and isCre:
 		alleleType = 'Targeted (Reporter)'
 		molecularMutation = 'Insertion|Intragenic deletion'
 		newAlleleSym = newAlleleSym1
 		newAlleleName = newAlleleName1
 		n = alleleSym.replace('>', '</sup>')
 		n = n.replace('<tm', '<sup>tm')
+		molecularNote = note_tmX1 % (n)
 
-		if isX:
-			molecularNote = note_tmX1 % (n)
-		else:
-			molecularNote = note_tmXe % (n)
+	elif isXe and isCre:
+		alleleType = 'Targeted (Reporter)'
+		molecularMutation = 'Insertion'
+		newAlleleSym = newAlleleSym1
+		newAlleleName = newAlleleName1
+		n = alleleSym.replace('>', '</sup>')
+		n = n.replace('<tm', '<sup>tm')
+		molecularNote = note_tmXe % (n)
 
 	elif isX and isFlp:
 		alleleType = 'Targeted (knock-out)'
@@ -640,7 +645,7 @@ def createAlleleFile():
 
 	elif isXa and isCre:
 		alleleType = 'Targeted (Reporter)'
-		molecularMutation = 'Insertion'
+		molecularMutation = 'Insertion|Intragenic deletion'
 		newAlleleSym = newAlleleSymB
 		newAlleleName = newAlleleNameB
 		n = alleleSym.replace('>', '</sup>')
