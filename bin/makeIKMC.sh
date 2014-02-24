@@ -6,7 +6,6 @@
 #  Purpose:
 #
 #      This script is a wrapper around the process that creates the IKMC Allele file
-#	and loads the Alleles into MGI
 #
 #  Usage:
 #
@@ -14,13 +13,13 @@
 #
 #  Env Vars:
 #
-#      See the configuration file (ikmc.config)
+#      See the configuration file (sanger.config)
 #
-#  Inputs:  ikmc.config
+#  Inputs:  None
 #
 #  Outputs:
 #
-#      - Log files (${LOG_DIAG}, ${LOG_)
+#      - Log file (${LOG_DIAG})
 #
 #  Exit Codes:
 #
@@ -36,8 +35,7 @@
 #      1) Source the configuration file to establish the environment.
 #      2) Verify that the input file exists.
 #      3) Establish the log file.
-#      4) Call makeIKMC.py to create the allele file.
-#      5) Call makeAllele.csh to create/load the allele file.
+#      4) Call makeIKMC.py to create the association file.
 #
 #  Notes:  None
 #
@@ -59,40 +57,11 @@ else
 fi
 
 #
-#  Source the DLA library functions.
-#
-
-if [ "${DLAJOBSTREAMFUNC}" != "" ]
-then
-    if [ -r ${DLAJOBSTREAMFUNC} ]
-    then
-        . ${DLAJOBSTREAMFUNC}
-    else
-        echo "Cannot source DLA functions script: ${DLAJOBSTREAMFUNC}" | tee -a ${LOG}
-        exit 1
-    fi
-else
-    echo "Environment variable DLAJOBSTREAMFUNC has not been defined." | tee -a ${LOG}
-    exit 1
-fi
-
-#
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
 rm -rf ${LOG}
 touch ${LOG}
-
-#
-# createArchive
-#
-echo "archiving..." >> ${LOG}
-date >> ${LOG}
-preload ${OUTPUTDIR}
-rm -rf ${OUTPUTDIR}/*.diagnostics
-rm -rf ${OUTPUTDIR}/*.error
-echo "archiving complete" >> ${LOG}
-date >> ${LOG}
 
 #
 # find & copy download file to input directory
@@ -125,38 +94,27 @@ then
     echo "Error: Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
     exit 1
 fi
+exit 0
 
 #
 # Create the Alleles
 #
-#echo "" >> ${LOG}
-#date >> ${LOG}
-#echo "Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
-#./makeAllele.sh ${CONFIG} 2>&1 >> ${LOG}
-#STAT=$?
-#if [ ${STAT} -ne 0 ]
-#then
-#    echo "Error: Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
-#    exit 1
-#fi
-
-#
-# copy ${OUTPUTDIR}/mgi_allele_ikmc.txt.new to ${IKMC_FTP} directory
-# add a 'ln -s' to a static ftp file
-#
-#useDate=`date '+%m%d%y'`
-#echo ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
-#cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
+./makeAllele.sh ${CONFIG} 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: problem copying output file to ftp site" | tee -a ${LOG}
+    echo "Error: Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
     exit 1
 fi
 
 #
-# run postload cleanup and email logs
+# copy ${OUTPUTDIR}/mgi_allele_ikmc.txt.new to ${IKMC_FTP} directory
 #
-shutDown
-exit 0
+#useDate=`date '+%m%d%y'`
+#echo ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
+#cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
 
+exit 0

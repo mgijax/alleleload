@@ -277,7 +277,7 @@ def initialize():
 
     errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
 
-    return
+    return 0
 
 #
 # Purpose: Close files.
@@ -325,6 +325,8 @@ def setPrimaryKeys():
     results = db.sql('select maxKey = max(_Assoc_key) + 1 from ALL_Allele_CellLine', 'auto')
     mutantKey = results[0]['maxKey']
 
+    return 0
+
 #
 # Purpose:  BCPs the data into the database
 #
@@ -354,7 +356,7 @@ def bcpFiles():
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
-    return
+    return 0
 
 #
 # Purpose:  processes data
@@ -374,6 +376,7 @@ def processFile():
         # Split the line into tokens
         tokens = line[:-1].split('\t')
 
+	print line
         try:
 	    markerID = tokens[0]
 	    symbol = tokens[1]
@@ -438,9 +441,9 @@ def processFile():
         # if errors, continue to next record
 	# errors are stored (via loadlib) in the .error log
 
-        if markrKey == 0 \
+        if markerKey == 0 \
 		or qualifierKey == 0 \
-		or markrStatusKey == 0 \
+		or markerStatusKey == 0 \
 		or alleleStatusKey == 0 \
 		or alleleTypeKey == 0 \
 		or germLineKey == 0 \
@@ -564,7 +567,8 @@ def processFile():
 
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
-        newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
+        #newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
+        newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
 	    % (mgi_utils.prvalue(markerID), \
 	       mgi_utils.prvalue(symbol), \
 	       mgi_utils.prvalue(name), \
@@ -576,15 +580,15 @@ def processFile():
 	       mgi_utils.prvalue(references), \
 	       mgi_utils.prvalue(strainOfOrigin), \
 	       mgi_utils.prvalue(mutantCellLine), \
-	       mgi_utils.prvalue(molecularNotes), \
-	       mgi_utils.prvalue(driverNotes), \
-	       mgi_utils.prvalue(ikmcNotes), \
 	       mgi_utils.prvalue(mutation), \
 	       mgi_utils.prvalue(inheritanceMode), \
 	       mgi_utils.prvalue(isMixed), \
 	       mgi_utils.prvalue(isExtinct), \
 	       mgi_utils.prvalue(createdBy), \
 	       mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
+	       #mgi_utils.prvalue(molecularNotes), \
+	       #mgi_utils.prvalue(driverNotes), \
+	       #mgi_utils.prvalue(ikmcNotes), \
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
@@ -599,6 +603,9 @@ def processFile():
 
     if not DEBUG:
         db.sql('exec ACC_setMax %d' % (lineNum), None)
+
+
+    return 0
 
 #
 # Purpose: write 1 or more mutation cell line associations to bcp file

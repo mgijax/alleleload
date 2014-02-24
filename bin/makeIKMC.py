@@ -442,7 +442,7 @@ def createAlleleFile():
 		error = 1
 
 	if not alleleLookup.has_key(ikmc_allele_id_8):
-		logit = 'field 8: allele is not in MGI and is not a tmX, tmXa, tmXe\n'
+		logit = 'field 8: allele is not in MGI or is not a tmX, tmXa, tmXe\n'
 		error = 1
 
 	else:
@@ -488,15 +488,16 @@ def createAlleleFile():
 		 	mgi_allele_id_17 + '\n')
 		continue
 
-	# Allele Symbol # Allele will be 'tmXa', 'tmX', 'tmXe'
+	# Allele will be 'tmXa', 'tmX', 'tmXe'
 	isXa = 0		# tm1a, tm2a, etc.
-	isX = 0		# tm1, tm2, etc.
+	isX = 0			# tm1, tm2, etc.
 	isXe = 0		# tm1e, tm2e, etc.
 	isCre = 0
 	isFlp = 0
 
 	alleleSym = alleleLookup[ikmc_allele_id_8][0]['symbol']
 	alleleName = alleleLookup[ikmc_allele_id_8][0]['name']
+	alleleKey = alleleLookup[ikmc_allele_id_8][0]['_Allele_key']
 	strainOfOrigin = alleleLookup[ikmc_allele_id_8][0]['strain']
 	markerSym = alleleLookup[ikmc_allele_id_8][0]['markerSym']
 	alleleSym_6 = ikmc_marker_symbol_1 + '<' + ikmc_allele_symbol_6 + '>'
@@ -514,6 +515,9 @@ def createAlleleFile():
 	newAlleleName2 = alleleName.replace(tokens4[0], tokens4[0] + '.2')
 	newAlleleNameB = alleleName.replace('a,', 'b,')
 	newAlleleNameC = alleleName.replace('a,', 'c,')
+
+	childExists = 0
+	cellLineExists = 0
 
 	# determine isXa, isXe, isX
 
@@ -554,10 +558,14 @@ def createAlleleFile():
 	# 
 
 	elif isXa and alleleSym != alleleSym_6:
-		logit = 'Must handle special tmXa/tmXe case\n'
+
 		# special logging requested by Kim
-		if ikmc_allele_symbol_6 and len(ikmc_allele_symbol_6)>4 and ikmc_allele_symbol_6[3]!="e":
-			logit = "Field 8 and Field 6 symbols do not match"
+		#if len(ikmc_allele_symbol_6) > 4 and ikmc_allele_symbol_6[3] != "e":
+		if len(ikmc_allele_symbol_6) > 4 and ikmc_allele_symbol_6.find('e(') != -1:
+			logit = "field 8 and field 6 symbols do not match"
+		else:
+			logit = 'Must handle special tmXa/tmXe case\n'
+
 		fpSkipDiag.write(logit + '\t' + \
 			ikmc_marker_symbol_1 + '\t' + \
 			ikmc_marker_id_2 + '\t' + \
@@ -574,13 +582,10 @@ def createAlleleFile():
 	#
 	# if the child already exist:
 	#	if mutant cell line is not attached to child:
-	# 		add additional mutant cell line and IMKC colony name (to-do)
-#			and cellLineLookup.has_key(ikmc_escell_name_9):
+	# 		add additional mutant cell line and IMKC colony name
 	#
 
 	else:
-		childExists = 0
-
 		if (isX or isXe) and isCre and childAlleleLookup.has_key(newAlleleSym1):
 			childExists = 1
 			newAlleleSym = newAlleleSym1
@@ -598,19 +603,28 @@ def createAlleleFile():
 			newAlleleSym = newAlleleSymB
 
 		if childExists:
-			logit = 'Child already exists in MGI'
-			fpExistsDiag.write(logit + '\t' + \
-				ikmc_marker_symbol_1 + '\t' + \
-				ikmc_marker_id_2 + '\t' + \
-		 		ikmc_allele_symbol_6 + '\t' + \
-		 		ikmc_allele_escell_symbol_7 + '\t' + \
-		 		ikmc_allele_id_8 + '\t' + \
-		 		ikmc_escell_name_9 + '\t' + \
-		 		ikmc_iscre_12 + '\t' + \
-		 		ikmc_tatcre_13 + '\t' + \
-		 		mgi_allele_id_17 + '\t' + \
-				alleleSym + '\t' + newAlleleSym + '\n')
-			continue
+			if cellLineLookup.has_key(ikmc_escell_name_9):
+				#print newAlleleSym, ikmc_escell_name_9
+				for c in cellLineLookup[ikmc_escell_name_9]:
+					if c['_Allele_key'] == alleleKey:
+						cellLineExists = 1
+
+			if cellLineExists:
+				logit = 'Child & Cell Line already exists in MGI'
+				fpExistsDiag.write(logit + '\t' + \
+					ikmc_marker_symbol_1 + '\t' + \
+					ikmc_marker_id_2 + '\t' + \
+		 			ikmc_allele_symbol_6 + '\t' + \
+		 			ikmc_allele_escell_symbol_7 + '\t' + \
+		 			ikmc_allele_id_8 + '\t' + \
+		 			ikmc_escell_name_9 + '\t' + \
+		 			ikmc_iscre_12 + '\t' + \
+		 			ikmc_tatcre_13 + '\t' + \
+		 			mgi_allele_id_17 + '\t' + \
+					alleleSym + '\t' + newAlleleSym + '\n')
+				continue
+			else:
+				print alleleSym
 
 	#
 	# new Allele has passed the rules...ready to create the new allele
@@ -746,7 +760,10 @@ def createAlleleFile():
 
 	# if adding an additional mutant cell line and IKMC Colony to an existing allele
 	# then add the _Allele_key
-	fpAllele.write('\n')
+	if childExists and not cellLineExists:
+		fpAllele.write(str(alleleKey) + '\n')
+	else:
+		fpAllele.write('\n')
 
 	lineNum += 1
 
