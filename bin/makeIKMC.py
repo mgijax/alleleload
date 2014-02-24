@@ -111,10 +111,11 @@ fpExistsDiag = None
 fpIKMC = None
 fpAllele = None
 
-alleleLookup = {}
-childAlleleLookup = {}
-markerLookup = []
-cellLineLookup = {}
+alleleByID = {}
+childAlleleBySymbol = {}
+markerByID = []
+cellLineBySymbol = {}
+cellLineByKey = {}
 allelesAdded = []
 
 jnumber = ''
@@ -142,7 +143,8 @@ def initialize():
     global ikmcFile, alleleFile
     global fpLogDiag, fpLogCur, fpSkipDiag, fpExistsDiag
     global fpIKMC, fpAllele
-    global alleleLookup, childAlleleLookup, markerLookup, cellLineLookup
+    global alleleByID, childAlleleBySymbol, markerByID
+    global cellLineBySymbol, cellLineByKey
     global jnumber, createdBy
 
     logDiagFile = os.getenv('LOG_DIAG')
@@ -242,10 +244,10 @@ def initialize():
 	''', 'auto')
     for r in results:
 	key = r['accID']
-	alleleLookup[key] = []
-	alleleLookup[key].append(r)
+	alleleByID[key] = []
+	alleleByID[key].append(r)
 	key = r['markerID']
-	markerLookup.append(key)
+	markerByID.append(key)
 
     #
     # Allele Accession ID/Key/Symbol
@@ -274,8 +276,8 @@ def initialize():
 	''', 'auto')
     for r in results:
 	key = r['symbol']
-	childAlleleLookup[key] = []
-	childAlleleLookup[key].append(r)
+	childAlleleBySymbol[key] = []
+	childAlleleBySymbol[key].append(r)
 
     #
     # Mutant Cell Lines and their Alleles
@@ -296,10 +298,18 @@ def initialize():
 	and ac._MutantCellLine_key = c._CellLine_key
 	''', 'auto')
     for r in results:
+
+	# by cell line symbol
 	key = r['cellLine']
-	if not cellLineLookup.has_key(key):
-		cellLineLookup[key] = []
-	cellLineLookup[key].append(r)
+	if not cellLineBySymbol.has_key(key):
+		cellLineBySymbol[key] = []
+	cellLineBySymbol[key].append(r)
+
+	# by allele key
+	key = r['_Allele_key']
+	if not cellLineByKey.has_key(key):
+		cellLineByKey[key] = []
+	cellLineByKey[key].append(r)
 
     return rc
 
@@ -437,11 +447,11 @@ def createAlleleFile():
 		logit = 'field 17: we have already processed this row\n'
 		error = 1
 
-	if ikmc_marker_id_2 not in markerLookup:
+	if ikmc_marker_id_2 not in markerByID:
 		logit = 'field 2 : marker is not in MGI\n'
 		error = 1
 
-	if not alleleLookup.has_key(ikmc_allele_id_8):
+	if not alleleByID.has_key(ikmc_allele_id_8):
 		logit = 'field 8: allele is not in MGI or is not a tmX, tmXa, tmXe\n'
 		error = 1
 
@@ -451,13 +461,13 @@ def createAlleleFile():
 		#		ikmc_allele_id_8, then skip
 		#
 
-		if not cellLineLookup.has_key(ikmc_escell_name_9):
+		if not cellLineBySymbol.has_key(ikmc_escell_name_9):
 			logit = 'field 9: es cell line is not associated with *any* allele in MGI\n'
 			error = 1
 		else:
 			skipIt = 1
-			aKey = alleleLookup[ikmc_allele_id_8][0]['_Allele_key']
-			cellLine = cellLineLookup[ikmc_escell_name_9]
+			aKey = alleleByID[ikmc_allele_id_8][0]['_Allele_key']
+			cellLine = cellLineBySymbol[ikmc_escell_name_9]
 			for c in cellLine:
 				cKey = c['_Allele_key']
 				if aKey == cKey:
@@ -495,11 +505,11 @@ def createAlleleFile():
 	isCre = 0
 	isFlp = 0
 
-	alleleSym = alleleLookup[ikmc_allele_id_8][0]['symbol']
-	alleleName = alleleLookup[ikmc_allele_id_8][0]['name']
-	alleleKey = alleleLookup[ikmc_allele_id_8][0]['_Allele_key']
-	strainOfOrigin = alleleLookup[ikmc_allele_id_8][0]['strain']
-	markerSym = alleleLookup[ikmc_allele_id_8][0]['markerSym']
+	alleleSym = alleleByID[ikmc_allele_id_8][0]['symbol']
+	alleleName = alleleByID[ikmc_allele_id_8][0]['name']
+	alleleKey = alleleByID[ikmc_allele_id_8][0]['_Allele_key']
+	strainOfOrigin = alleleByID[ikmc_allele_id_8][0]['strain']
+	markerSym = alleleByID[ikmc_allele_id_8][0]['markerSym']
 	alleleSym_6 = ikmc_marker_symbol_1 + '<' + ikmc_allele_symbol_6 + '>'
 
 	tokens1 = alleleSym.split('<')
@@ -518,6 +528,7 @@ def createAlleleFile():
 
 	childExists = 0
 	cellLineExists = 0
+	childKey = ''
 
 	# determine isXa, isXe, isX
 
@@ -586,27 +597,29 @@ def createAlleleFile():
 	#
 
 	else:
-		if (isX or isXe) and isCre and childAlleleLookup.has_key(newAlleleSym1):
+		if (isX or isXe) and isCre and childAlleleBySymbol.has_key(newAlleleSym1):
 			childExists = 1
 			newAlleleSym = newAlleleSym1
 
-		elif isX and isFlp and childAlleleLookup.has_key(newAlleleSym2):
+		elif isX and isFlp and childAlleleBySymbol.has_key(newAlleleSym2):
 			childExists = 1
 			newAlleleSym = newAlleleSym2
 
-		elif isXa and isCre and childAlleleLookup.has_key(newAlleleSymB):
+		elif isXa and isCre and childAlleleBySymbol.has_key(newAlleleSymB):
 			childExists = 1
 			newAlleleSym = newAlleleSymB
 
-		elif isXa and isFlp and childAlleleLookup.has_key(newAlleleSymC):
+		elif isXa and isFlp and childAlleleBySymbol.has_key(newAlleleSymC):
 			childExists = 1
-			newAlleleSym = newAlleleSymB
+			newAlleleSym = newAlleleSymC
 
 		if childExists:
-			if cellLineLookup.has_key(ikmc_escell_name_9):
-				#print newAlleleSym, ikmc_escell_name_9
-				for c in cellLineLookup[ikmc_escell_name_9]:
-					if c['_Allele_key'] == alleleKey:
+			cellLineExists = 0
+			childKey = childAlleleBySymbol[newAlleleSym][0]['_Allele_key']
+
+			if cellLineByKey.has_key(childKey):
+				for c in cellLineByKey[childKey]:
+					if c['cellLine'] == ikmc_escell_name_9:
 						cellLineExists = 1
 
 			if cellLineExists:
@@ -623,8 +636,9 @@ def createAlleleFile():
 		 			mgi_allele_id_17 + '\t' + \
 					alleleSym + '\t' + newAlleleSym + '\n')
 				continue
-			else:
-				print alleleSym
+			#else:
+			#	print alleleSym, ikmc_escell_name_9
+			# OK to go!
 
 	#
 	# new Allele has passed the rules...ready to create the new allele
@@ -761,7 +775,7 @@ def createAlleleFile():
 	# if adding an additional mutant cell line and IKMC Colony to an existing allele
 	# then add the _Allele_key
 	if childExists and not cellLineExists:
-		fpAllele.write(str(alleleKey) + '\n')
+		fpAllele.write(str(childKey) + '\n')
 	else:
 		fpAllele.write('\n')
 

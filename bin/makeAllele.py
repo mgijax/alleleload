@@ -361,6 +361,42 @@ def bcpFiles():
 #
 # Purpose:  processes data
 #
+def processFileIKMC(alleleKey, mutantCellLine, ikmcNotes, createdByKey):
+
+    global noteKey
+
+    print alleleKey
+
+    #
+    # mutant cell line
+    #
+    addMutantCellLine(alleleKey, mutantCellLine, createdByKey)
+
+    # ikmc notes
+    mgiNoteSeqNum = 1
+    if len(ikmcNotes) > 0:
+
+    	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+		% (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
+	   	createdByKey, createdByKey, loaddate, loaddate))
+
+	while len(ikmcNotes) > 255:
+		noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		    % (noteKey, mgiNoteSeqNum, ikmcNotes[:255], createdByKey, createdByKey, loaddate, loaddate))
+		ikmcNotes = ikmcNotes[255:]
+		mgiNoteSeqNum = mgiNoteSeqNum + 1
+
+	if len(ikmcNotes) > 0:
+	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		    % (noteKey, mgiNoteSeqNum, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+
+    noteKey = noteKey + 1
+
+    return 1
+
+#
+# Purpose:  processes data
+#
 def processFile():
 
     global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey
@@ -376,7 +412,7 @@ def processFile():
         # Split the line into tokens
         tokens = line[:-1].split('\t')
 
-	print line
+	#print line
         try:
 	    markerID = tokens[0]
 	    symbol = tokens[1]
@@ -400,6 +436,15 @@ def processFile():
 	    existingAlleleKey = tokens[19]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
+
+	# creator
+	createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
+        if createdByKey == 0:
+            continue
+
+	if len(existingAlleleKey) > 0:
+		processFileIKMC(existingAlleleKey, mutantCellLine, ikmcNotes, createdByKey)
+		continue
 
 	# marker key
 	markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
@@ -434,9 +479,6 @@ def processFile():
 
 	# reference
 	refKey = loadlib.verifyReference(jnum, lineNum, errorFile)
-
-	# creator
-	createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
 
         # if errors, continue to next record
 	# errors are stored (via loadlib) in the .error log
@@ -567,7 +609,6 @@ def processFile():
 
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
-        #newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
         newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
 	    % (mgi_utils.prvalue(markerID), \
 	       mgi_utils.prvalue(symbol), \
@@ -580,15 +621,12 @@ def processFile():
 	       mgi_utils.prvalue(references), \
 	       mgi_utils.prvalue(strainOfOrigin), \
 	       mgi_utils.prvalue(mutantCellLine), \
-	       mgi_utils.prvalue(mutation), \
+	       mgi_utils.prvalue(allMutations), \
 	       mgi_utils.prvalue(inheritanceMode), \
 	       mgi_utils.prvalue(isMixed), \
 	       mgi_utils.prvalue(isExtinct), \
 	       mgi_utils.prvalue(createdBy), \
 	       mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
-	       #mgi_utils.prvalue(molecularNotes), \
-	       #mgi_utils.prvalue(driverNotes), \
-	       #mgi_utils.prvalue(ikmcNotes), \
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
