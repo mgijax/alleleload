@@ -83,16 +83,16 @@ fi
 #
 # Create the IKMC/Allele input file
 #
-echo "" >> ${LOG}
-date >> ${LOG}
-echo "Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
-./makeIKMC.py 2>&1 >> ${LOG}
-STAT=$?
-if [ ${STAT} -ne 0 ]
-then
-    echo "Error: Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
-    exit 1
-fi
+#echo "" >> ${LOG}
+#date >> ${LOG}
+#echo "Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
+#./makeIKMC.py 2>&1 >> ${LOG}
+#STAT=$?
+#if [ ${STAT} -ne 0 ]
+#then
+#    echo "Error: Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
+#    exit 1
+#fi
 #exit 0
 
 #
