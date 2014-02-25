@@ -358,7 +358,7 @@ def bcpFiles():
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
-    db.sql(ikmcNoteSQL, None)
+    #db.sql(ikmcNoteSQL, None)
 
     return 0
 
