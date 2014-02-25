@@ -39,8 +39,8 @@
 #	field 17: Mixed
 #	field 18: Extinct
 #	field 19: Creation Date
-#	field 20: Existing Allele key (to add Mutant Cell Line & IKMC Colony Name)
-#	field 21: Existing IKMC notes for this Allele (note key|note)
+#	field 20: Add mutant cell line/IKMC to new Allele (not yet in database)
+#	field 21: Add mutant cell line/IKMC to existing Allele (in database)
 #
 # Outputs:
 #
@@ -365,39 +365,46 @@ def bcpFiles():
 #
 # Purpose:  processes data
 #
-def processFileIKMC(alleleKey, existingIKMCnotes, mutantCellLine, ikmcNotes, createdByKey):
+def processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
+	mutantCellLine, ikmcNotes, createdByKey):
 
     global noteKey, ikmcNoteSQL
 
-    #
-    # mutant cell line
-    #
-    addMutantCellLine(alleleKey, mutantCellLine, createdByKey)
+    print mutantCellLine
 
-    # existing ikmc notes
-    if len(existingIKMCnotes) > 0:
+    if len(createMutantCellLine2) > 0:
 
-        tokens = existingIKMCnotes.split('|')
-	nKey = tokens[0]
-	note = tokens[1] + ',' + ikmcNotes
+	tokens = createMutantCellLine2.split(':')
+	alleleKey = tokens[0]
+	newNotes = tokens[1]
 
-	ikmcNoteSQL = ikmcNoteSQL + \
-		'''
-		update MGI_NoteChunk
-		set note = '%s'
-		where _Note_key = %s
-		''' % (note, nKey)
+    	#
+    	# mutant cell line
+    	#
+    	addMutantCellLine(alleleKey, mutantCellLine, createdByKey)
 
-    # new ikmc notes
-    elif len(ikmcNotes) > 0:
-	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+    	# existing ikmc notes
+	if len(newNotes) > 0:
+        	tokens = newNotes.split('|')
+		nKey = tokens[0]
+		note = tokens[1] + '|' + ikmcNotes
+
+		ikmcNoteSQL = ikmcNoteSQL + \
+			'''
+			update MGI_NoteChunk
+			set note = '%s'
+			where _Note_key = %s
+			''' % (note, nKey)
+
+	else:
+	    noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
 		% (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
 		   createdByKey, createdByKey, loaddate, loaddate))
 
-	noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+	    noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
 		% (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
 
-	noteKey = noteKey + 1
+	    noteKey = noteKey + 1
 
     return 1
 
@@ -439,8 +446,8 @@ def processFile():
 	    isMixed = tokens[16]
 	    isExtinct = tokens[17]
 	    createdBy = tokens[18]
-	    existingAlleleKey = tokens[19]
-	    existingIKMCnotes = tokens[20]
+	    createMutantCellLine1 = tokens[19]
+	    createMutantCellLine2 = tokens[20]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -449,9 +456,10 @@ def processFile():
         if createdByKey == 0:
             continue
 
-	if len(existingAlleleKey) > 0:
-		processFileIKMC(existingAlleleKey, existingIKMCnotes, mutantCellLine, ikmcNotes, createdByKey)
-		continue
+	#if createMutantCellLine1 == 1 or len(createMutantCellLine2) > 0:
+	#	processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
+	#		mutantCellLine, ikmcNotes, createdByKey)
+	#	continue
 
 	# marker key
 	markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)

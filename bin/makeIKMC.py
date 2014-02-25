@@ -63,8 +63,8 @@
 #	field 17: Mixed
 #	field 18: Extinct
 #	field 19: Creation Date
-#	field 20: Existing Allele key (to add Mutant Cell Line & IKMC Colony Name)
-#	field 21: Existing IKMC notes for this Allele (note key|note)
+#	field 20: Add mutant cell line/IKMC to new Allele (not yet in database)
+#	field 21: Add mutant cell line/IKMC to existing Allele (in database)
 #
 #  Exit Codes:
 #
@@ -117,7 +117,7 @@ childAlleleBySymbol = {}
 markerByID = []
 cellLineBySymbol = {}
 cellLineByKey = {}
-allelesAdded = []
+alleleAdded = {}
 ikmcNotes = {}
 
 jnumber = ''
@@ -704,23 +704,38 @@ def createAlleleFile():
 	# if the new Allele has already been created (it's a duplicate)
 	#
 
-	if newAlleleSym in allelesAdded:
-		logit = 'Duplicate: child already added by this load\n'
-		fpExistsDiag.write(logit + '\t' + \
-			ikmc_marker_symbol_1 + '\t' + \
-			ikmc_marker_id_2 + '\t' + \
-		 	ikmc_allele_symbol_6 + '\t' + \
-		 	ikmc_allele_escell_symbol_7 + '\t' + \
-		 	ikmc_allele_id_8 + '\t' + \
-		 	ikmc_escell_name_9 + '\t' + \
-		 	ikmc_iscre_12 + '\t' + \
-		 	ikmc_tatcre_13 + '\t' + \
-		 	mgi_allele_id_17 + '\t' + \
-			alleleSym + '\n')
-		continue
+	addCellLineOnly = 0
+	duplicateAllele = 0
+
+	if alleleAdded.has_key(newAlleleSym):
+
+		duplicateAllele = 1
+
+		#for a in alleleAdded[newAlleleSym]:
+		#	if a != ikmc_escell_name_9:
+		#		alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
+		#		addCellLineOnly = 1
+		#		duplicateAllele = 0
+
+		if duplicateAllele:
+			logit = 'Duplicate: child already added by this load\n'
+			fpExistsDiag.write(logit + '\t' + \
+				ikmc_marker_symbol_1 + '\t' + \
+				ikmc_marker_id_2 + '\t' + \
+		 		ikmc_allele_symbol_6 + '\t' + \
+		 		ikmc_allele_escell_symbol_7 + '\t' + \
+		 		ikmc_allele_id_8 + '\t' + \
+		 		ikmc_escell_name_9 + '\t' + \
+		 		ikmc_iscre_12 + '\t' + \
+		 		ikmc_tatcre_13 + '\t' + \
+		 		mgi_allele_id_17 + '\t' + \
+				alleleSym + '\n')
+			continue
 
 	# update the new allele list
-	allelesAdded.append(newAlleleSym)
+	else:
+		alleleAdded[newAlleleSym] = []
+		alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
 
 	#
 	# ready to create the Allele
@@ -783,15 +798,18 @@ def createAlleleFile():
 	# Created By
 	fpAllele.write(createdBy + '\t')
 
-	# adding an additional mutant cell line and IKMC Colony to an existing allele
+	# Add additional mutant cell line to a new allele in the same input file
+	fpAllele.write(str(addCellLineOnly) + '\t')
+
+	# Add additional mutant cell line to an existing allele that is already in the database
 	if childExists and not cellLineExists:
-		fpAllele.write(str(childKey) + '\t')
+		fpAllele.write(str(childKey) + ':')
 		if ikmcNotes.has_key(childKey):
 			ikmcNote = ikmcNotes[childKey]
 			fpAllele.write(str(ikmcNote[0]['_Note_key']) + '|' + ikmcNote[0]['note'])
 		fpAllele.write('\n')
 	else:
-		fpAllele.write('\t\n')
+		fpAllele.write('\n')
 
 	lineNum += 1
 
