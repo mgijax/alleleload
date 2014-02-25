@@ -35,24 +35,6 @@ QCOUTPUTDIR=${RPTDIR}
 
 export FILEDIR ARCHIVEDIR INPUTDIR OUTPUTDIR LOGDIR RPTDIR QCOUTPUTDIR 
 
-###########################################################################
-#
-# Input/Output files
-#
-###########################################################################
-
-# Log files
-#
-LOG_PROC=${LOGDIR}/test.proc.log
-LOG_DIAG=${LOGDIR}/test.diag.log
-LOG_CUR=${LOGDIR}/test.cur.log
-LOG_VAL=${LOGDIR}/test.val.log
-LOG_IKMC=${LOGDIR}/test.test.log
-SKIP_DIAG=${LOGDIR}/test.skip.log
-EXISTS_DIAG=${LOGDIR}/test.exist.log
-
-export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_IKMC SKIP_DIAG EXISTS_DIAG
-
 CREATEDBY=ikmc_alleleload
 JNUMBER=J:204739
 export CREATEDBY JNUMBER

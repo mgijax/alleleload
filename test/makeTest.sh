@@ -56,20 +56,26 @@ else
     exit 1
 fi
 
+IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_pass_fail.txt
+IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_pass_fail.txt
+INPUTFILE=${INPUTDIR}/DAL_pass_fail_mgi_allele_test.txt
+LOG_PROC=${LOGDIR}/DAL_pass_fail.proc.log
+LOG_DIAG=${LOGDIR}/DAL_pass_fail.diag.log
+LOG_CUR=${LOGDIR}/DAL_pass_fail.cur.log
+LOG_VAL=${LOGDIR}/DAL_pass_fail.val.log
+LOG_IKMC=${LOGDIR}/DAL_pass_fail.log
+SKIP_DIAG=${LOGDIR}/DAL_pass_fail.skip.log
+EXISTS_DIAG=${LOGDIR}/DAL_pass_fail.exist.log
+
+export IKMC_INPUT_FILE IKMC_COPY_INPUT_FILE INPUTFILE
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_IKMC SKIP_DIAG EXISTS_DIAG
+
 #
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
 rm -rf ${LOG}
 touch ${LOG}
-
-#
-# Create the Test/Allele input file
-#
-IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_pass_fail.txt
-IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_pass_fail.txt
-INPUTFILE=${INPUTDIR}/mgi_allele_test.txt
-export IKMC_INPUT_FILE IKMC_COPY_INPUT_FILE INPUTFILE
 
 echo "" >> ${LOG}
 date >> ${LOG}
