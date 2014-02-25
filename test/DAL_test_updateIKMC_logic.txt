@@ -16,87 +16,14 @@ Aldoc	MGI:101863	BL3034	C57BL/6NCrl	UCD	tm1(KOMP)Vlcg	tm1(KOMP)Vlcg	MGI:3847537	
 Tor1aip2	MGI:3582695	BL3034	C57BL/6NTac	Velocigene	tm2(KOMP)Vlcg	tm2(KOMP)Vlcg	MGI:5284935	14737A-C5	14737A-C5 	BL3034-1	cre	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6NTac	Velocigene			"Duplicate, should kick out"	fail
 Tor1aip2	MGI:3582695	BL3034	C57BL/6NTac	Velocigene	tm2(KOMP)Vlcg	tm2(KOMP)Vlcg	MGI:5284935	14737A-C5	14737A-C5 	BL3034-1	flp	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6NTac	Velocigene			"Duplicate, should kick out"	fail
 Zmiz2	MGI:106374	JAX-10680C-D1-1	C57BL/6N	JAX	tm1(KOMP)Vlcg	tm1(KOMP)Vlcg	MGI:3812666	10680C-D1	VGB6	JR18593	cre	f	B6N.Cg-Tg(Sox2-cre)1Amc/J	C57BL/6NJ	JAX			"Duplicate, should kick out"	fail
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
-																			
+Aldoc	MGI:101863	BL3034	C57BL/6NCrl	UCD	tm1(KOMP)Vlcg	tm1(KOMP)Vlcg	MGI:3847537	11975A-B1	VGB6	BL3034-1klf	cre	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6NCrl	UCD			"Update ""cre"" tm1.1 allele MCL, Colony"	pass
+Aldoc	MGI:101863	BL3034	C57BL/6NCrl	UCD	tm1(KOMP)Vlcg	tm1(KOMP)Vlcg	MGI:3847537	11975A-D3	VGB6	BL3034-1klf	flp	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6NCrl	UCD			"Update ""flp"" tm1.2 allele Colony"	pass
+Tor1aip2	MGI:3582695	BL3034	C57BL/6NTac	Velocigene	tm2(KOMP)Vlcg	tm2(KOMP)Vlcg	MGI:5284935	14737A-G12	14737A-C5 	BL3034-1klf	cre	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6NTac	Velocigene			"Update ""cre"" tm2.1 allele MCL, Colony"	pass
+Tor1aip2	MGI:3582695	BL3034	C57BL/6NTac	Velocigene	tm2(KOMP)Vlcg	tm2(KOMP)Vlcg	MGI:5284935	14737A-G12	14737A-C5 	BL3034-1	flp	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6NTac	Velocigene			"Update ""flp"" tm2.2 allele MCL"	pass
+Recql4	MGI:1931028	BL3034	C57BL/6N-A<tm1Brd>	WTSI	tm3(EUCOMM)Wtsi	tm3(EUCOMM)Wtsi	MGI:5050948	EPD0566_5_H12	EPD0566_5_A10	BL3034-1klf	cre	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6N-A<tm1Brd>	WTSI			"Update ""cre"" tm3.1 allele MCL, Colony"	pass
+Recql4	MGI:1931028	BL3034	C57BL/6N-A<tm1Brd>	WTSI	tm3(EUCOMM)Wtsi	tm3(EUCOMM)Wtsi	MGI:5050948	EPD0566_5_A10	EPD0566_5_A10	BL3034-1klf	flp	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6N-A<tm1Brd>	WTSI			"Update ""flp"" tm3.2 allele Colony"	pass
+Dis3	MGI:1919912	HMGU-HEPD0659_5_E08-1	C57BL/6NTac/USA	HMGU	tm1e(EUCOMM)Hmgu	tm1e(EUCOMM)Hmgu	MGI:4820203	HEPD0659_5_E08	JM8A3.N1	HMGU-HEPD0659_5_E08-1-1klf	cre	f	Gt(ROSA)26Sor&lt;tm16(cre)Arte&gt;	C57BL/6NTac	HMGU			"Update ""cre"" tm1e.1 allele Colony"	pass
+Kars	MGI:1934754	HMGU-HEPD0659_5_E08-1	C57BL/6N-A<tm1Brd>	EUCOMM	tm2e(EUCOMM)Hmgu	tm2e(EUCOMM)Hmgu	MGI:5511479	HEPD0792_4_G06	JM8A3.N1	HMGU-HEPD0659_5_E08-1-1klf	cre	f	Gt(ROSA)26Sor&lt;tm16(cre)Arte&gt;	C57BL/6N-A<tm1Brd>	EUCOMM			"Update ""cre"" tm2e.1 allele Colony"	pass
+Adsl	MGI:103202	Adsl EPD0306_3_D03	C57BL/6N	BCM	tm1a(KOMP)Wtsi	tm1a(KOMP)Wtsi	MGI:4364902	EPD0306_3_D03	JM8A1.N3	Adsl EPD0306_3_D03-1klf	cre	f	MGI:3046308: Hprt&lt;tm1(CMV-cre)Brd&gt;	C57BL/6N	BCM			"Update ""cre"" tm1b allele Colony"	pass
+Fam134c	MGI:1915248	MAST	C57BL/6NTac	WTSI	tm2a(EUCOMM)Wtsi	tm2a(EUCOMM)Wtsi	MGI:4433416	EPD0037_1_B03	JM8.N4	H-Fam134c-B03-TM1Bklf	cre	f	C57BL/6NTac-Tg(ACTB-cre)3Mrt/H	C57BL/6NTac	Harwell			"Update ""cre"" tm2b allele Colony"	pass
+Prmt5	MGI:1351645	MBWK	C57BL/6Brd-Tyr&lt;c-Brd&gt;	WTSI	tm2a(EUCOMM)Wtsi	tm2a(EUCOMM)Wtsi	MGI:4432368	EPD0160_2_H06	JM8A3	MMAFklf	flp	f	C57BL/6N-Gt(ROSA)26Sor&lt;tm1(FLP1)Dym&gt;	C57BL/6Brd-Tyr&lt;c-Brd&gt;;C57BL/6N	WTSI			"Update ""flp"" tm2c allele MCL, Colony"	pass
