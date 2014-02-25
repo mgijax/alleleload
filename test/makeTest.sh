@@ -66,6 +66,11 @@ touch ${LOG}
 #
 # Create the Test/Allele input file
 #
+IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_pass_fail.txt
+IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_pass_fail.txt
+INPUTFILE=${INPUTDIR}/mgi_allele_test.txt
+export IKMC_INPUT_FILE IKMC_COPY_INPUT_FILE INPUTFILE
+
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create the Test/Allele input file (makeTest.sh)" | tee -a ${LOG}

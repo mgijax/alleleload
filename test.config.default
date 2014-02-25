@@ -41,14 +41,6 @@ export FILEDIR ARCHIVEDIR INPUTDIR OUTPUTDIR LOGDIR RPTDIR QCOUTPUTDIR
 #
 ###########################################################################
 
-# input file from the test directory
-#
-IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_pass_fail.txt
-IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_pass_fail.txt
-INPUTFILE=${INPUTDIR}/mgi_allele_test.txt
-
-export IKMC_INPUT_FILE IKMC_COPY_INPUT_FILE INPUTFILE
-
 # Log files
 #
 LOG_PROC=${LOGDIR}/test.proc.log
@@ -79,7 +71,7 @@ export JOBSTREAM
 MAIL_LOADNAME="TEST-Allele Load"
 
 #  Recipient list for mailing the log files (comma-separated)
-MAIL_LOG_CUR="mgiadmin@jax.org"
+MAIL_LOG_CUR="mgi-scrum-dog@jax.org"
 
 export MAIL_LOADNAME MAIL_LOG_PROC MAIL_LOG_CUR
 

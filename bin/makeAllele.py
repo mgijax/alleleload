@@ -40,6 +40,7 @@
 #	field 18: Extinct
 #	field 19: Creation Date
 #	field 20: Existing Allele key (to add Mutant Cell Line & IKMC Colony Name)
+#	field 21: Existing IKMC notes for this Allele (note key|note)
 #
 # Outputs:
 #
@@ -151,6 +152,7 @@ mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
 mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
 mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
+ikmcNoteSQL = ''
 
 mgiTypeKey = 11		# Allele
 mgiPrefix = "MGI:"
@@ -356,41 +358,46 @@ def bcpFiles():
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
+    db.sql(ikmcNoteSQL, None)
+
     return 0
 
 #
 # Purpose:  processes data
 #
-def processFileIKMC(alleleKey, mutantCellLine, ikmcNotes, createdByKey):
+def processFileIKMC(alleleKey, existingIKMCnotes, mutantCellLine, ikmcNotes, createdByKey):
 
-    global noteKey
-
-    print alleleKey
+    global noteKey, ikmcNoteSQL
 
     #
     # mutant cell line
     #
     addMutantCellLine(alleleKey, mutantCellLine, createdByKey)
 
-    # ikmc notes
-    mgiNoteSeqNum = 1
-    if len(ikmcNotes) > 0:
+    # existing ikmc notes
+    if len(existingIKMCnotes) > 0:
 
-    	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+        tokens = existingIKMCnotes.split('|')
+	nKey = tokens[0]
+	note = tokens[1] + ',' + ikmcNotes
+
+	ikmcNoteSQL = ikmcNoteSQL + \
+		'''
+		update MGI_NoteChunk
+		set note = '%s'
+		where _Note_key = %s
+		''' % (note, nKey)
+
+    # new ikmc notes
+    elif len(ikmcNotes) > 0:
+	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
 		% (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
-	   	createdByKey, createdByKey, loaddate, loaddate))
+		   createdByKey, createdByKey, loaddate, loaddate))
 
-	while len(ikmcNotes) > 255:
-		noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, ikmcNotes[:255], createdByKey, createdByKey, loaddate, loaddate))
-		ikmcNotes = ikmcNotes[255:]
-		mgiNoteSeqNum = mgiNoteSeqNum + 1
+	noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		% (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
 
-	if len(ikmcNotes) > 0:
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
-
-    noteKey = noteKey + 1
+	noteKey = noteKey + 1
 
     return 1
 
@@ -411,7 +418,6 @@ def processFile():
 
         # Split the line into tokens
         tokens = line[:-1].split('\t')
-
 	#print line
         try:
 	    markerID = tokens[0]
@@ -434,6 +440,7 @@ def processFile():
 	    isExtinct = tokens[17]
 	    createdBy = tokens[18]
 	    existingAlleleKey = tokens[19]
+	    existingIKMCnotes = tokens[20]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -443,7 +450,7 @@ def processFile():
             continue
 
 	if len(existingAlleleKey) > 0:
-		processFileIKMC(existingAlleleKey, mutantCellLine, ikmcNotes, createdByKey)
+		processFileIKMC(existingAlleleKey, existingIKMCnotes, mutantCellLine, ikmcNotes, createdByKey)
 		continue
 
 	# marker key
@@ -588,22 +595,14 @@ def processFile():
 	    noteKey = noteKey + 1
 
 	# ikmc notes
-	mgiNoteSeqNum = 1
 	if len(ikmcNotes) > 0:
 
 	    noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
 		% (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
 		   createdByKey, createdByKey, loaddate, loaddate))
 
-	    while len(ikmcNotes) > 255:
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, ikmcNotes[:255], createdByKey, createdByKey, loaddate, loaddate))
-		ikmcNotes = ikmcNotes[255:]
-		mgiNoteSeqNum = mgiNoteSeqNum + 1
-
-	    if len(ikmcNotes) > 0:
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+	    noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		% (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
 
 	    noteKey = noteKey + 1
 
