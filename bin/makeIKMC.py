@@ -118,6 +118,7 @@ markerByID = []
 cellLineBySymbol = {}
 cellLineByKey = {}
 alleleAdded = {}
+colonyAdded = {}
 ikmcNotes = {}
 
 jnumber = ''
@@ -537,6 +538,8 @@ def createAlleleFile():
 	newAlleleNameB = alleleName.replace('a,', 'b,')
 	newAlleleNameC = alleleName.replace('a,', 'c,')
 
+	molecularNote = ''
+
 	childExists = 0
 	cellLineExists = 0
 	childKey = ''
@@ -704,18 +707,18 @@ def createAlleleFile():
 	# if the new Allele has already been created (it's a duplicate)
 	#
 
-	addCellLineOnly = 0
+	attachCellLine = 0
 	duplicateAllele = 0
 
 	if alleleAdded.has_key(newAlleleSym):
 
-		duplicateAllele = 1
+		attachCellLine = 1
+		duplicateAllele = 0
 
-		#for a in alleleAdded[newAlleleSym]:
-		#	if a != ikmc_escell_name_9:
-		#		alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
-		#		addCellLineOnly = 1
-		#		duplicateAllele = 0
+		for a in alleleAdded[newAlleleSym]:
+			if a == ikmc_escell_name_9:
+				attachCellLine = 0
+				duplicateAllele = 1
 
 		if duplicateAllele:
 			logit = 'Duplicate: child already added by this load\n'
@@ -731,11 +734,16 @@ def createAlleleFile():
 		 		mgi_allele_id_17 + '\t' + \
 				alleleSym + '\n')
 			continue
+		else:
+			alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
+			colonyAdded[newAlleleSym].append(ikmc_colony_11)
 
 	# update the new allele list
 	else:
 		alleleAdded[newAlleleSym] = []
 		alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
+		colonyAdded[newAlleleSym] = []
+		colonyAdded[newAlleleSym].append(ikmc_colony_11)
 
 	#
 	# ready to create the Allele
@@ -760,7 +768,7 @@ def createAlleleFile():
 	fpAllele.write('\t')
 
 	# Allele Collection
-	fpAllele.write('\t')
+	fpAllele.write('Not Specified\t')
 
 	# Transmission
 	fpAllele.write('Germline' + '\t')
@@ -799,7 +807,12 @@ def createAlleleFile():
 	fpAllele.write(createdBy + '\t')
 
 	# Add additional mutant cell line to a new allele in the same input file
-	fpAllele.write(str(addCellLineOnly) + '\t')
+	if attachCellLine:
+		fpAllele.write(str(attachCellLine) + ':')
+		if colonyAdded.has_key(newAlleleSym):
+			fpAllele.write('|'.join(colonyAdded[newAlleleSym]) + '\t')
+	else:
+		fpAllele.write(str(attachCellLine) + '\t')
 
 	# Add additional mutant cell line to an existing allele that is already in the database
 	if childExists and not cellLineExists:
