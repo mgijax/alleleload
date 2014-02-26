@@ -63,9 +63,9 @@
 #	field 17: Mixed
 #	field 18: Extinct
 #	field 19: Creation Date
-#	field 20: Add mutant cell line/IKMC to new Allele (not yet in database)
-#	field 21: Add mutant cell line/IKMC to existing Allele (in database)
-#	field 22: Update the parent's Allele Status => Approved (847114)
+#	field 20: Add mutant cell line
+#	field 21: Add IKMC Colony Note
+#	field 22: Set the child's Allele Status = Approved (847114)
 #
 #  Exit Codes:
 #
@@ -296,6 +296,8 @@ def initialize():
     #	excluding NCOM (for now)
     #		or a.symbol like "%<tm%(NCOM%"
     #
+    # includes:  Approved, Reserved
+    #
     print 'querying for cell lines'
     results = db.sql('''
 	select a._Allele_key, c._CellLine_key, c.cellLine
@@ -303,7 +305,7 @@ def initialize():
 	where (a.symbol like "%<tm%(KOMP%"
 		or a.symbol like "%<tm%(EUCOMM%"
 		)
-	and a._Allele_Status_key in (847114, 3983021, 847113)
+	and a._Allele_Status_key in (847114, 847113)
 	and a._Allele_key = ac._Allele_key
 	and ac._MutantCellLine_key = c._CellLine_key
 	''', 'auto')
@@ -637,7 +639,8 @@ def createAlleleFile():
 		if childExists:
 			cellLineExists = 0
 			childKey = childAlleleBySymbol[newAlleleSym][0]['_Allele_key']
-			isReserved = childAlleleBySymbol[newAlleleSym][0]['_Allele_Status_key']
+			if childAlleleBySymbol[newAlleleSym][0]['_Allele_Status_key'] == 847113:
+				isReserved = 1
 
 			if cellLineByKey.has_key(childKey):
 				for c in cellLineByKey[childKey]:
@@ -775,7 +778,6 @@ def createAlleleFile():
 	fpAllele.write('Approved' + '\t')
 
 	# Allele Type
-	alleleType = alleleType.replace('Targeted (Reporter)', 'Targeted')
 	fpAllele.write(alleleType + '\t')
 
 	# Allele Subtype
@@ -820,23 +822,25 @@ def createAlleleFile():
 	# Created By
 	fpAllele.write(createdBy + '\t')
 
-	# Add additional mutant cell line to a new allele in the same input file
+	# Add additional mutant cell line to a new or existing allele
 	if attachCellLine:
-		if colonyAdded.has_key(newAlleleSym):
-			fpAllele.write('|'.join(colonyAdded[newAlleleSym]) + '\t')
-	else:
-		fpAllele.write('\t')
+		fpAllele.write('0')
+	elif childExists and not cellLineExists:
+		fpAllele.write(str(childKey))
+	fpAllele.write('\t')
 
-	# Add additional mutant cell line to an existing allele that is already in the database
-	if childExists and not cellLineExists:
+	# Add IKMC Colony/Note to a new or existing allele
+	if childExists and ikmcNotes.has_key(childKey):
+		ikmcNote = ikmcNotes[childKey]
+		fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + ikmcNote[0]['note'])
+	elif childExists and not ikmcNotes.has_key(childKey):
 		fpAllele.write(str(childKey) + '::')
-		if ikmcNotes.has_key(childKey):
-			ikmcNote = ikmcNotes[childKey]
-			fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + ikmcNote[0]['note'])
-		fpAllele.write('\t')
-	else:
-		fpAllele.write('\t')
+	elif colonyAdded.has_key(newAlleleSym):
+		fpAllele.write('0::')
+		fpAllele.write('|'.join(colonyAdded[newAlleleSym]))
+	fpAllele.write('\t')
 
+	# Set the child's Allele Status = Approved
 	if isReserved:
 		fpAllele.write(str(childKey))
 	fpAllele.write('\n')

@@ -39,8 +39,9 @@
 #	field 17: Mixed
 #	field 18: Extinct
 #	field 19: Creation Date
-#	field 20: Add mutant cell line/IKMC to new Allele (not yet in database)
-#	field 21: Add mutant cell line/IKMC to existing Allele (in database)
+#	field 20: Add mutant cell line
+#	field 21: Add IKMC Colony Note
+#	field 22: Set the child's Allele Status = Approved (847114)
 #
 # Outputs:
 #
@@ -98,7 +99,7 @@ inputFileName = os.environ['INPUTFILE']
 outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
 
-DEBUG = 0		# if 0, not in debug mode
+DEBUG = 1		# if 0, not in debug mode
 
 bcpon = 1		# can the bcp files be bcp-ed into the database?  default is yes.
 
@@ -152,7 +153,7 @@ mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
 mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
 mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
-ikmcNoteSQL = ''
+ikmcSQL = ''
 
 mgiTypeKey = 11		# Allele
 mgiPrefix = "MGI:"
@@ -362,72 +363,104 @@ def bcpFiles():
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
-    if len(ikmcNoteSQL) > 0:
-    	db.sql(ikmcNoteSQL, None)
+    if len(ikmcSQL) > 0:
+    	db.sql(ikmcSQL, None)
 
     return 0
 
 #
 # Purpose:  processes data
 #
-# add additional mutant cell line/IKMC note to a new allele (not in the database)
-# or
-# add additional mutant cell line/IKMC note to a allele that *is* in the database
+# a) add additional mutant cell lines to new and existing alleles
+# b) add additional IKMC Colony note to new and existing alleles
+# c) set Allele Status = Approved for reserved alleles
 #
-def processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
+def processFileIKMC(createMCL, createNote, setStatus, \
 	symbol, mutantCellLine, ikmcNotes, createdByKey):
 
-    global alleleKey, noteKey, ikmcNoteSQL
-
-    # use new alleleKey to attach additional mcl and ikmc note
-    if len(createMutantCellLine1) > 0:
-
-	aKey = alleleLookup[symbol][0][0]
-	nKey = alleleLookup[symbol][0][1]
-	note = createMutantCellLine1
-
-    # use existing alleleKey
-    elif len(createMutantCellLine2) > 0:
-
-	tokens = createMutantCellLine2.split('::')
-	aKey = tokens[0]
-	newNotes = tokens[1]
-	note = ''
-
-	# either, we will update an existing ikmc note
-	# or we will add a new ikmc note to an existing allele
-	try:
-        	tokens = newNotes.split('||')
-		nKey = tokens[0]
-		note = tokens[1] + '|' + ikmcNotes
-
-	except:
-	    	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
-			% (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
-		   	createdByKey, createdByKey, loaddate, loaddate))
-
-	    	noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-			% (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
-
-	    	noteKey = noteKey + 1
+    global noteKey, ikmcSQL
 
     #
-    # add another mutant cell line
+    # add new MCLs to new/existing alleles
     #
-    addMutantCellLine(aKey, mutantCellLine, createdByKey)
+    if len(createMCL) > 0:
 
-    # only if updating an existing ikmc note
+	if int(createMCL) == 0:
+		aKey = alleleLookup[symbol][0][0]
+	else:
+		aKey = createMCL
 
-    if len(note) > 0:
+    	addMutantCellLine(aKey, mutantCellLine, createdByKey)
 
-	ikmcNoteSQL = ikmcNoteSQL + \
+    #
+    # set allele/status = Approved for existing "reserved" alleles
+    #
+    if len(setStatus) > 0:
+	ikmcSQL = ikmcSQL + \
 		'''
-		update MGI_NoteChunk
-		set note = '%s'
-		where _Note_key = %s
-		''' % (note, nKey)
+		update ALL_Allele 
+		set _Allele_Status_key = 847114 
+		where _Allele_key = %s
+		''' % (setStatus)
 
-    #print ikmcNoteSQL
+    # add new IKMC Colony Note to new/existing alleles
+    #
+    # key||existing note => child exists/update existing parent/note key
+    #
+    # key::blank => child exists/no parent note/add ikmcNote
+    #
+    # 0::blank => use new alleleKey + ikmcNotes
+    #
+    # blank : do nothing
+    #
+
+    if len(createNote) > 0:
+
+	# child exists, note exists : update existing note
+        try:
+	    tokens = createNote.split('||')
+	    nKey = tokens[0]
+	    note = tokens[1] + '|' + ikmcNotes
+
+	    ikmcSQL = ikmcSQL + \
+		    '''
+		    update MGI_NoteChunk 
+		    set note = '%s' 
+		    where _Note_key = %s
+		    ''' % (note, nKey)
+		    	
+        except:
+
+	    tokens = createNote.split('::')
+	    aKey = tokens[0]
+
+	    # duplicate child, additional note : add note to new child
+	    if int(aKey) == 0:
+		nKey = alleleLookup[symbol][0][1]
+		note = ikmcNotes
+
+	        ikmcSQL = ikmcSQL + \
+		        '''
+		        update MGI_NoteChunk 
+		        set note = '%s' 
+		        where _Note_key = %s
+		        ''' % (note, nKey)
+		    	
+	    # child exists, note does not exist : add note to existing child
+	    else:
+		aKey = tokens[0]
+		note = ikmcNotes
+
+	        noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+		    % (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
+	   	    createdByKey, createdByKey, loaddate, loaddate))
+
+	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+	            % (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+
+	        noteKey = noteKey + 1
+
+    print ikmcSQL
 
     return 1
 
@@ -470,8 +503,9 @@ def processFile():
 	    isMixed = tokens[16]
 	    isExtinct = tokens[17]
 	    createdBy = tokens[18]
-	    createMutantCellLine1 = tokens[19]
-	    createMutantCellLine2 = tokens[20]
+	    createMCL = tokens[19]
+	    createNote = tokens[20]
+	    setStatus = tokens[21]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -481,8 +515,8 @@ def processFile():
             continue
 
 	# processing for IKMC-only
-	if len(createMutantCellLine1) > 0 or len(createMutantCellLine2) > 0:
-		processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
+	if len(createMCL) > 0 or len(createNote) > 0 or len(setStatus) > 0:
+		processFileIKMC(createMCL, createNote, setStatus, \
 			symbol, mutantCellLine, ikmcNotes, createdByKey)
 		continue
 
@@ -542,16 +576,11 @@ def processFile():
 	collectionKey = 11025586
 
 	# allele (master)
-        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
-	    alleleStatusKey, germLineKey, collectionKey, symbol, name, \
+	    alleleStatusKey, germLineKey, symbol, name, \
 	    isExtinct, isMixed, \
 	    createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
-        #alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-        #    % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
-	#    alleleStatusKey, germLineKey, symbol, name, \
-	#    isExtinct, isMixed, \
-	#    createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
 
 	# allele/marker
         markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
