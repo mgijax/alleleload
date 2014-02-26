@@ -637,8 +637,11 @@ def createAlleleFile():
 			newAlleleSym = newAlleleSymC
 
 		if childExists:
+
 			cellLineExists = 0
+			colonyExists = 0
 			childKey = childAlleleBySymbol[newAlleleSym][0]['_Allele_key']
+
 			if childAlleleBySymbol[newAlleleSym][0]['_Allele_Status_key'] == 847113:
 				isReserved = 1
 
@@ -647,13 +650,19 @@ def createAlleleFile():
 					if c['cellLine'] == ikmc_escell_name_9:
 						cellLineExists = 1
 
+			if ikmcNotes.has_key(childKey):
+				for c in ikmcNotes[childKey]:
+					if c['note'].find(ikmc_colony_11) != -1:
+						colonyExists = 1
+
 			#
 			# if the child exists 
 			# and the cell line exists
+			# and the colony exists
 			# and the child's status is *not* reserved
 			#
-			if cellLineExists and not isReserved:
-				logit = 'Child & Cell Line already exists in MGI'
+			if cellLineExists and cellLineExists and colonyExists and not isReserved:
+				logit = 'Child/Cell Line/Colony already exists in MGI'
 				fpExistsDiag.write(logit + '\t' + \
 					ikmc_marker_symbol_1 + '\t' + \
 					ikmc_marker_id_2 + '\t' + \
@@ -725,24 +734,21 @@ def createAlleleFile():
 
 	attachCellLine = 0
 	attachColony = 0
-	duplicateAllele = 0
 
 	if alleleAdded.has_key(newAlleleSym):
 
 		attachCellLine = 1
 		attachColony = 1
-		duplicateAllele = 0
 
 		for a in alleleAdded[newAlleleSym]:
 			if a == ikmc_escell_name_9:
 				attachCellLine = 0
-				duplicateAllele = 1
 
 		for a in colonyAdded[newAlleleSym]:
 			if a == ikmc_colony_11:
 				attachColony = 0
 
-		if duplicateAllele:
+		if not attachCellLine and not attachColony:
 			logit = 'Duplicate: child already added by this load\n'
 			fpExistsDiag.write(logit + '\t' + \
 				ikmc_marker_symbol_1 + '\t' + \
