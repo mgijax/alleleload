@@ -762,6 +762,7 @@ def createAlleleFile():
 	fpAllele.write('Approved' + '\t')
 
 	# Allele Type
+	alleleType = alleleType.replace('Targeted (Reporter)', 'Targeted')
 	fpAllele.write(alleleType + '\t')
 
 	# Allele Subtype
@@ -815,10 +816,10 @@ def createAlleleFile():
 
 	# Add additional mutant cell line to an existing allele that is already in the database
 	if childExists and not cellLineExists:
-		fpAllele.write(str(childKey) + ':')
+		fpAllele.write(str(childKey) + '::')
 		if ikmcNotes.has_key(childKey):
 			ikmcNote = ikmcNotes[childKey]
-			fpAllele.write(str(ikmcNote[0]['_Note_key']) + '|' + ikmcNote[0]['note'])
+			fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + ikmcNote[0]['note'])
 		fpAllele.write('\n')
 	else:
 		fpAllele.write('\n')

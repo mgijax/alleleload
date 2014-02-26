@@ -370,12 +370,16 @@ def bcpFiles():
 #
 # Purpose:  processes data
 #
+# add additional mutant cell line/IKMC note to a new allele (not in the database)
+# or
+# add additional mutant cell line/IKMC note to a allele that *is* in the database
+#
 def processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
 	symbol, mutantCellLine, ikmcNotes, createdByKey):
 
     global alleleKey, noteKey, ikmcNoteSQL
 
-    # use new alleleKey
+    # use new alleleKey to attach additional mcl and ikmc note
     if len(createMutantCellLine1) > 0:
 
 	aKey = alleleLookup[symbol][0][0]
@@ -385,20 +389,34 @@ def processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
     # use existing alleleKey
     elif len(createMutantCellLine2) > 0:
 
-	tokens = createMutantCellLine2.split(':')
+	tokens = createMutantCellLine2.split('::')
 	aKey = tokens[0]
 	newNotes = tokens[1]
+	note = ''
 
-        tokens = newNotes.split('|')
-	nKey = tokens[0]
-	note = tokens[1] + '|' + ikmcNotes
+	# either, we will update an existing ikmc note
+	# or we will add a new ikmc note to an existing allele
+	try:
+        	tokens = newNotes.split('||')
+		nKey = tokens[0]
+		note = tokens[1] + '|' + ikmcNotes
+
+	except:
+	    	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+			% (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
+		   	createdByKey, createdByKey, loaddate, loaddate))
+
+	    	noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+			% (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+
+	    	noteKey = noteKey + 1
 
     #
     # add another mutant cell line
     #
     addMutantCellLine(aKey, mutantCellLine, createdByKey)
 
-    # update ikmc notes
+    # only if updating an existing ikmc note
 
     if len(note) > 0:
 
@@ -409,7 +427,7 @@ def processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
 		where _Note_key = %s
 		''' % (note, nKey)
 
-    print ikmcNoteSQL
+    #print ikmcNoteSQL
 
     return 1
 
