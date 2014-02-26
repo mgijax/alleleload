@@ -65,6 +65,7 @@
 #	field 19: Creation Date
 #	field 20: Add mutant cell line/IKMC to new Allele (not yet in database)
 #	field 21: Add mutant cell line/IKMC to existing Allele (in database)
+#	field 22: Update the parent's Allele Status => Approved (847114)
 #
 #  Exit Codes:
 #
@@ -215,17 +216,19 @@ def initialize():
     fpAllele = None
 
     #
-    # Allele Accession ID/Key/Symbol/Name/Strain/Marker Acc ID/Marker Symbol
+    # Parent: Allele Accession ID/Key/Symbol/Name/Strain/Marker Acc ID/Marker Symbol
     #
     # KOMP, EUCOMM only : existing parents
     # excluding NCOM (for now)
     #		or a.symbol like "%<tm%[ae](NCOM%"
     #		or a.symbol like "%<tm[0-9](NCOM%"
     #
+    # includes:  Approved
+    #
     print 'querying for parents'
     results = db.sql('''
-	select aa.accID, a._Allele_key, a.symbol, a.name, s.strain,
-		am.accID as markerID, m.symbol as markerSym
+	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a.name,
+		s.strain, am.accID as markerID, m.symbol as markerSym
 	from ALL_Allele a, ACC_Accession aa, ACC_Accession am, MRK_Marker m, PRB_Strain s
 	where (a.symbol like "%<tm[ae](KOMP%"
 	        or a.symbol like "%<tm[0-9](KOMP%"
@@ -233,7 +236,7 @@ def initialize():
 		or a.symbol like "%<tm[0-9](EUCOMM%"
 		or a.symbol like "%<tm%[ae](EUCOMM%"
 		)
-	and a._Allele_Status_key in (847114, 3983021)
+	and a._Allele_Status_key in (847114)
 	and a._Allele_key = aa._Object_key
 	and a._Strain_key = s._Strain_key
 	and aa._MGIType_key = 11
@@ -255,15 +258,17 @@ def initialize():
 	markerByID.append(key)
 
     #
-    # Allele Accession ID/Key/Symbol
+    # Child: Allele Accession ID/Key/Symbol
     #
     # KOMP, EUCOMM only : existing children
     #	excluding NCOM (for now)
     #		or a.symbol like "%<tm%.%(NCOM%"
     #
+    # includes:  Approved, Reserved
+    #
     print 'querying for children'
     results = db.sql('''
-	select aa.accID, a._Allele_key, a.symbol
+	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol
 	from ALL_Allele a, ACC_Accession aa
 	where (a.symbol like "%<tm%.%(KOMP%"
 		or a.symbol like "%<tm%b(KOMP%"
@@ -272,7 +277,7 @@ def initialize():
 		or a.symbol like "%<tm%b(EUCOMM%"
 		or a.symbol like "%<tm%c(EUCOMM%"
 		)
-	and a._Allele_Status_key in (847114, 3983021)
+	and a._Allele_Status_key in (847114, 847113)
 	and a._Allele_key = aa._Object_key
 	and aa._MGIType_key = 11
 	and aa._LogicalDB_key = 1
@@ -298,7 +303,7 @@ def initialize():
 	where (a.symbol like "%<tm%(KOMP%"
 		or a.symbol like "%<tm%(EUCOMM%"
 		)
-	and a._Allele_Status_key in (847114, 3983021)
+	and a._Allele_Status_key in (847114, 3983021, 847113)
 	and a._Allele_key = ac._Allele_key
 	and ac._MutantCellLine_key = c._CellLine_key
 	''', 'auto')
@@ -522,6 +527,7 @@ def createAlleleFile():
 	alleleKey = alleleByID[ikmc_allele_id_8][0]['_Allele_key']
 	strainOfOrigin = alleleByID[ikmc_allele_id_8][0]['strain']
 	markerSym = alleleByID[ikmc_allele_id_8][0]['markerSym']
+
 	alleleSym_6 = ikmc_marker_symbol_1 + '<' + ikmc_allele_symbol_6 + '>'
 
 	tokens1 = alleleSym.split('<')
@@ -543,6 +549,7 @@ def createAlleleFile():
 	childExists = 0
 	cellLineExists = 0
 	childKey = ''
+	isReserved = 0
 
 	# determine isXa, isXe, isX
 
@@ -630,13 +637,19 @@ def createAlleleFile():
 		if childExists:
 			cellLineExists = 0
 			childKey = childAlleleBySymbol[newAlleleSym][0]['_Allele_key']
+			isReserved = childAlleleBySymbol[newAlleleSym][0]['_Allele_Status_key']
 
 			if cellLineByKey.has_key(childKey):
 				for c in cellLineByKey[childKey]:
 					if c['cellLine'] == ikmc_escell_name_9:
 						cellLineExists = 1
 
-			if cellLineExists:
+			#
+			# if the child exists 
+			# and the cell line exists
+			# and the child's status is *not* reserved
+			#
+			if cellLineExists and not isReserved:
 				logit = 'Child & Cell Line already exists in MGI'
 				fpExistsDiag.write(logit + '\t' + \
 					ikmc_marker_symbol_1 + '\t' + \
@@ -820,9 +833,13 @@ def createAlleleFile():
 		if ikmcNotes.has_key(childKey):
 			ikmcNote = ikmcNotes[childKey]
 			fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + ikmcNote[0]['note'])
-		fpAllele.write('\n')
+		fpAllele.write('\t')
 	else:
-		fpAllele.write('\n')
+		fpAllele.write('\t')
+
+	if isReserved:
+		fpAllele.write(str(childKey))
+	fpAllele.write('\n')
 
 	lineNum += 1
 
