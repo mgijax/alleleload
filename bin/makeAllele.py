@@ -99,7 +99,7 @@ inputFileName = os.environ['INPUTFILE']
 outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
 
-DEBUG = 1		# if 0, not in debug mode
+DEBUG = 0		# if 0, not in debug mode
 
 bcpon = 1		# can the bcp files be bcp-ed into the database?  default is yes.
 
@@ -342,6 +342,7 @@ def bcpFiles():
     bcpdelim = "|"
 
     if DEBUG or not bcpon:
+    	print ikmcSQL
         return
 
     closeFiles()
@@ -416,21 +417,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 
     if len(createNote) > 0:
 
-	# child exists, note exists : update existing note
         try:
-	    tokens = createNote.split('||')
-	    nKey = tokens[0]
-	    note = tokens[1] + '|' + ikmcNotes
-
-	    ikmcSQL = ikmcSQL + \
-		    '''
-		    update MGI_NoteChunk 
-		    set note = '%s' 
-		    where _Note_key = %s
-		    ''' % (note, nKey)
-		    	
-        except:
-
 	    tokens = createNote.split('::')
 	    aKey = tokens[0]
 
@@ -456,12 +443,23 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 	   	    createdByKey, createdByKey, loaddate, loaddate))
 
 	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-	            % (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+	            % (noteKey, 1, note, createdByKey, createdByKey, loaddate, loaddate))
 
 	        noteKey = noteKey + 1
 
-    print ikmcSQL
+	# child exists, note exists : update existing note
+        except:
+	    tokens = createNote.split('||')
+	    nKey = tokens[0]
+	    note = tokens[1] + '|' + ikmcNotes
 
+	    ikmcSQL = ikmcSQL + \
+		    '''
+		    update MGI_NoteChunk 
+		    set note = '%s' 
+		    where _Note_key = %s
+		    ''' % (note, nKey)
+		    	
     return 1
 
 #

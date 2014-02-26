@@ -724,17 +724,23 @@ def createAlleleFile():
 	#
 
 	attachCellLine = 0
+	attachColony = 0
 	duplicateAllele = 0
 
 	if alleleAdded.has_key(newAlleleSym):
 
 		attachCellLine = 1
+		attachColony = 1
 		duplicateAllele = 0
 
 		for a in alleleAdded[newAlleleSym]:
 			if a == ikmc_escell_name_9:
 				attachCellLine = 0
 				duplicateAllele = 1
+
+		for a in colonyAdded[newAlleleSym]:
+			if a == ikmc_colony_11:
+				attachColony = 0
 
 		if duplicateAllele:
 			logit = 'Duplicate: child already added by this load\n'
@@ -830,12 +836,18 @@ def createAlleleFile():
 	fpAllele.write('\t')
 
 	# Add IKMC Colony/Note to a new or existing allele
+
+	# child exists/ikmc note exists : update existing note
 	if childExists and ikmcNotes.has_key(childKey):
 		ikmcNote = ikmcNotes[childKey]
 		fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + ikmcNote[0]['note'])
+
+	# child exists/ikmc note does not exis : add note
 	elif childExists and not ikmcNotes.has_key(childKey):
 		fpAllele.write(str(childKey) + '::')
-	elif colonyAdded.has_key(newAlleleSym):
+
+	# new/non-duplicate IKMC Colony
+	elif attachColony:
 		fpAllele.write('0::')
 		fpAllele.write('|'.join(colonyAdded[newAlleleSym]))
 	fpAllele.write('\t')
