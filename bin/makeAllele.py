@@ -98,7 +98,7 @@ inputFileName = os.environ['INPUTFILE']
 outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
 
-DEBUG = 1		# if 0, not in debug mode
+DEBUG = 0		# if 0, not in debug mode
 
 bcpon = 1		# can the bcp files be bcp-ed into the database?  default is yes.
 
@@ -376,11 +376,11 @@ def processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
     global alleleKey, noteKey, ikmcNoteSQL
 
     # use new alleleKey
-    if int(createMutantCellLine1) == 1:
+    if len(createMutantCellLine1) > 0:
 
 	aKey = alleleLookup[symbol][0][0]
 	nKey = alleleLookup[symbol][0][1]
-	note = ikmcNotes
+	note = createMutantCellLine1
 
     # use existing alleleKey
     elif len(createMutantCellLine2) > 0:
@@ -463,7 +463,7 @@ def processFile():
             continue
 
 	# processing for IKMC-only
-	if int(createMutantCellLine1) == 1 or len(createMutantCellLine2) > 0:
+	if len(createMutantCellLine1) > 0 or len(createMutantCellLine2) > 0:
 		processFileIKMC(createMutantCellLine1, createMutantCellLine2, \
 			symbol, mutantCellLine, ikmcNotes, createdByKey)
 		continue

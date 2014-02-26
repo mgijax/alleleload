@@ -808,11 +808,10 @@ def createAlleleFile():
 
 	# Add additional mutant cell line to a new allele in the same input file
 	if attachCellLine:
-		fpAllele.write(str(attachCellLine) + ':')
 		if colonyAdded.has_key(newAlleleSym):
 			fpAllele.write('|'.join(colonyAdded[newAlleleSym]) + '\t')
 	else:
-		fpAllele.write(str(attachCellLine) + '\t')
+		fpAllele.write('\t')
 
 	# Add additional mutant cell line to an existing allele that is already in the database
 	if childExists and not cellLineExists:
