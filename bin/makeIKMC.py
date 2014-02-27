@@ -550,7 +550,7 @@ def createAlleleFile():
 
 	childExists = 0
 	cellLineExists = 0
-	childKey = ''
+	childKey = 0
 	isReserved = 0
 
 	# determine isXa, isXe, isX
@@ -679,7 +679,7 @@ def createAlleleFile():
 			#	print alleleSym, ikmc_escell_name_9
 			# OK to go!
 
-	print alleleSym, ikmc_colony_11
+	#print alleleSym, ikmc_colony_11
 
 	#
 	# new Allele has passed the rules...ready to create the new allele
@@ -769,7 +769,7 @@ def createAlleleFile():
 			colonyAdded[newAlleleSym].append(ikmc_colony_11)
 
 	# update the new allele list
-	else:
+	elif int(childKey) == 0:
 		alleleAdded[newAlleleSym] = []
 		alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
 		colonyAdded[newAlleleSym] = []

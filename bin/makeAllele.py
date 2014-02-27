@@ -404,15 +404,19 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		where _Allele_key = %s
 		''' % (setStatus)
 
-    # add new IKMC Colony Note to new/existing alleles
     #
-    # key||existing note => child exists/update existing parent/note key
+    # Add IKMC Colony/Note to a new or existing allele
     #
-    # key::blank => child exists/no parent note/add ikmcNote
+    # child exists/ikmc note exists : update existing note
+    # 	|| => _Note_key||existing colony notes
     #
-    # 0::blank => use new alleleKey + ikmcNotes
+    # child exists/ikmc note does not exis : add note
+    # 	:: => allele/child key
     #
-    # blank : do nothing
+    # new allele/child/non-duplicate IKMC Colony
+    #	0::colony(s)
+    #
+    # blank => do nothing
     #
 
     if len(createNote) > 0:
@@ -424,7 +428,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 	    # duplicate child, additional note : add note to new child
 	    if int(aKey) == 0:
 		nKey = alleleLookup[symbol][0][1]
-		note = ikmcNotes
+		note = tokens[1]
 
 	        ikmcSQL = ikmcSQL + \
 		        '''
