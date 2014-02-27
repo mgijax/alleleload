@@ -834,31 +834,50 @@ def createAlleleFile():
 	# Created By
 	fpAllele.write(createdBy + '\t')
 
+	#
 	# Add additional mutant cell line to a new or existing allele
+	#
+	# 0 => use new allele key created by makeAllele.py
+	# > 0 => allele/child key of existing allele
+	# blank => do nothing
+	#
 	if attachCellLine:
 		fpAllele.write('0')
 	elif childExists and not cellLineExists:
 		fpAllele.write(str(childKey))
 	fpAllele.write('\t')
 
+	#
 	# Add IKMC Colony/Note to a new or existing allele
-
+	#
 	# child exists/ikmc note exists : update existing note
+	# 	|| => _Note_key||existing colony notes
+	#
+	# child exists/ikmc note does not exis : add note
+	# 	:: => allele/child key
+	#
+	# new allele/child/non-duplicate IKMC Colony
+	#	0::colony(s)
+	#
+	# blank => do nothing
+	#
+
 	if childExists and ikmcNotes.has_key(childKey):
 		ikmcNote = ikmcNotes[childKey]
 		fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + ikmcNote[0]['note'])
 
-	# child exists/ikmc note does not exis : add note
 	elif childExists and not ikmcNotes.has_key(childKey):
 		fpAllele.write(str(childKey) + '::')
 
-	# new/non-duplicate IKMC Colony
 	elif attachColony:
 		fpAllele.write('0::')
 		fpAllele.write('|'.join(colonyAdded[newAlleleSym]))
 	fpAllele.write('\t')
 
+	#
 	# Set the child's Allele Status = Approved
+	#
+
 	if isReserved:
 		fpAllele.write(str(childKey))
 	fpAllele.write('\n')
