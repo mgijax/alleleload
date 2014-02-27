@@ -661,7 +661,7 @@ def createAlleleFile():
 			# and the colony exists
 			# and the child's status is *not* reserved
 			#
-			if cellLineExists and cellLineExists and colonyExists and not isReserved:
+			if cellLineExists and colonyExists and not isReserved:
 				logit = 'Child/Cell Line/Colony already exists in MGI'
 				fpExistsDiag.write(logit + '\t' + \
 					ikmc_marker_symbol_1 + '\t' + \
@@ -678,6 +678,8 @@ def createAlleleFile():
 			#else:
 			#	print alleleSym, ikmc_escell_name_9
 			# OK to go!
+
+	print alleleSym, ikmc_colony_11
 
 	#
 	# new Allele has passed the rules...ready to create the new allele
