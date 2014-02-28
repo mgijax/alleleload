@@ -353,7 +353,7 @@ def openFiles():
     try:
         fpLogDiag = open(logDiagFile, 'a+')
     except:
-        print 'Cannot open file: ' + logDiagFile
+        print 'Cannot open diag file: ' + logDiagFile
         return 1
 
     #
@@ -362,7 +362,7 @@ def openFiles():
     try:
         fpLogCur = open(logCurFile, 'a+')
     except:
-        print 'Cannot open file: ' + logCurFile
+        print 'Cannot open cur file: ' + logCurFile
         return 1
 
     #
@@ -371,7 +371,7 @@ def openFiles():
     try:
         fpSkipDiag = open(skipDiagFile, 'w')
     except:
-        print 'Cannot open file: ' + skipDiagFile
+        print 'Cannot open skip file: ' + skipDiagFile
         return 1
 
     #
@@ -380,16 +380,16 @@ def openFiles():
     try:
         fpExistsDiag = open(existsDiagFile, 'w')
     except:
-        print 'Cannot open file: ' + existsDiagFile
+        print 'Cannot open exists file: ' + existsDiagFile
         return 1
 
     #
-    # Open the IKMC/Biomart file
+    # Open the IKMC file
     #
     try:
         fpIKMC = open(ikmcFile, 'r')
     except:
-        print 'Cannot open file: ' + ikmcFile
+        print 'Cannot open ikmc file: ' + ikmcFile
         return 1
 
     #
@@ -398,7 +398,7 @@ def openFiles():
     try:
         fpAllele = open(alleleFile, 'w')
     except:
-        print 'Cannot open file: ' + alleleFile
+        print 'Cannot open allele file: ' + alleleFile
         return 1
 
 

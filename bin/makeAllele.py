@@ -343,7 +343,7 @@ def bcpFiles():
 
     if DEBUG or not bcpon:
     	print ikmcSQL
-        return
+        return 0
 
     closeFiles()
 
@@ -442,14 +442,29 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		aKey = tokens[0]
 		note = ikmcNotes
 
-	        noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
-	   	    createdByKey, createdByKey, loaddate, loaddate))
+		if alleleLookup.has_key(symbol):
+			nKey = alleleLookup[symbol][0][1]
 
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-	            % (noteKey, 1, note, createdByKey, createdByKey, loaddate, loaddate))
+	    		ikmcSQL = ikmcSQL + \
+		    		'''
+		    		update MGI_NoteChunk 
+		    		set note = rtrim(note) + '|' + '%s' 
+		    		where _Note_key = %s
+		    		''' % (note, nKey)
 
-	        noteKey = noteKey + 1
+		else:
+	        	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+		    	% (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
+	   	    	createdByKey, createdByKey, loaddate, loaddate))
+
+	        	noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+	            	% (noteKey, 1, note, createdByKey, createdByKey, loaddate, loaddate))
+
+			# save symbol/aKey/ikmc note key
+			alleleLookup[symbol] = []
+			alleleLookup[symbol].append((aKey, noteKey))
+
+	        	noteKey = noteKey + 1
 
 	# child exists, note exists : update existing note
         except:
