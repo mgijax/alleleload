@@ -79,12 +79,12 @@ touch ${LOG}
 
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Running test DAL_pass_fail..." | tee -a ${LOG}
+echo "Running makeIKMC test DAL_pass_fail..." | tee -a ${LOG}
 ${ALLELELOAD}/bin/makeIKMC.py
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: Running test DAL_pass_fail." | tee -a ${LOG}
+    echo "Error: Running makeIKMC test DAL_pass_fail." | tee -a ${LOG}
     exit 1
 fi
 
@@ -111,12 +111,12 @@ touch ${LOG}
 
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Running test DAL_test_logic..." | tee -a ${LOG}
+echo "Running makeIKMC test DAL_test_logic..." | tee -a ${LOG}
 ${ALLELELOAD}/bin/makeIKMC.py
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: Running test DAL_test_logic." | tee -a ${LOG}
+    echo "Error: Running makeIKMC test DAL_test_logic." | tee -a ${LOG}
     exit 1
 fi
 
@@ -143,12 +143,22 @@ touch ${LOG}
 
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Running test DAL_test_updateMGI_logic..." | tee -a ${LOG}
+echo "Running makeIKMC test DAL_test_updateMGI_logic..." | tee -a ${LOG}
 ${ALLELELOAD}/bin/makeIKMC.py
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: Running test DAL_test_updateMGI_logic." | tee -a ${LOG}
+    echo "Error: Running makeIKMC test DAL_test_updateMGI_logic." | tee -a ${LOG}
+    exit 1
+fi
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Running makeAllele test DAL_test_updateMGI_logic..." | tee -a ${LOG}
+${ALLELELOAD}/bin/makeAllele.py
+STAT=$?
+if [ ${STAT} -ne 0 ]
+then
+    echo "Error: Running makeAllele test DAL_test_updateMGI_logic." | tee -a ${LOG}
     exit 1
 fi
 
@@ -175,12 +185,22 @@ touch ${LOG}
 
 echo "" >> ${LOG}
 date >> ${LOG}
-echo "Running test DAL_test_updateIKMC_logic..." | tee -a ${LOG}
+echo "Running makeIKMC test DAL_test_updateIKMC_logic..." | tee -a ${LOG}
 ${ALLELELOAD}/bin/makeIKMC.py
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "Error: Running test DAL_test_updateIKMC_logic." | tee -a ${LOG}
+    echo "Error: Running makeIKMC test DAL_test_updateIKMC_logic." | tee -a ${LOG}
+    exit 1
+fi
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Running makeAllele test DAL_test_updateIKMC_logic..." | tee -a ${LOG}
+${ALLELELOAD}/bin/makeAllele.py
+STAT=$?
+if [ ${STAT} -ne 0 ]
+then
+    echo "Error: Running makeAllele test DAL_test_updateIKMC_logic." | tee -a ${LOG}
     exit 1
 fi
 
