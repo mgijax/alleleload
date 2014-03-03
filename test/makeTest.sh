@@ -58,7 +58,7 @@ fi
 
 IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_pass_fail.txt
 IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_pass_fail.txt
-INPUTFILE=${INPUTDIR}/DAL_pass_fail_mgi_allele_test.txt
+INPUTFILE=${INPUTDIR}/DAL_pass_fail_mgi_allele_test_allele.txt
 LOG_PROC=${LOGDIR}/DAL_pass_fail.proc.log
 LOG_DIAG=${LOGDIR}/DAL_pass_fail.diag.log
 LOG_CUR=${LOGDIR}/DAL_pass_fail.cur.log
@@ -90,7 +90,7 @@ fi
 
 IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_test_logic.txt
 IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_test_logic.txt
-INPUTFILE=${INPUTDIR}/DAL_test_logic.txt
+INPUTFILE=${INPUTDIR}/DAL_test_logic_allele.txt
 LOG_PROC=${LOGDIR}/DAL_test_logic.proc.log
 LOG_DIAG=${LOGDIR}/DAL_test_logic.diag.log
 LOG_CUR=${LOGDIR}/DAL_test_logic.cur.log
@@ -122,7 +122,7 @@ fi
 
 IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_test_updateMGI_logic.txt
 IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_test_updateMGI_logic.txt
-INPUTFILE=${INPUTDIR}/DAL_test_updateMGI_logic.txt
+INPUTFILE=${INPUTDIR}/DAL_test_updateMGI_logic_allele.txt
 LOG_PROC=${LOGDIR}/DAL_test_updateMGI_logic.proc.log
 LOG_DIAG=${LOGDIR}/DAL_test_updateMGI_logic.diag.log
 LOG_CUR=${LOGDIR}/DAL_test_updateMGI_logic.cur.log
@@ -164,7 +164,7 @@ fi
 
 IKMC_INPUT_FILE=${ALLELELOAD}/test/DAL_test_updateIKMC_logic.txt
 IKMC_COPY_INPUT_FILE=${INPUTDIR}/DAL_test_updateIKMC_logic.txt
-INPUTFILE=${INPUTDIR}/DAL_test_updateIKMC_logic.txt
+INPUTFILE=${INPUTDIR}/DAL_test_updateIKMC_logic_allele.txt
 LOG_PROC=${LOGDIR}/DAL_test_updateIKMC_logic.proc.log
 LOG_DIAG=${LOGDIR}/DAL_test_updateIKMC_logic.diag.log
 LOG_CUR=${LOGDIR}/DAL_test_updateIKMC_logic.cur.log
