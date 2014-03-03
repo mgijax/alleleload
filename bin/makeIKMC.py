@@ -66,6 +66,7 @@
 #	field 20: Add mutant cell line
 #	field 21: Add IKMC Colony Note
 #	field 22: Set the child's Allele Status = Approved (847114)
+#	field 23: Allele MGI ID (if child allele already exists)
 #
 #  Exit Codes:
 #
@@ -882,6 +883,13 @@ def createAlleleFile():
 
 	if isReserved:
 		fpAllele.write(str(childKey))
+	fpAllele.write('\t')
+
+	#
+	# Child Allele MGI ID
+	#
+	if childAlleleBySymbol.has_key(newAlleleSym):
+		fpAllele.write(childAlleleBySymbol[newAlleleSym][0]['accID'])
 	fpAllele.write('\n')
 
 	lineNum += 1
