@@ -697,24 +697,30 @@ def processFile():
 
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
-        newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
-	    % (mgi_utils.prvalue(markerID), \
-	       mgi_utils.prvalue(symbol), \
-	       mgi_utils.prvalue(name), \
-	       mgi_utils.prvalue(alleleStatus), \
-	       mgi_utils.prvalue(alleleType), \
-	       mgi_utils.prvalue(alleleSubtype), \
-	       mgi_utils.prvalue(collection), \
-	       mgi_utils.prvalue(germLine), \
-	       mgi_utils.prvalue(references), \
-	       mgi_utils.prvalue(strainOfOrigin), \
-	       mgi_utils.prvalue(mutantCellLine), \
-	       mgi_utils.prvalue(allMutations), \
-	       mgi_utils.prvalue(inheritanceMode), \
-	       mgi_utils.prvalue(isMixed), \
-	       mgi_utils.prvalue(isExtinct), \
-	       mgi_utils.prvalue(createdBy), \
-	       mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
+	if createdBy == 'ikmc_alleleload':
+        	newAlleleFile.write('%s\t%s%s\t%s\n' \
+	    	% (mgi_utils.prvalue(ikmcNotes), \
+			mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey), \
+			mgi_utils.prvalue(symbol)))
+	else:
+        	newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
+	    	% (mgi_utils.prvalue(markerID), \
+	       	mgi_utils.prvalue(symbol), \
+	       	mgi_utils.prvalue(name), \
+	       	mgi_utils.prvalue(alleleStatus), \
+	       	mgi_utils.prvalue(alleleType), \
+	       	mgi_utils.prvalue(alleleSubtype), \
+	       	mgi_utils.prvalue(collection), \
+	       	mgi_utils.prvalue(germLine), \
+	       	mgi_utils.prvalue(references), \
+	       	mgi_utils.prvalue(strainOfOrigin), \
+	       	mgi_utils.prvalue(mutantCellLine), \
+	       	mgi_utils.prvalue(allMutations), \
+	       	mgi_utils.prvalue(inheritanceMode), \
+	       	mgi_utils.prvalue(isMixed), \
+	       	mgi_utils.prvalue(isExtinct), \
+	       	mgi_utils.prvalue(createdBy), \
+	       	mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
 
 	# save symbol/alleleKey/ikmc note key
 	alleleLookup[symbol] = []
