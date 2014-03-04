@@ -480,7 +480,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		    where _Note_key = %s
 		    ''' % (note, nKey)
 		    	
-    newAlleleFile.write('%s\t\t%s\n' \
+    newAlleleFile.write('%s\t%s\t%s\n' \
 	   	% (mgi_utils.prvalue(ikmcNotes), \
 			mgi_utils.prvalue(existingAlleleID), \
 			mgi_utils.prvalue(symbol)))
