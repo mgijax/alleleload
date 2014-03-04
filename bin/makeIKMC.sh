@@ -111,8 +111,12 @@ fi
 #
 # copy ${OUTPUTDIR}/mgi_allele_ikmc.txt.new to ${IKMC_FTP} directory
 #
-#useDate=`date '+%m%d%y'`
-#echo ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
-#cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Copying IKMC output file to ftp directory..." | tee -a ${LOG}
+useDate=`date '+%m%d%Y'`
+cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
+rm -rf ${IKMC_FTP}/mgi_allele_ikmc.txt.current | tee -a ${LOG}
+ln -s ${IKMC_FTP}/mgi_allele_ikmc.txt.${useDate} ${IKMC_FTP}/mgi_allele_ikmc.txt.current | tee -a ${LOG}
 
 exit 0

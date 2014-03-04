@@ -634,7 +634,6 @@ def createAlleleFile():
 			newAlleleSym = newAlleleSymB
 
 		elif isXa and isFlp and childAlleleBySymbol.has_key(newAlleleSymC):
-			print newAlleleSymC
 			childExists = 1
 			newAlleleSym = newAlleleSymC
 
@@ -663,8 +662,6 @@ def createAlleleFile():
 			# and the colony exists
 			# and the child's status is *not* reserved
 			#
-			if newAlleleSym == 'Prmt5<tm2c(EUCOMM)Wtsi>':
-				print childKey, cellLineExists, colonyExists
 			if cellLineExists and colonyExists and not isReserved:
 				logit = 'Child/Cell Line/Colony already exists in MGI'
 				fpExistsDiag.write(logit + '\t' + \
