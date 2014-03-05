@@ -57,11 +57,42 @@ else
 fi
 
 #
+#  Source the DLA library functions.
+#
+
+if [ "${DLAJOBSTREAMFUNC}" != "" ]
+then
+    if [ -r ${DLAJOBSTREAMFUNC} ]
+    then
+        . ${DLAJOBSTREAMFUNC}
+    else
+        echo "Cannot source DLA functions script: ${DLAJOBSTREAMFUNC}" | tee -a ${LOG}
+        exit 1
+    fi
+else
+    echo "Environment variable DLAJOBSTREAMFUNC has not been defined." | tee -a ${LOG}
+    exit 1
+fi
+
+#
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
 rm -rf ${LOG}
+rm -rf ${LOG_CUR}
 touch ${LOG}
+touch ${LOG_CUR}
+
+#
+# createArchive
+#
+echo "archiving..." >> ${LOG}
+date >> ${LOG}
+preload ${OUTPUTDIR}
+rm -rf ${OUTPUTDIR}/*.diagnostics
+rm -rf ${OUTPUTDIR}/*.error
+echo "archiving complete" >> ${LOG}
+date >> ${LOG}
 
 #
 # find & copy download file to input directory
@@ -88,11 +119,7 @@ date >> ${LOG}
 echo "Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
 ./makeIKMC.py 2>&1 >> ${LOG}
 STAT=$?
-if [ ${STAT} -ne 0 ]
-then
-    echo "Error: Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
-    exit 1
-fi
+checkStatus ${STAT} 'Create the IKMC/Allele input file (makeIKMC.sh)'
 
 #
 # Create the Alleles
@@ -102,11 +129,7 @@ date >> ${LOG}
 echo "Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
 ./makeAllele.sh ${CONFIG} 2>&1 >> ${LOG}
 STAT=$?
-if [ ${STAT} -ne 0 ]
-then
-    echo "Error: Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
-    exit 1
-fi
+checkStatus ${STAT} 'Create the Alleles (makeAllele.sh)'
 
 #
 # copy ${OUTPUTDIR}/mgi_allele_ikmc.txt.new to ${IKMC_FTP} directory
@@ -120,5 +143,12 @@ rm -rf mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
 rm -rf mgi_allele_ikmc.txt.current | tee -a ${LOG}
 cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
 ln -s mgi_allele_ikmc.txt.${useDate} mgi_allele_ikmc.txt.current | tee -a ${LOG}
+STAT=0
+checkStatus ${STAT} 'Copying IKMC output file to ftp directory'
 
+#
+# run postload cleanup and email logs
+#
+shutDown
 exit 0
+
