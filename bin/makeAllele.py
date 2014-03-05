@@ -161,7 +161,7 @@ mgiTypeKey = 11		# Allele
 mgiPrefix = "MGI:"
 
 # key = symbol
-# value = (alleleKey, noteKey)
+# value = (alleleKey, noteKey, mgiKey)
 alleleLookup = {}
 
 loaddate = loadlib.loaddate
@@ -462,9 +462,9 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 	        	noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
 	            	% (noteKey, 1, note, createdByKey, createdByKey, loaddate, loaddate))
 
-			# save symbol/aKey/ikmc note key
+			# save symbol/aKey/ikmc note key/allele id
 			alleleLookup[symbol] = []
-			alleleLookup[symbol].append((aKey, noteKey))
+			alleleLookup[symbol].append((aKey, noteKey, 'missing allele id (1)'))
 
 	        	noteKey = noteKey + 1
 
@@ -481,9 +481,19 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		    where _Note_key = %s
 		    ''' % (note, nKey)
 		    	
+    # 
+    # print out the proper allele id
+    #
+    if len(existingAlleleID) > 0:
+	printAlleleID = existingAlleleID
+    elif alleleLookup.has_key(symbol):
+	printAlleleID = alleleLookup[symbol][0][2]
+    else:
+	printAlleleID = 'missing allele id (2)'
+
     newAlleleFile.write('%s\t%s\t%s\n' \
-	   	% (mgi_utils.prvalue(ikmcNotes), \
-			mgi_utils.prvalue(existingAlleleID), \
+   		% (mgi_utils.prvalue(ikmcNotes), \
+			mgi_utils.prvalue(printAlleleID), \
 			mgi_utils.prvalue(ikmcSymbol)))
 
     return 1
@@ -734,7 +744,7 @@ def processFile():
 
 	# save symbol/alleleKey/ikmc note key
 	alleleLookup[symbol] = []
-	alleleLookup[symbol].append((alleleKey, useIKMCnotekey))
+	alleleLookup[symbol].append((alleleKey, useIKMCnotekey, mgiPrefix + str(mgiKey)))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
