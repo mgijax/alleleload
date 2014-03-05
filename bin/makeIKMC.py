@@ -67,6 +67,7 @@
 #	field 21: Add IKMC Colony Note
 #	field 22: Set the child's Allele Status = Approved (847114)
 #	field 23: Allele MGI ID (if child allele already exists)
+#	field 24: Allele Symbol minus Marker Symbol (for IKMC format)
 #
 #  Exit Codes:
 #
@@ -890,7 +891,16 @@ def createAlleleFile():
 	#
 	if childAlleleBySymbol.has_key(newAlleleSym):
 		fpAllele.write(childAlleleBySymbol[newAlleleSym][0]['accID'])
-	fpAllele.write('\n')
+	fpAllele.write('\t')
+
+	#
+	# Allele Symbol nomenclature minus the Marker name
+	# 	Syt17<tm1b(KOMP)Wtsi> => tm1b(KOMP)Wtsi
+	#
+
+	p1 = newAlleleSym.find('<')
+	p2 = newAlleleSym.find('>')
+	fpAllele.write(newAlleleSym[p1+1:p2] + '\n')
 
 	lineNum += 1
 

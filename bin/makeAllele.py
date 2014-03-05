@@ -43,6 +43,7 @@
 #	field 21: Add IKMC Colony Note
 #	field 22: Set the child's Allele Status = Approved (847114)
 #       field 23: Allele MGI ID (if child allele already exists)
+#       field 24: Allele Symbol minus Marker Symbol (for IKMC format)
 #
 # Outputs:
 #
@@ -378,7 +379,7 @@ def bcpFiles():
 # c) set Allele Status = Approved for reserved alleles
 #
 def processFileIKMC(createMCL, createNote, setStatus, \
-	symbol, mutantCellLine, ikmcNotes, createdByKey, existingAlleleID):
+	symbol, ikmcSymbol, mutantCellLine, ikmcNotes, createdByKey, existingAlleleID):
 
     global noteKey, ikmcSQL
 
@@ -483,7 +484,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     newAlleleFile.write('%s\t%s\t%s\n' \
 	   	% (mgi_utils.prvalue(ikmcNotes), \
 			mgi_utils.prvalue(existingAlleleID), \
-			mgi_utils.prvalue(symbol)))
+			mgi_utils.prvalue(ikmcSymbol)))
 
     return 1
 
@@ -530,6 +531,7 @@ def processFile():
 	    createNote = tokens[20]
 	    setStatus = tokens[21]
 	    existingAlleleID = tokens[22]
+	    ikmcSymbol = tokens[23]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -541,7 +543,8 @@ def processFile():
 	# processing for IKMC-only
 	if len(createMCL) > 0 or len(createNote) > 0 or len(setStatus) > 0:
 		processFileIKMC(createMCL, createNote, setStatus, \
-			symbol, mutantCellLine, ikmcNotes, createdByKey, existingAlleleID)
+			symbol, ikmcSymbol, mutantCellLine, ikmcNotes, \
+			createdByKey, existingAlleleID)
 		continue
 
 	# marker key
@@ -708,7 +711,7 @@ def processFile():
         	newAlleleFile.write('%s\t%s%s\t%s\n' \
 	    	% (mgi_utils.prvalue(ikmcNotes), \
 			mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey), \
-			mgi_utils.prvalue(symbol)))
+			mgi_utils.prvalue(ikmcSymbol)))
 	else:
         	newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
 	    	% (mgi_utils.prvalue(markerID), \
