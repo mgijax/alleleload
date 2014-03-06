@@ -147,6 +147,15 @@ STAT=0
 checkStatus ${STAT} 'Copying IKMC output file to ftp directory'
 
 #
+# curator log
+#
+wc -l ${INPUTDIR}/mgi_modification_allele_report.tsv | tee -a ${LOG_CUR}
+wc -l ${INPUTDIR}/mgi_allele_ikmc.txt | tee -a ${LOG_CUR}
+wc -l ${LOGDIR}/ikmc.exist.log | tee -a ${LOG_CUR}
+wc -l ${LOGDIR}/ikmc.skip.log | tee -a ${LOG_CUR}
+wc -l ${OUTPUTDIR}/* | tee -a ${LOG_CUR}
+
+#
 # run postload cleanup and email logs
 #
 shutDown
