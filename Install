@@ -60,7 +60,7 @@ for c in ${ALLELELOAD}/*.config
 do
 echo 'running DLAINSTALL' ${c}
 . ${c}
+${DLAINSTALL} ${DEV}
 mkdir -p ${INPUTDIR}
 done
 
-${DLAINSTALL} ${DEV}
