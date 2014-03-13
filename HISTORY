@@ -1,3 +1,10 @@
+TAG: alleleload-5-1-8-?
+DATE: 03/13/2014
+STAFF: lec
+CHANGES:
+1) TR11515/allele stuff/Derivative Allele Load
+updates for new schema (collection and allele subtypes)
+
 TAG: alleleload-5-1-7-4
 TAG: alleleload-5-1-7-3
 TAG: alleleload-5-1-7-2

@@ -117,6 +117,7 @@ accFile = ''            # file descriptor
 accRefFile = ''         # file descriptor
 noteFile = ''		# file descriptor
 noteChunkFile = ''	# file descriptor
+annotFile = ''		# file descriptor
 newAlleleFile = ''      # file descriptor
 
 alleleTable = 'ALL_Allele'
@@ -128,6 +129,7 @@ accTable = 'ACC_Accession'
 accRefTable = 'ACC_AccessionReference'
 noteTable = 'MGI_Note'
 noteChunkTable = 'MGI_NoteChunk'
+annotTable = 'VOC_Annot'
 
 alleleFileName = outputDir + '/' + alleleTable + '.bcp'
 markerFileName = outputDir + '/' + markerTable + '.bcp'
@@ -138,6 +140,7 @@ accFileName = outputDir + '/' + accTable + '.bcp'
 accRefFileName = outputDir + '/' + accRefTable + '.bcp'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
 noteChunkFileName = outputDir + '/' + noteChunkTable + '.bcp'
+annotFileName = outputDir + '/' + annotTable + '.bcp'
 
 diagFileName = ''	# diagnostic file name
 errorFileName = ''	# error file name
@@ -150,6 +153,7 @@ refAssocKey = 0		# MGI_Reference_Assoc._Assoc_key
 accKey = 0              # ACC_Accession._Accession_key
 noteKey = 0		# MGI_Note._Note_key
 mgiKey = 0              # ACC_AccessionMax.maxNumericPart
+annotKey = 0		# VOC_Annot._Annot_key
 mgiNoteObjectKey = 11   # MGI_Note._MGIType_key
 mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
@@ -159,6 +163,8 @@ ikmcSQL = ''
 
 mgiTypeKey = 11		# Allele
 mgiPrefix = "MGI:"
+annotTypeKey = 1014
+qualifierKey = 1614158
 
 # key = symbol
 # value = (alleleKey, noteKey, mgiKey)
@@ -196,7 +202,7 @@ def exit(
 def initialize():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global alleleFile, markerFile, mutationFile, mutantFile, refFile
-    global accFile, accRefFile, noteFile, noteChunkFile
+    global accFile, accRefFile, noteFile, noteChunkFile, annotFile
     global newAlleleFile
  
     db.useOneConnection(1)
@@ -274,6 +280,11 @@ def initialize():
     except:
         exit(1, 'Could not open file %s\n' % noteChunkFileName)
 
+    try:
+        annotFile = open(annotFileName, 'w')
+    except:
+        exit(1, 'Could not open file %s\n' % annotFileName)
+
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)
 
@@ -302,6 +313,7 @@ def closeFiles():
     accRefFile.close()
     noteFile.close()
     noteChunkFile.close()
+    annotFile.close()
 
     return 0
 
@@ -310,7 +322,7 @@ def closeFiles():
 #
 def setPrimaryKeys():
 
-    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey
+    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey, annotKey
 
     results = db.sql('select maxKey = max(_Allele_key) + 1 from ALL_Allele', 'auto')
     alleleKey = results[0]['maxKey']
@@ -333,6 +345,9 @@ def setPrimaryKeys():
 
     results = db.sql('select maxKey = max(_Assoc_key) + 1 from ALL_Allele_CellLine', 'auto')
     mutantKey = results[0]['maxKey']
+
+    results = db.sql('select maxKey = max(_Annot_key) + 1 from VOC_Annot', 'auto')
+    annotKey = results[0]['maxKey']
 
     return 0
 
@@ -361,8 +376,9 @@ def bcpFiles():
     bcp7 = '%s%s in %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
     bcp8 = '%s%s in %s %s' % (bcpI, noteTable, noteFileName, bcpII)
     bcp9 = '%s%s in %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
+    bcp10 = '%s%s in %s %s' % (bcpI, annotTable, annotFileName, bcpII)
 
-    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9]:
+    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9, bcp10]:
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
@@ -503,7 +519,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 #
 def processFile():
 
-    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey
+    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, annotKey
     global alleleLookup
 
     lineNum = 0
@@ -523,8 +539,8 @@ def processFile():
 	    name = tokens[2]
 	    alleleStatus = tokens[3]
 	    alleleType = tokens[4]
-	    alleleSubtype = tokens[5]
-	    collection = tokens[6]
+	    alleleSubtypes = tokens[5]
+	    collectionKey = tokens[6]
 	    germLine = tokens[7]
 	    references = tokens[8]
 	    strainOfOrigin = tokens[9]
@@ -610,12 +626,12 @@ def processFile():
         # if no errors, process the allele
 
 	# not specified/testing
-	collectionKey = 11025586
+	#collectionKey = 11025586
 
 	# allele (master)
-        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
-	    alleleStatusKey, germLineKey, symbol, name, \
+	    alleleStatusKey, germLineKey, collectionKey, symbol, name, \
 	    isExtinct, isMixed, \
 	    createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
 
@@ -630,6 +646,9 @@ def processFile():
         	mutationFile.write('%s|%s|%s|%s\n' \
 	    	% (alleleKey, mutationKey, loaddate, loaddate))
 
+	#
+	# allele references
+	#
 	allReferences = references.split('||')
 	for reference in allReferences:
 		refType, refID = reference.split('|')
@@ -646,6 +665,20 @@ def processFile():
 	    		% (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \
 	       		createdByKey, createdByKey, loaddate, loaddate))
 		refAssocKey = refAssocKey + 1
+
+	#
+	# allele subtypes
+	#
+	allSubtypes = alleleSubtypes.split('|')
+	for s in allSubtypes:
+
+		# _vocab_key = 93 (Allele Subtype)
+		alleleSubtypeKey = loadlib.verifyTerm('', 93, s, lineNum, errorFile)
+
+        	annotFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+                	% (annotKey, annotTypeKey, alleleKey, alleleSubtypeKey, \
+        			qualifierKey, loaddate, loaddate))
+		annotKey = annotKey + 1
 
         #
         # mutant cell line

@@ -229,7 +229,7 @@ def initialize():
     #
     print 'querying for parents'
     results = db.sql('''
-	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a.name,
+	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a.name, a._Collection_key,
 		s.strain, am.accID as markerID, m.symbol as markerSym
 	from ALL_Allele a, ACC_Accession aa, ACC_Accession am, MRK_Marker m, PRB_Strain s
 	where (a.symbol like "%<tm[ae](KOMP%"
@@ -270,7 +270,7 @@ def initialize():
     #
     print 'querying for children'
     results = db.sql('''
-	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol
+	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a._Collection_key
 	from ALL_Allele a, ACC_Accession aa
 	where (a.symbol like "%<tm%.%(KOMP%"
 		or a.symbol like "%<tm%b(KOMP%"
@@ -529,6 +529,7 @@ def createAlleleFile():
 	alleleSym = alleleByID[ikmc_allele_id_8][0]['symbol']
 	alleleName = alleleByID[ikmc_allele_id_8][0]['name']
 	alleleKey = alleleByID[ikmc_allele_id_8][0]['_Allele_key']
+	collectionKey = alleleByID[ikmc_allele_id_8][0]['_Collection_key']
 	strainOfOrigin = alleleByID[ikmc_allele_id_8][0]['strain']
 	markerSym = alleleByID[ikmc_allele_id_8][0]['markerSym']
 
@@ -688,7 +689,8 @@ def createAlleleFile():
 	#
 
 	if isX and isCre:
-		alleleType = 'Targeted (Reporter)'
+		alleleType = 'Targeted'
+		alleleSubType = 'Null/knockout|Reporter'
 		molecularMutation = 'Insertion|Intragenic deletion'
 		newAlleleSym = newAlleleSym1
 		newAlleleName = newAlleleName1
@@ -697,7 +699,8 @@ def createAlleleFile():
 		molecularNote = note_tmX1 % (n)
 
 	elif isXe and isCre:
-		alleleType = 'Targeted (Reporter)'
+		alleleType = 'Targeted'
+		alleleSubType = 'Null/knockout|Reporter'
 		molecularMutation = 'Insertion'
 		newAlleleSym = newAlleleSym1
 		newAlleleName = newAlleleName1
@@ -706,7 +709,8 @@ def createAlleleFile():
 		molecularNote = note_tmXe % (n)
 
 	elif isX and isFlp:
-		alleleType = 'Targeted (knock-out)'
+		alleleType = 'Targeted'
+		alleleSubType = 'Null/knockout'
 		molecularMutation = 'Insertion'
 		newAlleleSym = newAlleleSym2
 		newAlleleName = newAlleleName2
@@ -715,7 +719,8 @@ def createAlleleFile():
 		molecularNote = note_tmX2 % (n)
 
 	elif isXa and isCre:
-		alleleType = 'Targeted (Reporter)'
+		alleleType = 'Targeted'
+		alleleSubType = 'Null/knockout|Reporter'
 		molecularMutation = 'Insertion|Intragenic deletion'
 		newAlleleSym = newAlleleSymB
 		newAlleleName = newAlleleNameB
@@ -725,6 +730,7 @@ def createAlleleFile():
 
 	elif isXa and isFlp:
 		alleleType = 'Targeted (Floxed/Frt)'
+		alleleSubType = 'Conditional ready'
 		molecularMutation = 'Insertion'
 		newAlleleSym = newAlleleSymC
 		newAlleleName = newAlleleNameC
@@ -797,10 +803,10 @@ def createAlleleFile():
 	fpAllele.write(alleleType + '\t')
 
 	# Allele Subtype
-	fpAllele.write('\t')
+	fpAllele.write(alleleSubType + '\t')
 
 	# Allele Collection
-	fpAllele.write('Not Specified\t')
+	fpAllele.write(str(collectionKey) + '\t')
 
 	# Transmission
 	fpAllele.write('Germline' + '\t')
