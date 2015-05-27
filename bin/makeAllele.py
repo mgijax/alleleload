@@ -160,7 +160,7 @@ mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
 mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
 mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
-ikmcSQL = ''
+ikmcSQLs = []
 
 mgiTypeKey = 11		# Allele
 mgiPrefix = "MGI:"
@@ -356,31 +356,31 @@ def bcpFiles():
     bcpdelim = "|"
 
     if DEBUG or not bcpon:
-    	print ikmcSQL
+    	print ikmcSQLs
 
     closeFiles()
 
     bcpI = '%s %s %s' % (BCP_COMMAND, db.get_sqlServer(), db.get_sqlDatabase())
     bcpII = '"|" "\\n" mgd'
 
-    bcp1 = '%s%s "/" %s %s' % (bcpI, alleleTable, alleleFileName, bcpII)
-    bcp2 = '%s%s "/" %s %s' % (bcpI, markerTable, markerFileName, bcpII)
-    bcp3 = '%s%s "/" %s %s' % (bcpI, mutationTable, mutationFileName, bcpII)
-    bcp4 = '%s%s "/" %s %s' % (bcpI, mutantTable, mutantFileName, bcpII)
-    bcp5 = '%s%s "/" %s %s' % (bcpI, refTable, refFileName, bcpII)
-    bcp6 = '%s%s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
-    bcp7 = '%s%s "/" %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
-    bcp8 = '%s%s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    bcp9 = '%s%s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
-    bcp10 = '%s%s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
+    bcp1 = '%s %s "/" %s %s' % (bcpI, alleleTable, alleleFileName, bcpII)
+    bcp2 = '%s %s "/" %s %s' % (bcpI, markerTable, markerFileName, bcpII)
+    bcp3 = '%s %s "/" %s %s' % (bcpI, mutationTable, mutationFileName, bcpII)
+    bcp4 = '%s %s "/" %s %s' % (bcpI, mutantTable, mutantFileName, bcpII)
+    bcp5 = '%s %s "/" %s %s' % (bcpI, refTable, refFileName, bcpII)
+    bcp6 = '%s %s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
+    bcp7 = '%s %s "/" %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
+    bcp8 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
+    bcp9 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
+    bcp10 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
 
     db.commit()
     for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9, bcp10]:
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
-    if len(ikmcSQL) > 0:
-    	db.sql(ikmcSQL, None)
+    if len(ikmcSQLs) > 0:
+    	db.sql(ikmcSQLs, None)
 	db.commit()
 
 #
@@ -393,7 +393,7 @@ def bcpFiles():
 def processFileIKMC(createMCL, createNote, setStatus, \
 	symbol, ikmcSymbol, mutantCellLine, ikmcNotes, createdByKey, existingAlleleID):
 
-    global noteKey, ikmcSQL
+    global noteKey, ikmcSQLs
 
     #
     # add new MCLs to new/existing alleles
@@ -411,12 +411,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     # set allele/status = Approved for existing "reserved" alleles
     #
     if len(setStatus) > 0:
-	ikmcSQL = ikmcSQL + \
-		'''
+	ikmcSQLs.append( '''
 		update ALL_Allele 
 		set _Allele_Status_key = 847114 
-		where _Allele_key = %s;
+		where _Allele_key = %s
 		''' % (setStatus)
+	)
 
     #
     # Add IKMC Colony/Note to a new or existing allele
@@ -444,12 +444,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		nKey = alleleLookup[symbol][0][1]
 		note = tokens[1]
 
-	        ikmcSQL = ikmcSQL + \
-		        '''
+	        ikmcSQLs.append( '''
 		        update MGI_NoteChunk 
 		        set note = '%s' 
 		        where _Note_key = %s;
 		        ''' % (note, nKey)
+		    )
 		    	
 	    # child exists, note does not exist : add note to existing child
 	    else:
@@ -459,12 +459,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		if alleleLookup.has_key(symbol):
 			nKey = alleleLookup[symbol][0][1]
 
-	    		ikmcSQL = ikmcSQL + \
-		    		'''
+	    		ikmcSQLs.append( '''
 		    		update MGI_NoteChunk 
 		    		set note = rtrim(note) + '|' + '%s' 
 		    		where _Note_key = %s;
 		    		''' % (note, nKey)
+		        )
 
 		else:
 	        	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
@@ -486,12 +486,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 	    nKey = tokens[0]
 	    note = tokens[1] + '|' + ikmcNotes
 
-	    ikmcSQL = ikmcSQL + \
-		    '''
+	    ikmcSQLs.append( '''
 		    update MGI_NoteChunk 
 		    set note = '%s' 
 		    where _Note_key = %s;
 		    ''' % (note, nKey)
+	    )
 		    	
     # 
     # print out the proper allele id
