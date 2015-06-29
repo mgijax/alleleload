@@ -232,22 +232,22 @@ def initialize():
 	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a.name, a._Collection_key,
 		s.strain, am.accID as markerID, m.symbol as markerSym
 	from ALL_Allele a, ACC_Accession aa, ACC_Accession am, MRK_Marker m, PRB_Strain s
-	where (a.symbol like "%<tm[ae](KOMP%"
-	        or a.symbol like "%<tm[0-9](KOMP%"
-		or a.symbol like "%<tm%[ae](KOMP%"
-		or a.symbol like "%<tm[0-9](EUCOMM%"
-		or a.symbol like "%<tm%[ae](EUCOMM%"
+	where (lower(a.symbol) like '%<tm[ae](komp%'
+	        or lower(a.symbol) like '%<tm[0-9](komp%'
+		or lower(a.symbol) like '%<tm%[ae](komp%'
+		or lower(a.symbol) like '%<tm[0-9](eucomm%'
+		or lower(a.symbol) like '%<tm%[ae](eucomm%'
 		)
 	and a._Allele_Status_key in (847114)
 	and a._Allele_key = aa._Object_key
 	and a._Strain_key = s._Strain_key
 	and aa._MGIType_key = 11
 	and aa._LogicalDB_key = 1
-	and aa.prefixPart = "MGI:"
+	and aa.prefixPart = 'MGI:'
 	and aa.preferred = 1
 	and a._Marker_key = am._Object_key
 	and am._MGIType_key = 2
-	and am.prefixPart = "MGI:"
+	and am.prefixPart = 'MGI:'
 	and am._LogicalDB_key = 1
 	and am.preferred = 1
 	and a._Marker_key = m._Marker_key
@@ -272,18 +272,18 @@ def initialize():
     results = db.sql('''
 	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a._Collection_key
 	from ALL_Allele a, ACC_Accession aa
-	where (a.symbol like "%<tm%.%(KOMP%"
-		or a.symbol like "%<tm%b(KOMP%"
-		or a.symbol like "%<tm%c(KOMP%"
-		or a.symbol like "%<tm%.%(EUCOMM%"
-		or a.symbol like "%<tm%b(EUCOMM%"
-		or a.symbol like "%<tm%c(EUCOMM%"
+	where (lower(a.symbol) like '%<tm%.%(komp%'
+		or lower(a.symbol) like '%<tm%b(komp%'
+		or lower(a.symbol) like '%<tm%c(komp%'
+		or lower(a.symbol) like '%<tm%.%(eucomm%'
+		or lower(a.symbol) like '%<tm%b(eucomm%'
+		or lower(a.symbol) like '%<tm%c(eucomm%'
 		)
 	and a._Allele_Status_key in (847114, 847113)
 	and a._Allele_key = aa._Object_key
 	and aa._MGIType_key = 11
 	and aa._LogicalDB_key = 1
-	and aa.prefixPart = "MGI:"
+	and aa.prefixPart = 'MGI:'
 	and aa.preferred = 1
 	''', 'auto')
     for r in results:
@@ -304,8 +304,8 @@ def initialize():
     results = db.sql('''
 	select a._Allele_key, c._CellLine_key, c.cellLine
 	from ALL_Allele a, ALL_Allele_CellLine ac, ALL_CellLine c
-	where (a.symbol like "%<tm%(KOMP%"
-		or a.symbol like "%<tm%(EUCOMM%"
+	where (lower(a.symbol) like '%<tm%(komp%'
+		or lower(a.symbol) like '%<tm%(eucomm%'
 		)
 	and a._Allele_Status_key in (847114, 847113)
 	and a._Allele_key = ac._Allele_key

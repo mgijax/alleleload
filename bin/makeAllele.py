@@ -100,6 +100,7 @@ passwordFileName = os.environ['MGD_DBPASSWORDFILE']
 inputFileName = os.environ['INPUTFILE']
 outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
+BCP_COMMAND = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
 DEBUG = 0		# if 0, not in debug mode
 
@@ -159,7 +160,7 @@ mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
 mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
 mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
-ikmcSQL = ''
+ikmcSQLs = []
 
 mgiTypeKey = 11		# Allele
 mgiPrefix = "MGI:"
@@ -288,16 +289,11 @@ def initialize():
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)
 
-    # Set Log File Descriptor
-    db.set_sqlLogFD(diagFile)
-
     diagFile.write('Start Date/Time: %s\n' % (mgi_utils.date()))
     diagFile.write('Server: %s\n' % (db.get_sqlServer()))
     diagFile.write('Database: %s\n' % (db.get_sqlDatabase()))
 
     errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
-
-    return 0
 
 #
 # Purpose: Close files.
@@ -315,7 +311,18 @@ def closeFiles():
     noteChunkFile.close()
     annotFile.close()
 
-    return 0
+def selectNextKey(tablename, primaryColumn,
+	whereClause=''):
+    """
+    Returns next available primary key for tableName.primaryColumn 
+    """
+
+    if whereClause:
+        whereClause = 'where %s' % whereClause
+
+    results = db.sql('''select max(%s) + 1 as maxkey from %s
+	    %s''' % (primaryColumn, tablename, whereClause), 'auto')
+    return results[0]['maxkey']
 
 #
 # Purpose:  sets global primary key variables
@@ -324,32 +331,22 @@ def setPrimaryKeys():
 
     global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey, annotKey
 
-    results = db.sql('select maxKey = max(_Allele_key) + 1 from ALL_Allele', 'auto')
-    alleleKey = results[0]['maxKey']
+    alleleKey = selectNextKey('ALL_Allele','_Allele_key')
 
-    results = db.sql('select maxKey = max(_Assoc_key) + 1 from ALL_Marker_Assoc', 'auto')
-    assocKey = results[0]['maxKey']
+    assocKey = selectNextKey('ALL_Marker_Assoc','_Assoc_key')
 
-    results = db.sql('select maxKey = max(_Assoc_key) + 1 from MGI_Reference_Assoc', 'auto')
-    refAssocKey = results[0]['maxKey']
+    refAssocKey = selectNextKey('MGI_Reference_Assoc','_Assoc_key')
 
-    results = db.sql('select maxKey = max(_Accession_key) + 1 from ACC_Accession', 'auto')
-    accKey = results[0]['maxKey']
+    accKey = selectNextKey('ACC_Accession','_Accession_key')
 
-    results = db.sql('select maxKey = max(_Note_key) + 1 from MGI_Note', 'auto')
-    noteKey = results[0]['maxKey']
+    noteKey = selectNextKey('MGI_Note','_Note_key')
 
-    results = db.sql('select maxKey = maxNumericPart + 1 from ACC_AccessionMax ' + \
-        'where prefixPart = "%s"' % (mgiPrefix), 'auto')
-    mgiKey = results[0]['maxKey']
+    mgiKey = selectNextKey('ACC_AccessionMax','maxNumericPart', \
+	    whereClause='''prefixPart = '%s' ''' % mgiPrefix)
 
-    results = db.sql('select maxKey = max(_Assoc_key) + 1 from ALL_Allele_CellLine', 'auto')
-    mutantKey = results[0]['maxKey']
+    mutantKey = selectNextKey('ALL_Allele_CellLine','_Assoc_key')
 
-    results = db.sql('select maxKey = max(_Annot_key) + 1 from VOC_Annot', 'auto')
-    annotKey = results[0]['maxKey']
-
-    return 0
+    annotKey = selectNextKey('VOC_Annot','_Annot_key')
 
 #
 # Purpose:  BCPs the data into the database
@@ -359,33 +356,32 @@ def bcpFiles():
     bcpdelim = "|"
 
     if DEBUG or not bcpon:
-    	print ikmcSQL
-        return 0
+    	print ikmcSQLs
 
     closeFiles()
 
-    bcpI = 'cat %s | bcp %s..' % (passwordFileName, db.get_sqlDatabase())
-    bcpII = '-c -t\"|" -S%s -U%s' % (db.get_sqlServer(), db.get_sqlUser())
+    bcpI = '%s %s %s' % (BCP_COMMAND, db.get_sqlServer(), db.get_sqlDatabase())
+    bcpII = '"|" "\\n" mgd'
 
-    bcp1 = '%s%s in %s %s' % (bcpI, alleleTable, alleleFileName, bcpII)
-    bcp2 = '%s%s in %s %s' % (bcpI, markerTable, markerFileName, bcpII)
-    bcp3 = '%s%s in %s %s' % (bcpI, mutationTable, mutationFileName, bcpII)
-    bcp4 = '%s%s in %s %s' % (bcpI, mutantTable, mutantFileName, bcpII)
-    bcp5 = '%s%s in %s %s' % (bcpI, refTable, refFileName, bcpII)
-    bcp6 = '%s%s in %s %s' % (bcpI, accTable, accFileName, bcpII)
-    bcp7 = '%s%s in %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
-    bcp8 = '%s%s in %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    bcp9 = '%s%s in %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
-    bcp10 = '%s%s in %s %s' % (bcpI, annotTable, annotFileName, bcpII)
+    bcp1 = '%s %s "/" %s %s' % (bcpI, alleleTable, alleleFileName, bcpII)
+    bcp2 = '%s %s "/" %s %s' % (bcpI, markerTable, markerFileName, bcpII)
+    bcp3 = '%s %s "/" %s %s' % (bcpI, mutationTable, mutationFileName, bcpII)
+    bcp4 = '%s %s "/" %s %s' % (bcpI, mutantTable, mutantFileName, bcpII)
+    bcp5 = '%s %s "/" %s %s' % (bcpI, refTable, refFileName, bcpII)
+    bcp6 = '%s %s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
+    bcp7 = '%s %s "/" %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
+    bcp8 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
+    bcp9 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
+    bcp10 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
 
+    db.commit()
     for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9, bcp10]:
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
-    if len(ikmcSQL) > 0:
-    	db.sql(ikmcSQL, None)
-
-    return 0
+    if len(ikmcSQLs) > 0:
+    	db.sql(ikmcSQLs, None)
+	db.commit()
 
 #
 # Purpose:  processes data
@@ -397,7 +393,7 @@ def bcpFiles():
 def processFileIKMC(createMCL, createNote, setStatus, \
 	symbol, ikmcSymbol, mutantCellLine, ikmcNotes, createdByKey, existingAlleleID):
 
-    global noteKey, ikmcSQL
+    global noteKey, ikmcSQLs
 
     #
     # add new MCLs to new/existing alleles
@@ -415,12 +411,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     # set allele/status = Approved for existing "reserved" alleles
     #
     if len(setStatus) > 0:
-	ikmcSQL = ikmcSQL + \
-		'''
+	ikmcSQLs.append( '''
 		update ALL_Allele 
 		set _Allele_Status_key = 847114 
 		where _Allele_key = %s
 		''' % (setStatus)
+	)
 
     #
     # Add IKMC Colony/Note to a new or existing allele
@@ -448,12 +444,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		nKey = alleleLookup[symbol][0][1]
 		note = tokens[1]
 
-	        ikmcSQL = ikmcSQL + \
-		        '''
+	        ikmcSQLs.append( '''
 		        update MGI_NoteChunk 
 		        set note = '%s' 
-		        where _Note_key = %s
+		        where _Note_key = %s;
 		        ''' % (note, nKey)
+		    )
 		    	
 	    # child exists, note does not exist : add note to existing child
 	    else:
@@ -463,12 +459,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 		if alleleLookup.has_key(symbol):
 			nKey = alleleLookup[symbol][0][1]
 
-	    		ikmcSQL = ikmcSQL + \
-		    		'''
+	    		ikmcSQLs.append( '''
 		    		update MGI_NoteChunk 
 		    		set note = rtrim(note) + '|' + '%s' 
-		    		where _Note_key = %s
+		    		where _Note_key = %s;
 		    		''' % (note, nKey)
+		        )
 
 		else:
 	        	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
@@ -490,12 +486,12 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 	    nKey = tokens[0]
 	    note = tokens[1] + '|' + ikmcNotes
 
-	    ikmcSQL = ikmcSQL + \
-		    '''
+	    ikmcSQLs.append( '''
 		    update MGI_NoteChunk 
 		    set note = '%s' 
-		    where _Note_key = %s
+		    where _Note_key = %s;
 		    ''' % (note, nKey)
+	    )
 		    	
     # 
     # print out the proper allele id
@@ -511,8 +507,6 @@ def processFileIKMC(createMCL, createNote, setStatus, \
    		% (mgi_utils.prvalue(ikmcNotes), \
 			mgi_utils.prvalue(printAlleleID), \
 			mgi_utils.prvalue(ikmcSymbol)))
-
-    return 1
 
 #
 # Purpose:  processes data
@@ -791,10 +785,9 @@ def processFile():
     #
 
     if not DEBUG:
-        db.sql('exec ACC_setMax %d' % (lineNum), None)
+        db.sql('select * from ACC_setMax(%d)' % (lineNum), None)
+	db.commit()
 
-
-    return 0
 
 #
 # Purpose: write 1 or more mutation cell line associations to bcp file
@@ -825,19 +818,14 @@ def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
 #
 
 
-if initialize() != 0:
-    sys.exit(1)
+initialize()
 
-if setPrimaryKeys() != 0:
-    sys.exit(1)
+setPrimaryKeys()
 
-if processFile() != 0:
-    sys.exit(1)
+processFile()
 
-if bcpFiles() != 0:
+try:
+    bcpFiles()
+finally:
     closeFiles()
-    sys.exit(1)
-
-closeFiles()
-sys.exit(0)
 
