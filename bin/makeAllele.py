@@ -50,7 +50,6 @@
 #       BCP files:
 #
 #       ALL_Allele.bcp                  master Allele records
-#	ALL_Marker_Assoc.bcp		allele/marker associations
 #	ALL_Allele_Mutation.bcp
 #       ALL_Allele_CellLine.bcp
 #
@@ -110,7 +109,6 @@ diagFile = ''		# diagnostic file descriptor
 errorFile = ''		# error file descriptor
 inputFile = ''		# file descriptor
 alleleFile = ''         # file descriptor
-markerFile = ''		# file descriptor
 mutationFile = ''	# file descriptor
 mutantFile = ''		# file descriptor
 refFile = ''            # file descriptor
@@ -122,7 +120,6 @@ annotFile = ''		# file descriptor
 newAlleleFile = ''      # file descriptor
 
 alleleTable = 'ALL_Allele'
-markerTable = 'ALL_Marker_Assoc'
 mutationTable = 'ALL_Allele_Mutation'
 mutantTable = 'ALL_Allele_CellLine'
 refTable = 'MGI_Reference_Assoc'
@@ -133,7 +130,6 @@ noteChunkTable = 'MGI_NoteChunk'
 annotTable = 'VOC_Annot'
 
 alleleFileName = outputDir + '/' + alleleTable + '.bcp'
-markerFileName = outputDir + '/' + markerTable + '.bcp'
 mutationFileName = outputDir + '/' + mutationTable + '.bcp'
 mutantFileName =  outputDir + '/' + mutantTable + '.bcp'
 refFileName = outputDir + '/' + refTable + '.bcp'
@@ -148,7 +144,6 @@ errorFileName = ''	# error file name
 newAlleleFileName = ''	# output file with new accession ids
 
 alleleKey = 0           # ALL_Allele._Allele_key
-assocKey =  0		# ALL_Marker_Assoc._Assoc_key
 mutantKey = 0  		# ALL_Allele_CellLine._Assoc_key
 refAssocKey = 0		# MGI_Reference_Assoc._Assoc_key
 accKey = 0              # ACC_Accession._Accession_key
@@ -202,7 +197,7 @@ def exit(
 #
 def initialize():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
-    global alleleFile, markerFile, mutationFile, mutantFile, refFile
+    global alleleFile, mutationFile, mutantFile, refFile
     global accFile, accRefFile, noteFile, noteChunkFile, annotFile
     global newAlleleFile
  
@@ -240,11 +235,6 @@ def initialize():
         alleleFile = open(alleleFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % alleleFileName)
-
-    try:
-        markerFile = open(markerFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % markerFileName)
 
     try:
         mutationFile = open(mutationFileName, 'w')
@@ -301,7 +291,6 @@ def initialize():
 def closeFiles():
 
     alleleFile.close()
-    markerFile.close()
     mutationFile.close()
     mutantFile.close()
     refFile.close()
@@ -329,11 +318,9 @@ def selectNextKey(tablename, primaryColumn,
 #
 def setPrimaryKeys():
 
-    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey, annotKey
+    global alleleKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey, annotKey
 
     alleleKey = selectNextKey('ALL_Allele','_Allele_key')
-
-    assocKey = selectNextKey('ALL_Marker_Assoc','_Assoc_key')
 
     refAssocKey = selectNextKey('MGI_Reference_Assoc','_Assoc_key')
 
@@ -364,15 +351,14 @@ def bcpFiles():
     bcpII = '"|" "\\n" mgd'
 
     bcp1 = '%s %s "/" %s %s' % (bcpI, alleleTable, alleleFileName, bcpII)
-    bcp2 = '%s %s "/" %s %s' % (bcpI, markerTable, markerFileName, bcpII)
-    bcp3 = '%s %s "/" %s %s' % (bcpI, mutationTable, mutationFileName, bcpII)
-    bcp4 = '%s %s "/" %s %s' % (bcpI, mutantTable, mutantFileName, bcpII)
-    bcp5 = '%s %s "/" %s %s' % (bcpI, refTable, refFileName, bcpII)
-    bcp6 = '%s %s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
-    bcp7 = '%s %s "/" %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
-    bcp8 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    bcp9 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
-    bcp10 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
+    bcp2 = '%s %s "/" %s %s' % (bcpI, mutationTable, mutationFileName, bcpII)
+    bcp3 = '%s %s "/" %s %s' % (bcpI, mutantTable, mutantFileName, bcpII)
+    bcp4 = '%s %s "/" %s %s' % (bcpI, refTable, refFileName, bcpII)
+    bcp5 = '%s %s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
+    bcp6 = '%s %s "/" %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
+    bcp7 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
+    bcp8 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
+    bcp9 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
 
     db.commit()
     for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9, bcp10]:
@@ -513,7 +499,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 #
 def processFile():
 
-    global alleleKey, assocKey, refAssocKey, accKey, noteKey, mgiKey, annotKey
+    global alleleKey, refAssocKey, accKey, noteKey, mgiKey, annotKey
     global alleleLookup
 
     lineNum = 0
@@ -623,16 +609,11 @@ def processFile():
 	#collectionKey = 11025586
 
 	# allele (master)
-        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
 	    alleleStatusKey, germLineKey, collectionKey, symbol, name, \
-	    isExtinct, isMixed, \
+	    isExtinct, isMixed, refKey, markerStatusKey, \
 	    createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
-
-	# allele/marker
-        markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-	    % (assocKey, alleleKey, markerKey, qualifierKey, refKey, markerStatusKey, \
-	       createdByKey, createdByKey, loaddate, loaddate))
 
 	# molecular mutation
 	for mutation in allMutations:
@@ -766,6 +747,8 @@ def processFile():
 	       	mgi_utils.prvalue(inheritanceMode), \
 	       	mgi_utils.prvalue(isMixed), \
 	       	mgi_utils.prvalue(isExtinct), \
+	       	mgi_utils.prvalue(refKey), \
+	       	mgi_utils.prvalue(markerStatusKey), \
 	       	mgi_utils.prvalue(createdBy), \
 	       	mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
 
@@ -775,7 +758,6 @@ def processFile():
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
-	assocKey = assocKey + 1
         alleleKey = alleleKey + 1
 
     #	end of "for line in inputFile.readlines():"
