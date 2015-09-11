@@ -754,7 +754,6 @@ def processFile():
 	       	mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
 
 	# save symbol/alleleKey/ikmc note key
-	print 'save symbol: ', symbol, alleleKey
 	alleleLookup[symbol] = []
 	alleleLookup[symbol].append((alleleKey, useIKMCnotekey, mgiPrefix + str(mgiKey)))
 
