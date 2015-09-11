@@ -309,8 +309,7 @@ def selectNextKey(tablename, primaryColumn,
     if whereClause:
         whereClause = 'where %s' % whereClause
 
-    results = db.sql('''select max(%s) + 1 as maxkey from %s
-	    %s''' % (primaryColumn, tablename, whereClause), 'auto')
+    results = db.sql('''select max(%s) + 1 as maxkey from %s %s''' % (primaryColumn, tablename, whereClause), 'auto')
     return results[0]['maxkey']
 
 #
@@ -328,8 +327,7 @@ def setPrimaryKeys():
 
     noteKey = selectNextKey('MGI_Note','_Note_key')
 
-    mgiKey = selectNextKey('ACC_AccessionMax','maxNumericPart', \
-	    whereClause='''prefixPart = '%s' ''' % mgiPrefix)
+    mgiKey = selectNextKey('ACC_AccessionMax','maxNumericPart', whereClause='''prefixPart = '%s' ''' % mgiPrefix)
 
     mutantKey = selectNextKey('ALL_Allele_CellLine','_Assoc_key')
 
@@ -361,7 +359,7 @@ def bcpFiles():
     bcp9 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
 
     db.commit()
-    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9, bcp10]:
+    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9]:
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
@@ -385,6 +383,9 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     # add new MCLs to new/existing alleles
     #
     if len(createMCL) > 0:
+
+	if DEBUG:
+		print symbol, createMCL
 
 	if int(createMCL) == 0:
 		aKey = alleleLookup[symbol][0][0]
@@ -420,6 +421,9 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     #
 
     if len(createNote) > 0:
+
+	if DEBUG:
+		print 'createNote: ', symbol
 
         try:
 	    tokens = createNote.split('::')
@@ -468,6 +472,9 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 
 	# child exists, note exists : update existing note
         except:
+	    if DEBUG:
+	    	print createNote
+
 	    tokens = createNote.split('||')
 	    nKey = tokens[0]
 	    note = tokens[1] + '|' + ikmcNotes
@@ -557,11 +564,6 @@ def processFile():
 	markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
 
 	# hard-coded
-	# _vocab_key = 70 (Marker-Allele Association Qualifier)
-	# _term_key = 4268547 (Not Specified)
-	qualifierKey = 4268547
-
-	# hard-coded
 	# _vocab_key = 73 (Marker-Allele Association Status)
 	# _term_key = 4268545 (Curated)
 	markerStatusKey = 4268545
@@ -591,7 +593,6 @@ def processFile():
 	# errors are stored (via loadlib) in the .error log
 
         if markerKey == 0 \
-		or qualifierKey == 0 \
 		or markerStatusKey == 0 \
 		or alleleStatusKey == 0 \
 		or alleleTypeKey == 0 \
@@ -753,6 +754,7 @@ def processFile():
 	       	mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
 
 	# save symbol/alleleKey/ikmc note key
+	print 'save symbol: ', symbol, alleleKey
 	alleleLookup[symbol] = []
 	alleleLookup[symbol].append((alleleKey, useIKMCnotekey, mgiPrefix + str(mgiKey)))
 

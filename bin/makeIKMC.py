@@ -232,11 +232,10 @@ def initialize():
 	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a.name, a._Collection_key,
 		s.strain, am.accID as markerID, m.symbol as markerSym
 	from ALL_Allele a, ACC_Accession aa, ACC_Accession am, MRK_Marker m, PRB_Strain s
-	where (lower(a.symbol) like '%<tm[ae](komp%'
-	        or lower(a.symbol) like '%<tm[0-9](komp%'
-		or lower(a.symbol) like '%<tm%[ae](komp%'
-		or lower(a.symbol) like '%<tm[0-9](eucomm%'
-		or lower(a.symbol) like '%<tm%[ae](eucomm%'
+	where (lower(a.symbol) ~ '.*<tm([0-9])\(komp.*'
+		or lower(a.symbol) ~ '.*<tm.*([ae])\(komp.*'
+		or lower(a.symbol) ~ '.*<tm([0-9])\(eucomm.*'
+		or lower(a.symbol) ~ '.*<tm.*([ae])\(eucomm.*'
 		)
 	and a._Allele_Status_key in (847114)
 	and a._Allele_key = aa._Object_key
@@ -272,12 +271,12 @@ def initialize():
     results = db.sql('''
 	select aa.accID, a._Allele_key, a._Allele_Status_key, a.symbol, a._Collection_key
 	from ALL_Allele a, ACC_Accession aa
-	where (lower(a.symbol) like '%<tm%.%(komp%'
-		or lower(a.symbol) like '%<tm%b(komp%'
-		or lower(a.symbol) like '%<tm%c(komp%'
-		or lower(a.symbol) like '%<tm%.%(eucomm%'
-		or lower(a.symbol) like '%<tm%b(eucomm%'
-		or lower(a.symbol) like '%<tm%c(eucomm%'
+	where (lower(a.symbol) ~ '.*<tm.*\..*\(komp.*'
+		or lower(a.symbol) ~ '.*<tm.*b\(komp.*'
+		or lower(a.symbol) ~ '.*<tm.*c\(komp.*'
+		or lower(a.symbol) ~ '.*<tm.*\..*\(eucomm.*'
+		or lower(a.symbol) ~ '.*<tm.*b\(eucomm.*'
+		or lower(a.symbol) ~ '.*<tm.*c\(eucomm.*'
 		)
 	and a._Allele_Status_key in (847114, 847113)
 	and a._Allele_key = aa._Object_key
@@ -304,8 +303,8 @@ def initialize():
     results = db.sql('''
 	select a._Allele_key, c._CellLine_key, c.cellLine
 	from ALL_Allele a, ALL_Allele_CellLine ac, ALL_CellLine c
-	where (lower(a.symbol) like '%<tm%(komp%'
-		or lower(a.symbol) like '%<tm%(eucomm%'
+	where (lower(a.symbol) ~ '.*<tm.*\(komp.*'
+		or lower(a.symbol) ~ '.*<tm.*\(eucomm.*'
 		)
 	and a._Allele_Status_key in (847114, 847113)
 	and a._Allele_key = ac._Allele_key
@@ -729,7 +728,7 @@ def createAlleleFile():
 		molecularNote = note_tmXb % (n)
 
 	elif isXa and isFlp:
-		alleleType = 'Targeted (Floxed/Frt)'
+		alleleType = 'Targeted'
 		alleleSubType = 'Conditional ready'
 		molecularMutation = 'Insertion'
 		newAlleleSym = newAlleleSymC
@@ -863,7 +862,7 @@ def createAlleleFile():
 	# child exists/ikmc note exists : update existing note
 	# 	|| => _Note_key||existing colony notes
 	#
-	# child exists/ikmc note does not exis : add note
+	# child exists/ikmc note does not exist : add note
 	# 	:: => allele/child key
 	#
 	# new allele/child/non-duplicate IKMC Colony
