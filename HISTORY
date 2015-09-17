@@ -1,8 +1,9 @@
 TAG: alleleload-6-0-0-?
 DATE: 09/11/2015
-STAFF: lec
-CHANGES: TR12011/12070
-1) postgres changes/same data input file
+STAFF: lec 
+CHANGES:
+1) TR12011/12070/scrum-dog/use new input file
+2) postgres cleanup
 
 TAG: alleleload-6-0-0-2
 DATE: 08/21/15

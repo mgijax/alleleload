@@ -13,7 +13,7 @@
 #
 #  Env Vars:
 #
-#      See the configuration file (sanger.config)
+#      See the configuration file
 #
 #  Inputs:  None
 #
