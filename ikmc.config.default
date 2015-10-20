@@ -65,7 +65,7 @@ CREATEDBY=ikmc_alleleload
 JNUMBER=J:204739
 export CREATEDBY JNUMBER
 
-IKMC_FTP=/export/gondor/ftp/pub/IKMC
+IKMC_FTP=${FTPROOT}/pub/IKMC
 export IKMC_FTP
 
 ###########################################################################
