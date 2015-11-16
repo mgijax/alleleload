@@ -158,7 +158,7 @@ mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
 ikmcSQLs = []
 
 mgiTypeKey = 11		# Allele
-mgiPrefix = "MGI:"
+mgiPrefix = 'MGI:'
 annotTypeKey = 1014
 qualifierKey = 1614158
 
@@ -300,18 +300,6 @@ def closeFiles():
     noteChunkFile.close()
     annotFile.close()
 
-def selectNextKey(tablename, primaryColumn,
-	whereClause=''):
-    """
-    Returns next available primary key for tableName.primaryColumn 
-    """
-
-    if whereClause:
-        whereClause = 'where %s' % whereClause
-
-    results = db.sql('''select max(%s) + 1 as maxkey from %s %s''' % (primaryColumn, tablename, whereClause), 'auto')
-    return results[0]['maxkey']
-
 #
 # Purpose:  sets global primary key variables
 #
@@ -319,19 +307,27 @@ def setPrimaryKeys():
 
     global alleleKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey, annotKey
 
-    alleleKey = selectNextKey('ALL_Allele','_Allele_key')
+    results = db.sql('select max(_Allele_key) + 1 as maxKey from ALL_Allele', 'auto')
+    alleleKey = results[0]['maxKey']
 
-    refAssocKey = selectNextKey('MGI_Reference_Assoc','_Assoc_key')
+    results = db.sql('select max(_Assoc_key) + 1 as maxKey from MGI_Reference_Assoc', 'auto')
+    refAssocKey = results[0]['maxKey']
 
-    accKey = selectNextKey('ACC_Accession','_Accession_key')
+    results = db.sql('select max(_Accession_key) + 1 as maxKey from ACC_Accession', 'auto')
+    accKey = results[0]['maxKey']
 
-    noteKey = selectNextKey('MGI_Note','_Note_key')
+    results = db.sql('select max(_Note_key) + 1 as maxKey from MGI_Note', 'auto')
+    noteKey = results[0]['maxKey']
 
-    mgiKey = selectNextKey('ACC_AccessionMax','maxNumericPart', whereClause='''prefixPart = '%s' ''' % mgiPrefix)
+    results = db.sql('''select max(maxNumericPart) + 1 as maxKey from ACC_AccessionMax 
+    	where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
+    mgiKey = results[0]['maxKey']
 
-    mutantKey = selectNextKey('ALL_Allele_CellLine','_Assoc_key')
+    results = db.sql('select max(_Assoc_key) + 1 as maxKey from ALL_Allele_CellLine', 'auto')
+    mutantKey = results[0]['maxKey']
 
-    annotKey = selectNextKey('VOC_Annot','_Annot_key')
+    results = db.sql('select max(_Annot_key) + 1 as maxKey from VOC_Annot', 'auto')
+    annotKey = results[0]['maxKey']
 
 #
 # Purpose:  BCPs the data into the database
@@ -341,7 +337,7 @@ def bcpFiles():
     bcpdelim = "|"
 
     if DEBUG or not bcpon:
-    	print ikmcSQLs
+	return
 
     closeFiles()
 
@@ -359,11 +355,13 @@ def bcpFiles():
     bcp9 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
 
     db.commit()
+
     for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9]:
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
     if len(ikmcSQLs) > 0:
+        print ikmcSQLs
     	db.sql(ikmcSQLs, None)
 	db.commit()
 
@@ -398,12 +396,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     # set allele/status = Approved for existing "reserved" alleles
     #
     if len(setStatus) > 0:
-	ikmcSQLs.append( '''
-		update ALL_Allele 
-		set _Allele_Status_key = 847114 
-		where _Allele_key = %s
-		''' % (setStatus)
-	)
+	ikmcSQLs.append('update ALL_Allele set _Allele_Status_key = 847114 where _Allele_key = %s' % (setStatus))
 
     #
     # Add IKMC Colony/Note to a new or existing allele
@@ -433,13 +426,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 	    if int(aKey) == 0:
 		nKey = alleleLookup[symbol][0][1]
 		note = tokens[1]
-
-	        ikmcSQLs.append( '''
-		        update MGI_NoteChunk 
-		        set note = '%s' 
-		        where _Note_key = %s;
-		        ''' % (note, nKey)
-		    )
+	        ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
 		    	
 	    # child exists, note does not exist : add note to existing child
 	    else:
@@ -448,14 +435,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 
 		if alleleLookup.has_key(symbol):
 			nKey = alleleLookup[symbol][0][1]
-
-	    		ikmcSQLs.append( '''
-		    		update MGI_NoteChunk 
-		    		set note = rtrim(note) + '|' + '%s' 
-		    		where _Note_key = %s;
-		    		''' % (note, nKey)
-		        )
-
+	    		ikmcSQLs.append('''update MGI_NoteChunk set note = rtrim(note) || '|%s' where _Note_key = %s;''' % (note, nKey))
 		else:
 	        	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
 		    	% (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
@@ -478,13 +458,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 	    tokens = createNote.split('||')
 	    nKey = tokens[0]
 	    note = tokens[1] + '|' + ikmcNotes
-
-	    ikmcSQLs.append( '''
-		    update MGI_NoteChunk 
-		    set note = '%s' 
-		    where _Note_key = %s;
-		    ''' % (note, nKey)
-	    )
+	    ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
 		    	
     # 
     # print out the proper allele id
@@ -800,15 +774,13 @@ def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
 # Main
 #
 
+if __name__ == '__main__':
 
-initialize()
+	initialize()
 
-setPrimaryKeys()
+	setPrimaryKeys()
 
-processFile()
+	processFile()
 
-try:
-    bcpFiles()
-finally:
-    closeFiles()
+	bcpFiles()
 
