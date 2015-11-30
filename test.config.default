@@ -52,10 +52,7 @@ export JOBSTREAM
 #  The name of the load for the subject of an email notification
 MAIL_LOADNAME="TEST-Allele Load"
 
-#  Recipient list for mailing the log files (comma-separated)
-MAIL_LOG_CUR="mgi-scrum-dog@jax.org"
-
-export MAIL_LOADNAME MAIL_LOG_PROC MAIL_LOG_CUR
+export MAIL_LOADNAME
 
 INSTALLDIR=${ALLELELOAD}
 export INSTALLDIR

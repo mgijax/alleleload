@@ -81,11 +81,7 @@ export JOBSTREAM
 #  The name of the load for the subject of an email notification
 MAIL_LOADNAME="IKMC-Allele Load"
 
-#  Recipient list for mailing the log files (comma-separated)
-MAIL_LOG_PROC="mgiadmin@jax.org"
-MAIL_LOG_CUR="mgiadmin@jax.org"
-
-export MAIL_LOADNAME MAIL_LOG_PROC MAIL_LOG_CUR
+export MAIL_LOADNAME
 
 INSTALLDIR=${ALLELELOAD}
 export INSTALLDIR
