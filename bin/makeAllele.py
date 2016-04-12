@@ -652,15 +652,8 @@ def processFile():
 		% (noteKey, alleleKey, mgiNoteObjectKey, mgiMolecularNoteTypeKey, \
 		   createdByKey, createdByKey, loaddate, loaddate))
 
-	    while len(molecularNotes) > 255:
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, molecularNotes[:255], createdByKey, createdByKey, loaddate, loaddate))
-		molecularNotes = molecularNotes[255:]
-		mgiNoteSeqNum = mgiNoteSeqNum + 1
-
-	    if len(molecularNotes) > 0:
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, molecularNotes, createdByKey, createdByKey, loaddate, loaddate))
+	    noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		% (noteKey, mgiNoteSeqNum, molecularNotes, createdByKey, createdByKey, loaddate, loaddate))
 
 	    noteKey = noteKey + 1
 
@@ -672,15 +665,8 @@ def processFile():
 		% (noteKey, alleleKey, mgiNoteObjectKey, mgiDriverNoteTypeKey, \
 		   createdByKey, createdByKey, loaddate, loaddate))
 
-	    while len(driverNotes) > 255:
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, driverNotes[:255], createdByKey, createdByKey, loaddate, loaddate))
-		driverNotes = driverNotes[255:]
-		mgiNoteSeqNum = mgiNoteSeqNum + 1
-
-	    if len(driverNotes) > 0:
-	        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		    % (noteKey, mgiNoteSeqNum, driverNotes, createdByKey, createdByKey, loaddate, loaddate))
+	    noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+		% (noteKey, mgiNoteSeqNum, driverNotes, createdByKey, createdByKey, loaddate, loaddate))
 
 	    noteKey = noteKey + 1
 
