@@ -92,6 +92,9 @@ import sys
 import os
 import db
 
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
+
 # LOG_DIAG
 # LOG_CUR
 # SKIP_DIAG

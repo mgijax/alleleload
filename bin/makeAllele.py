@@ -89,6 +89,9 @@ import mgi_utils
 import loadlib
 import sourceloadlib
 
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
+
 #globals
 
 #
