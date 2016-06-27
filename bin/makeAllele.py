@@ -38,7 +38,7 @@
 #	field 16: Inheritance Mode
 #	field 17: Mixed
 #	field 18: Extinct
-#	field 19: Creation Date
+#	field 19: Created By
 #	field 20: Add mutant cell line
 #	field 21: Add IKMC Colony Note
 #	field 22: Set the child's Allele Status = Approved (847114)

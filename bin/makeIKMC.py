@@ -62,7 +62,7 @@
 #	field 16: Inheritance Mode
 #	field 17: Mixed
 #	field 18: Extinct
-#	field 19: Creation Date
+#	field 19: Created By
 #	field 20: Add mutant cell line
 #	field 21: Add IKMC Colony Note
 #	field 22: Set the child's Allele Status = Approved (847114)
@@ -876,7 +876,9 @@ def createAlleleFile():
 
 	if childExists and ikmcNotes.has_key(childKey):
 		ikmcNote = ikmcNotes[childKey]
-		fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + ikmcNote[0]['note'])
+		note = ikmcNote[0]['note']
+		note = note.replace('\n', '')
+		fpAllele.write(str(ikmcNote[0]['_Note_key']) + '||' + note)
 
 	elif childExists and not ikmcNotes.has_key(childKey):
 		fpAllele.write(str(childKey) + '::')
