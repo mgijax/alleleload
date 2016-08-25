@@ -45,11 +45,8 @@ else
     installFailed
 fi
 
-# Create a copy of the default index page that has the proper FTPURL
-# substituted in it 
-#
-rm -f ikmc_index.html
-sed "s/INCLUDE_FTPURL/$FTPURL/" ikmc_index.html.default > ikmc_index.html
+# create ftp_url server side include file
+echo "$FTPURL" > includes/ftp_url.html
 
 # Check to see if this is a development installation
 #
