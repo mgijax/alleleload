@@ -46,7 +46,7 @@ else
 fi
 
 # Create a copy of the default index page that has the proper FTPURL
-# substituted in it and copy it to the FTP report directory.
+# substituted in it 
 #
 rm -f ikmc_index.html
 sed "s/INCLUDE_FTPURL/$FTPURL/" ikmc_index.html.default > ikmc_index.html
