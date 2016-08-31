@@ -48,6 +48,10 @@ fi
 # create ftp_url server side include file
 echo "$FTPURL" > includes/ftp_url.html
 
+# create symlink for web links
+rm -rf ikmc_index.html
+ln -s ikmc_index.shtml ikmc_index.html
+
 # Check to see if this is a development installation
 #
 DEV=""
