@@ -1,8 +1,13 @@
+TAG: alleleload-6-0-7-1
+DATE: 01/05/2017
+STAFF: lec 
+CHANGES:
+1) TR12069/obsolete db.setAutoTranslate()
+
 TAG: alleleload-6-0-5-1, 6-0-6-1
 DATE: 08/31/2016
 STAFF: kstone
 CHANGES: changed ftp url
-
 
 TAG: alleleload-6-0-4-2
 DATE: 06/27/2016
