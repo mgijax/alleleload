@@ -584,7 +584,7 @@ def processFile():
 	#collectionKey = 11025586
 
 	# allele (master)
-        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s||0|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+        alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s|0|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
 	    alleleStatusKey, germLineKey, collectionKey, symbol, name, \
 	    isExtinct, isMixed, refKey, markerStatusKey, \
