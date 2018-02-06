@@ -56,7 +56,7 @@
 #	field 10: Strain of Origin
 #	field 11: Mutant Cell Line ID
 #	field 12: Molecular Notes (_NoteType_key = 1021)
-#	field 13: Driver Notes (_NoteType_key = 1034)
+#       field 13: Driver Gene (MGI_Relationship._Category_key = 1006/_Object_key_2 = marker)
 #	field 14: IKMC Colony Name (_NoteType_key = 1041)
 #	field 15: Molecular Mutation
 #	field 16: Inheritance Mode
