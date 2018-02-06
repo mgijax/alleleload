@@ -317,7 +317,7 @@ def setPrimaryKeys():
     results = db.sql('select max(_Allele_key) + 1 as maxKey from ALL_Allele', 'auto')
     alleleKey = results[0]['maxKey']
 
-    results = db.sql('select max(_Assoc_key) + 1 as maxKey from MGI_Reference_Assoc', 'auto')
+    results = db.sql(''' select nextval('mgi_reference_assoc_seq') as maxKey ''', 'auto')
     refAssocKey = results[0]['maxKey']
 
     results = db.sql('select max(_Accession_key) + 1 as maxKey from ACC_Accession', 'auto')
@@ -330,7 +330,7 @@ def setPrimaryKeys():
     	where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
 
-    results = db.sql('select max(_Assoc_key) + 1 as maxKey from ALL_Allele_CellLine', 'auto')
+    results = db.sql(''' select nextval('all_allele_cellline_seq') as maxKey ''', 'auto')
     mutantKey = results[0]['maxKey']
 
     results = db.sql('select max(_Annot_key) + 1 as maxKey from VOC_Annot', 'auto')
@@ -371,6 +371,13 @@ def bcpFiles():
         print ikmcSQLs
     	db.sql(ikmcSQLs, None)
 	db.commit()
+
+    # update mgi_reference_assoc_seq auto-sequence
+    db.sql(''' select setval('mgi_reference_assoc_seq', (select max(_Assoc_key) + 1 from MGI_Reference_Assoc)) ''', None)
+    # update all_allele_cellline_seq auto-sequence
+    db.sql(''' select setval('all_allele_cellline_seq', (select max(_Assoc_key) + 1 from ALL_Allele_CellLine)) ''', None)
+
+    db.commit()
 
 #
 # Purpose:  processes data

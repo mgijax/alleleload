@@ -2,7 +2,7 @@ TAG: alleleload-6-0-11-?
 DATE: 11/20/2017
 STAFF: lec 
 CHANGES:
-R12662/GMC/MGI_Relationship._Category_key = 1006
+TR12662/GMC/MGI_Relationship._Category_key = 1006
 removed noteFile code
 place hodler for MGI_Relationship code
 the IKMC is the only product using this and IKMC does not add any driver note
