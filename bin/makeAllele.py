@@ -32,7 +32,7 @@
 #	field 10: Strain of Origin
 #	field 11: Mutant Cell Line ID
 #	field 12: Molecular Notes (_NoteType_key = 1021)
-#	field 13: Driver Notes (_NoteType_key = 1034)
+#	field 13: Driver Gene (MGI_Relationship._Category_key = 1006/_Object_key_2 = marker)
 #	field 14: IKMC Colony Name (_NoteType_key = 1041)
 #	field 15: Molecular Mutation
 #	field 16: Inheritance Mode
@@ -74,6 +74,13 @@
 # Implementation:
 #
 # History
+#
+# 11/20/2017	lec
+# 	driver notes
+# 	TR12662/MGI_Relationship._Category_key = 1006
+# 	removed noteFile code
+# 	place hodler for MGI_Relationship code
+# 	the IKMC is the only product using this and IKMC does not add any driver note
 #
 # 01/27/2014	lec
 #	- TR11515/IKMC
@@ -658,17 +665,12 @@ def processFile():
 	    noteKey = noteKey + 1
 
 	# driver notes
-	mgiNoteSeqNum = 1
-	if len(driverNotes) > 0:
-
-	    noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
-		% (noteKey, alleleKey, mgiNoteObjectKey, mgiDriverNoteTypeKey, \
-		   createdByKey, createdByKey, loaddate, loaddate))
-
-	    noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		% (noteKey, mgiNoteSeqNum, driverNotes, createdByKey, createdByKey, loaddate, loaddate))
-
-	    noteKey = noteKey + 1
+	# TR12662/MGI_Relationship._Category_key = 1006
+	# removed noteFile code
+	# place hodler for MGI_Relationship code
+	# the IKMC is the only product using this and IKMC does not add any driver note
+	#mgiNoteSeqNum = 1
+	#if len(driverNotes) > 0:
 
 	# ikmc notes
 	useIKMCnotekey = 0
