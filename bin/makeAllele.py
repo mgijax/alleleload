@@ -317,7 +317,7 @@ def setPrimaryKeys():
     results = db.sql('select max(_Allele_key) + 1 as maxKey from ALL_Allele', 'auto')
     alleleKey = results[0]['maxKey']
 
-    results = db.sql(''' select nextval('mgi_reference_assoc_seq') as maxKey ''', 'auto')
+    results = db.sql('select max(_Assoc_key) + 1 as maxKey from MGI_Reference_Assoc', 'auto')
     refAssocKey = results[0]['maxKey']
 
     results = db.sql('select max(_Accession_key) + 1 as maxKey from ACC_Accession', 'auto')
@@ -326,11 +326,11 @@ def setPrimaryKeys():
     results = db.sql('select max(_Note_key) + 1 as maxKey from MGI_Note', 'auto')
     noteKey = results[0]['maxKey']
 
-    results = db.sql('''select max(maxNumericPart) + 1 as maxKey from ACC_AccessionMax 
+    results = db.sql(''' select max(maxNumericPart) + 1 as maxKey from ACC_AccessionMax 
     	where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
 
-    results = db.sql(''' select nextval('all_allele_cellline_seq') as maxKey ''', 'auto')
+    results = db.sql('select max(_Assoc_key) + 1 as maxKey from ALL_Allele_CellLine', 'auto')
     mutantKey = results[0]['maxKey']
 
     results = db.sql('select max(_Annot_key) + 1 as maxKey from VOC_Annot', 'auto')
