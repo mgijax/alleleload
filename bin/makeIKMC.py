@@ -130,17 +130,17 @@ mgiIKMCNoteTypeKey = 1041
 
 header = 'error\tfield 1\tfield 2\tfield 6\tfield 7\tfield 8\tfield 9\tfield 12\tfield 13\tfield 17\tfull allele symbol\tnew allele symbol\n'
 
-note_tmX1 = 'Cre-mediated excision of the parental %s allele resulted in the removal of the neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence.  Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+note_tmX1 = 'Cre-mediated excision of the parental %s allele resulted in the removal of the neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence.  Further information on targeting strategies used for this and other IKMC alleles can be found at http://www.informatics.jax.org/mgihome/nomen/IKMC_schematics.shtml.'
 
-note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other IKMC alleles can be found at http://www.informatics.jax.org/mgihome/nomen/IKMC_schematics.shtml.'
 
-note_tmXe = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+note_tmXe = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other IKMC alleles can be found at http://www.informatics.jax.org/mgihome/nomen/IKMC_schematics.shtml.'
 
-note_tmXb = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+note_tmXb = 'Cre-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette and critical exon(s) leaving behind the inserted lacZ reporter sequence. Further information on targeting strategies used for this and other IKMC alleles can be found at http://www.informatics.jax.org/mgihome/nomen/IKMC_schematics.shtml.'
 
-note_tmXc = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette and the inserted lacZ reporter sequence, leaving behind the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+note_tmXc = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette and the inserted lacZ reporter sequence, leaving behind the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other IKMC alleles can be found at http://www.informatics.jax.org/mgihome/nomen/IKMC_schematics.shtml.'
 
-note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+note_tmX2 = 'Flp-mediated excision of the parental %s allele resulted in the removal of the promoter-driven neomycin selection cassette, the inserted lacZ reporter sequence, and the loxP-flanked critical exon(s). Further information on targeting strategies used for this and other IKMC alleles can be found at http://www.informatics.jax.org/mgihome/nomen/IKMC_schematics.shtml.'
 
 #
 # Purpose: Initialization
