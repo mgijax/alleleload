@@ -333,7 +333,7 @@ def setPrimaryKeys():
     results = db.sql(''' select nextval('all_allele_cellline_seq') as maxKey ''', 'auto')
     mutantKey = results[0]['maxKey']
 
-    results = db.sql('select max(_Annot_key) + 1 as maxKey from VOC_Annot', 'auto')
+    results = db.sql(''' select nextval('voc_annot_seq') as maxKey ''', 'auto')
     annotKey = results[0]['maxKey']
 
 #
@@ -376,6 +376,8 @@ def bcpFiles():
     db.sql(''' select setval('mgi_reference_assoc_seq', (select max(_Assoc_key) from MGI_Reference_Assoc)) ''', None)
     # update all_allele_cellline_seq auto-sequence
     db.sql(''' select setval('all_allele_cellline_seq', (select max(_Assoc_key) from ALL_Allele_CellLine)) ''', None)
+    # update voc_annot_seq auto-sequence
+    db.sql(''' select setval('voc_annot_seq', (select max(_Annot_key) from VOC_Annot)) ''', None)
 
     db.commit()
 
