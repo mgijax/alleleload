@@ -1,5 +1,3 @@
-#!/usr/local/bin/python
-
 #
 # Program: makeAllele.py
 #
@@ -180,7 +178,7 @@ loaddate = loadlib.loaddate
 #
 def exit(
     status,          # numeric exit status (integer)
-    message = None   # exit message (string)
+    message = None   # exit message (str.
     ):
 
     if message is not None:
@@ -191,8 +189,8 @@ def exit(
         errorFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
         diagFile.close()
         errorFile.close()
-	inputFile.close()
-	newAlleleFile.close()
+        inputFile.close()
+        newAlleleFile.close()
     except:
         pass
 
@@ -222,12 +220,12 @@ def initialize():
         diagFile = open(diagFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % diagFileName)
-		
+                
     try:
         errorFile = open(errorFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % errorFileName)
-		
+                
     try:
         newAlleleFile = open(newAlleleFileName, 'w')
     except:
@@ -314,7 +312,7 @@ def setPrimaryKeys():
 
     global alleleKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey, annotKey
 
-    results = db.sql('select max(_Allele_key) + 1 as maxKey from ALL_Allele', 'auto')
+    results = db.sql(''' select nextval('all_allele_seq') as maxKey ''', 'auto')
     alleleKey = results[0]['maxKey']
 
     results = db.sql(''' select nextval('mgi_reference_assoc_seq') as maxKey ''', 'auto')
@@ -327,7 +325,7 @@ def setPrimaryKeys():
     noteKey = results[0]['maxKey']
 
     results = db.sql(''' select max(maxNumericPart) + 1 as maxKey from ACC_AccessionMax 
-    	where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
+        where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
 
     results = db.sql(''' select nextval('all_allele_cellline_seq') as maxKey ''', 'auto')
@@ -344,7 +342,7 @@ def bcpFiles():
     bcpdelim = "|"
 
     if DEBUG or not bcpon:
-	return
+        return
 
     closeFiles()
 
@@ -364,14 +362,16 @@ def bcpFiles():
     db.commit()
 
     for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9]:
-	diagFile.write('%s\n' % bcpCmd)
-	os.system(bcpCmd)
+        diagFile.write('%s\n' % bcpCmd)
+        os.system(bcpCmd)
 
     if len(ikmcSQLs) > 0:
-        print ikmcSQLs
-    	db.sql(ikmcSQLs, None)
-	db.commit()
+        print(ikmcSQLs)
+        db.sql(ikmcSQLs, None)
+        db.commit()
 
+    # update all_allele_seq auto-sequence
+    db.sql(''' select setval('all_allele_seq', (select max(_Allele_key) from ALL_Allele)) ''', None)
     # update mgi_reference_assoc_seq auto-sequence
     db.sql(''' select setval('mgi_reference_assoc_seq', (select max(_Assoc_key) from MGI_Reference_Assoc)) ''', None)
     # update all_allele_cellline_seq auto-sequence
@@ -389,7 +389,7 @@ def bcpFiles():
 # c) set Allele Status = Approved for reserved alleles
 #
 def processFileIKMC(createMCL, createNote, setStatus, \
-	symbol, ikmcSymbol, mutantCellLine, ikmcNotes, createdByKey, existingAlleleID):
+        symbol, ikmcSymbol, mutantCellLine, ikmcNotes, createdByKey, existingAlleleID):
 
     global noteKey, ikmcSQLs
 
@@ -398,21 +398,21 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     #
     if len(createMCL) > 0:
 
-	if DEBUG:
-		print symbol, createMCL
+        if DEBUG:
+                print(symbol, createMCL)
 
-	if int(createMCL) == 0:
-		aKey = alleleLookup[symbol][0][0]
-	else:
-		aKey = createMCL
+        if int(createMCL) == 0:
+                aKey = alleleLookup[symbol][0][0]
+        else:
+                aKey = createMCL
 
-    	addMutantCellLine(aKey, mutantCellLine, createdByKey)
+        addMutantCellLine(aKey, mutantCellLine, createdByKey)
 
     #
     # set allele/status = Approved for existing "reserved" alleles
     #
     if len(setStatus) > 0:
-	ikmcSQLs.append('update ALL_Allele set _Allele_Status_key = 847114 where _Allele_key = %s' % (setStatus))
+        ikmcSQLs.append('update ALL_Allele set _Allele_Status_key = 847114 where _Allele_key = %s' % (setStatus))
 
     #
     # Add IKMC Colony/Note to a new or existing allele
@@ -431,65 +431,65 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 
     if len(createNote) > 0:
 
-	if DEBUG:
-		print 'createNote: ', symbol
+        if DEBUG:
+                print('createNote: ', symbol)
 
         try:
-	    tokens = createNote.split('::')
-	    aKey = tokens[0]
+            tokens = createNote.split('::')
+            aKey = tokens[0]
 
-	    # duplicate child, additional note : add note to new child
-	    if int(aKey) == 0:
-		nKey = alleleLookup[symbol][0][1]
-		note = tokens[1]
-	        ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
-		    	
-	    # child exists, note does not exist : add note to existing child
-	    else:
-		aKey = tokens[0]
-		note = ikmcNotes
+            # duplicate child, additional note : add note to new child
+            if int(aKey) == 0:
+                nKey = alleleLookup[symbol][0][1]
+                note = tokens[1]
+                ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
+                        
+            # child exists, note does not exist : add note to existing child
+            else:
+                aKey = tokens[0]
+                note = ikmcNotes
 
-		if alleleLookup.has_key(symbol):
-			nKey = alleleLookup[symbol][0][1]
-	    		ikmcSQLs.append('''update MGI_NoteChunk set note = rtrim(note) || '|%s' where _Note_key = %s;''' % (note, nKey))
-		else:
-	        	noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
-		    	% (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
-	   	    	createdByKey, createdByKey, loaddate, loaddate))
+                if symbol in alleleLookup:
+                        nKey = alleleLookup[symbol][0][1]
+                        ikmcSQLs.append('''update MGI_NoteChunk set note = rtrim(note) || '|%s' where _Note_key = %s;''' % (note, nKey))
+                else:
+                        noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                        % (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
+                        createdByKey, createdByKey, loaddate, loaddate))
 
-	        	noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-	            	% (noteKey, 1, note, createdByKey, createdByKey, loaddate, loaddate))
+                        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+                        % (noteKey, 1, note, createdByKey, createdByKey, loaddate, loaddate))
 
-			# save symbol/aKey/ikmc note key/allele id
-			alleleLookup[symbol] = []
-			alleleLookup[symbol].append((aKey, noteKey, 'missing allele id (1)'))
+                        # save symbol/aKey/ikmc note key/allele id
+                        alleleLookup[symbol] = []
+                        alleleLookup[symbol].append((aKey, noteKey, 'missing allele id (1)'))
 
-	        	noteKey = noteKey + 1
+                        noteKey = noteKey + 1
 
-	# child exists, note exists : update existing note
+        # child exists, note exists : update existing note
         except:
-	    if DEBUG:
-	    	print createNote
+            if DEBUG:
+                print(createNote)
 
-	    tokens = createNote.split('||')
-	    nKey = tokens[0]
-	    note = tokens[1] + '|' + ikmcNotes
-	    ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
-		    	
+            tokens = createNote.split('||')
+            nKey = tokens[0]
+            note = tokens[1] + '|' + ikmcNotes
+            ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
+                        
     # 
     # print out the proper allele id
     #
     if len(existingAlleleID) > 0:
-	printAlleleID = existingAlleleID
-    elif alleleLookup.has_key(symbol):
-	printAlleleID = alleleLookup[symbol][0][2]
+        printAlleleID = existingAlleleID
+    elif symbol in alleleLookup:
+        printAlleleID = alleleLookup[symbol][0][2]
     else:
-	printAlleleID = 'missing allele id (2)'
+        printAlleleID = 'missing allele id (2)'
 
     newAlleleFile.write('%s\t%s\t%s\n' \
-   		% (mgi_utils.prvalue(ikmcNotes), \
-			mgi_utils.prvalue(printAlleleID), \
-			mgi_utils.prvalue(ikmcSymbol)))
+                % (mgi_utils.prvalue(ikmcNotes), \
+                        mgi_utils.prvalue(printAlleleID), \
+                        mgi_utils.prvalue(ikmcSymbol)))
 
 #
 # Purpose:  processes data
@@ -509,142 +509,142 @@ def processFile():
 
         # Split the line into tokens
         tokens = line[:-1].split('\t')
-	#print line
+        #print line
         try:
-	    markerID = tokens[0]
-	    symbol = tokens[1]
-	    name = tokens[2]
-	    alleleStatus = tokens[3]
-	    alleleType = tokens[4]
-	    alleleSubtypes = tokens[5]
-	    collectionKey = tokens[6]
-	    germLine = tokens[7]
-	    references = tokens[8]
-	    strainOfOrigin = tokens[9]
-	    mutantCellLine = tokens[10]
-	    molecularNotes = tokens[11]
-	    driverNotes = tokens[12]
-	    ikmcNotes = tokens[13]
-	    mutations = tokens[14]
-	    inheritanceMode = tokens[15]
-	    isMixed = tokens[16]
-	    isExtinct = tokens[17]
-	    createdBy = tokens[18]
-	    createMCL = tokens[19]
-	    createNote = tokens[20]
-	    setStatus = tokens[21]
-	    existingAlleleID = tokens[22]
-	    ikmcSymbol = tokens[23]
+            markerID = tokens[0]
+            symbol = tokens[1]
+            name = tokens[2]
+            alleleStatus = tokens[3]
+            alleleType = tokens[4]
+            alleleSubtypes = tokens[5]
+            collectionKey = tokens[6]
+            germLine = tokens[7]
+            references = tokens[8]
+            strainOfOrigin = tokens[9]
+            mutantCellLine = tokens[10]
+            molecularNotes = tokens[11]
+            driverNotes = tokens[12]
+            ikmcNotes = tokens[13]
+            mutations = tokens[14]
+            inheritanceMode = tokens[15]
+            isMixed = tokens[16]
+            isExtinct = tokens[17]
+            createdBy = tokens[18]
+            createMCL = tokens[19]
+            createNote = tokens[20]
+            setStatus = tokens[21]
+            existingAlleleID = tokens[22]
+            ikmcSymbol = tokens[23]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
-	# creator
-	createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
+        # creator
+        createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
         if createdByKey == 0:
             continue
 
-	# processing for IKMC-only
-	if len(createMCL) > 0 or len(createNote) > 0 or len(setStatus) > 0:
-		processFileIKMC(createMCL, createNote, setStatus, \
-			symbol, ikmcSymbol, mutantCellLine, ikmcNotes, \
-			createdByKey, existingAlleleID)
-		continue
+        # processing for IKMC-only
+        if len(createMCL) > 0 or len(createNote) > 0 or len(setStatus) > 0:
+                processFileIKMC(createMCL, createNote, setStatus, \
+                        symbol, ikmcSymbol, mutantCellLine, ikmcNotes, \
+                        createdByKey, existingAlleleID)
+                continue
 
-	# marker key
-	markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
+        # marker key
+        markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
 
-	# hard-coded
-	# _vocab_key = 73 (Marker-Allele Association Status)
-	# _term_key = 4268545 (Curated)
-	markerStatusKey = 4268545
+        # hard-coded
+        # _vocab_key = 73 (Marker-Allele Association Status)
+        # _term_key = 4268545 (Curated)
+        markerStatusKey = 4268545
 
-	# _vocab_key = 37 (Allele Status)
-	alleleStatusKey = loadlib.verifyTerm('', 37, alleleStatus, lineNum, errorFile)
+        # _vocab_key = 37 (Allele Status)
+        alleleStatusKey = loadlib.verifyTerm('', 37, alleleStatus, lineNum, errorFile)
 
-	# _vocab_key = 38 (Allele Type)
-	alleleTypeKey = loadlib.verifyTerm('', 38, alleleType, lineNum, errorFile)
+        # _vocab_key = 38 (Allele Type)
+        alleleTypeKey = loadlib.verifyTerm('', 38, alleleType, lineNum, errorFile)
 
-	# _vocab_key = 61 (Allele Transmission)
-	germLineKey = loadlib.verifyTerm('', 61, germLine, lineNum, errorFile)
+        # _vocab_key = 61 (Allele Transmission)
+        germLineKey = loadlib.verifyTerm('', 61, germLine, lineNum, errorFile)
 
-	# _vocab_key = 36 (Allele Molecular Mutation)
-	allMutations = mutations.split('|')
+        # _vocab_key = 36 (Allele Molecular Mutation)
+        allMutations = mutations.split('|')
 
-	# _vocab_key = 35 (Allele Status)
-	inheritanceModeKey = loadlib.verifyTerm('', 35, inheritanceMode, lineNum, errorFile)
+        # _vocab_key = 35 (Allele Status)
+        inheritanceModeKey = loadlib.verifyTerm('', 35, inheritanceMode, lineNum, errorFile)
 
-	# strains
-	strainOfOriginKey = sourceloadlib.verifyStrain(strainOfOrigin, lineNum, errorFile)
+        # strains
+        strainOfOriginKey = sourceloadlib.verifyStrain(strainOfOrigin, lineNum, errorFile)
 
-	# reference
-	refKey = loadlib.verifyReference(jnum, lineNum, errorFile)
+        # reference
+        refKey = loadlib.verifyReference(jnum, lineNum, errorFile)
 
         # if errors, continue to next record
-	# errors are stored (via loadlib) in the .error log
+        # errors are stored (via loadlib) in the .error log
 
         if markerKey == 0 \
-		or markerStatusKey == 0 \
-		or alleleStatusKey == 0 \
-		or alleleTypeKey == 0 \
-		or germLineKey == 0 \
-		or allMutations == 0 \
-		or inheritanceModeKey == 0 \
-		or strainOfOriginKey == 0 \
-		or refKey == 0 \
-		or createdByKey == 0:
+                or markerStatusKey == 0 \
+                or alleleStatusKey == 0 \
+                or alleleTypeKey == 0 \
+                or germLineKey == 0 \
+                or allMutations == 0 \
+                or inheritanceModeKey == 0 \
+                or strainOfOriginKey == 0 \
+                or refKey == 0 \
+                or createdByKey == 0:
             continue
 
         # if no errors, process the allele
 
-	# not specified/testing
-	#collectionKey = 11025586
+        # not specified/testing
+        #collectionKey = 11025586
 
-	# allele (master)
+        # allele (master)
         alleleFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s|0|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (alleleKey, markerKey, strainOfOriginKey, inheritanceModeKey, alleleTypeKey, \
-	    alleleStatusKey, germLineKey, collectionKey, symbol, name, \
-	    isExtinct, isMixed, refKey, markerStatusKey, \
-	    createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
+            alleleStatusKey, germLineKey, collectionKey, symbol, name, \
+            isExtinct, isMixed, refKey, markerStatusKey, \
+            createdByKey, createdByKey, createdByKey, loaddate, loaddate, loaddate))
 
-	# molecular mutation
-	for mutation in allMutations:
-		mutationKey = loadlib.verifyTerm('', 36, mutation, lineNum, errorFile)
-        	mutationFile.write('%s|%s|%s|%s\n' \
-	    	% (alleleKey, mutationKey, loaddate, loaddate))
+        # molecular mutation
+        for mutation in allMutations:
+                mutationKey = loadlib.verifyTerm('', 36, mutation, lineNum, errorFile)
+                mutationFile.write('%s|%s|%s|%s\n' \
+                % (alleleKey, mutationKey, loaddate, loaddate))
 
-	#
-	# allele references
-	#
-	allReferences = references.split('||')
-	for reference in allReferences:
-		refType, refID = reference.split('|')
-		refKey = loadlib.verifyReference(refID, lineNum, errorFile)
+        #
+        # allele references
+        #
+        allReferences = references.split('||')
+        for reference in allReferences:
+                refType, refID = reference.split('|')
+                refKey = loadlib.verifyReference(refID, lineNum, errorFile)
 
-		if refType == 'Original':
-			refAssocTypeKey = 1011
-		elif refType == 'Transmission':
-			refAssocTypeKey = 1023
-		elif refType == 'Molecular':
-			refAssocTypeKey = 1012
+                if refType == 'Original':
+                        refAssocTypeKey = 1011
+                elif refType == 'Transmission':
+                        refAssocTypeKey = 1023
+                elif refType == 'Molecular':
+                        refAssocTypeKey = 1012
 
-        	refFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-	    		% (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \
-	       		createdByKey, createdByKey, loaddate, loaddate))
-		refAssocKey = refAssocKey + 1
+                refFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                        % (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \
+                        createdByKey, createdByKey, loaddate, loaddate))
+                refAssocKey = refAssocKey + 1
 
-	#
-	# allele subtypes
-	#
-	allSubtypes = alleleSubtypes.split('|')
-	for s in allSubtypes:
+        #
+        # allele subtypes
+        #
+        allSubtypes = alleleSubtypes.split('|')
+        for s in allSubtypes:
 
-		# _vocab_key = 93 (Allele Subtype)
-		alleleSubtypeKey = loadlib.verifyTerm('', 93, s, lineNum, errorFile)
+                # _vocab_key = 93 (Allele Subtype)
+                alleleSubtypeKey = loadlib.verifyTerm('', 93, s, lineNum, errorFile)
 
-        	annotFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-                	% (annotKey, annotTypeKey, alleleKey, alleleSubtypeKey, \
-        			qualifierKey, loaddate, loaddate))
-		annotKey = annotKey + 1
+                annotFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+                        % (annotKey, annotTypeKey, alleleKey, alleleSubtypeKey, \
+                                qualifierKey, loaddate, loaddate))
+                annotKey = annotKey + 1
 
         #
         # mutant cell line
@@ -656,77 +656,77 @@ def processFile():
 
         accFile.write('%s|%s%d|%s|%s|1|%d|%d|0|1|%s|%s|%s|%s\n' \
             % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, alleleKey, mgiTypeKey, \
-	       createdByKey, createdByKey, loaddate, loaddate))
+               createdByKey, createdByKey, loaddate, loaddate))
 
-	# storing data in MGI_Note/MGI_NoteChunk
-	# molecular notes
+        # storing data in MGI_Note/MGI_NoteChunk
+        # molecular notes
 
-	mgiNoteSeqNum = 1
-	if len(molecularNotes) > 0:
+        mgiNoteSeqNum = 1
+        if len(molecularNotes) > 0:
 
-	    noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
-		% (noteKey, alleleKey, mgiNoteObjectKey, mgiMolecularNoteTypeKey, \
-		   createdByKey, createdByKey, loaddate, loaddate))
+            noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                % (noteKey, alleleKey, mgiNoteObjectKey, mgiMolecularNoteTypeKey, \
+                   createdByKey, createdByKey, loaddate, loaddate))
 
-	    noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		% (noteKey, mgiNoteSeqNum, molecularNotes, createdByKey, createdByKey, loaddate, loaddate))
+            noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+                % (noteKey, mgiNoteSeqNum, molecularNotes, createdByKey, createdByKey, loaddate, loaddate))
 
-	    noteKey = noteKey + 1
+            noteKey = noteKey + 1
 
-	# driver notes
-	# TR12662/MGI_Relationship._Category_key = 1006
-	# removed noteFile code
-	# place hodler for MGI_Relationship code
-	# the IKMC is the only product using this and IKMC does not add any driver note
-	#mgiNoteSeqNum = 1
-	#if len(driverNotes) > 0:
+        # driver notes
+        # TR12662/MGI_Relationship._Category_key = 1006
+        # removed noteFile code
+        # place hodler for MGI_Relationship code
+        # the IKMC is the only product using this and IKMC does not add any driver note
+        #mgiNoteSeqNum = 1
+        #if len(driverNotes) > 0:
 
-	# ikmc notes
-	useIKMCnotekey = 0
-	if len(ikmcNotes) > 0:
+        # ikmc notes
+        useIKMCnotekey = 0
+        if len(ikmcNotes) > 0:
 
-	    noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
-		% (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
-		   createdByKey, createdByKey, loaddate, loaddate))
+            noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                % (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
+                   createdByKey, createdByKey, loaddate, loaddate))
 
-	    noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-		% (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+            noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+                % (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
 
-	    useIKMCnotekey = noteKey
-	    noteKey = noteKey + 1
+            useIKMCnotekey = noteKey
+            noteKey = noteKey + 1
 
-	# Print out a new text file and attach the new MGI Allele IDs as the last field
+        # Print out a new text file and attach the new MGI Allele IDs as the last field
 
-	if createdBy == 'ikmc_alleleload':
-        	newAlleleFile.write('%s\t%s%s\t%s\n' \
-	    	% (mgi_utils.prvalue(ikmcNotes), \
-			mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey), \
-			mgi_utils.prvalue(ikmcSymbol)))
-	else:
-        	newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
-	    	% (mgi_utils.prvalue(markerID), \
-	       	mgi_utils.prvalue(symbol), \
-	       	mgi_utils.prvalue(name), \
-	       	mgi_utils.prvalue(alleleStatus), \
-	       	mgi_utils.prvalue(alleleType), \
-	       	mgi_utils.prvalue(alleleSubtype), \
-	       	mgi_utils.prvalue(collection), \
-	       	mgi_utils.prvalue(germLine), \
-	       	mgi_utils.prvalue(references), \
-	       	mgi_utils.prvalue(strainOfOrigin), \
-	       	mgi_utils.prvalue(mutantCellLine), \
-	       	mgi_utils.prvalue(allMutations), \
-	       	mgi_utils.prvalue(inheritanceMode), \
-	       	mgi_utils.prvalue(isMixed), \
-	       	mgi_utils.prvalue(isExtinct), \
-	       	mgi_utils.prvalue(refKey), \
-	       	mgi_utils.prvalue(markerStatusKey), \
-	       	mgi_utils.prvalue(createdBy), \
-	       	mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
+        if createdBy == 'ikmc_alleleload':
+                newAlleleFile.write('%s\t%s%s\t%s\n' \
+                % (mgi_utils.prvalue(ikmcNotes), \
+                        mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey), \
+                        mgi_utils.prvalue(ikmcSymbol)))
+        else:
+                newAlleleFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
+                % (mgi_utils.prvalue(markerID), \
+                mgi_utils.prvalue(symbol), \
+                mgi_utils.prvalue(name), \
+                mgi_utils.prvalue(alleleStatus), \
+                mgi_utils.prvalue(alleleType), \
+                mgi_utils.prvalue(alleleSubtype), \
+                mgi_utils.prvalue(collection), \
+                mgi_utils.prvalue(germLine), \
+                mgi_utils.prvalue(references), \
+                mgi_utils.prvalue(strainOfOrigin), \
+                mgi_utils.prvalue(mutantCellLine), \
+                mgi_utils.prvalue(allMutations), \
+                mgi_utils.prvalue(inheritanceMode), \
+                mgi_utils.prvalue(isMixed), \
+                mgi_utils.prvalue(isExtinct), \
+                mgi_utils.prvalue(refKey), \
+                mgi_utils.prvalue(markerStatusKey), \
+                mgi_utils.prvalue(createdBy), \
+                mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey)))
 
-	# save symbol/alleleKey/ikmc note key
-	alleleLookup[symbol] = []
-	alleleLookup[symbol].append((alleleKey, useIKMCnotekey, mgiPrefix + str(mgiKey)))
+        # save symbol/alleleKey/ikmc note key
+        alleleLookup[symbol] = []
+        alleleLookup[symbol].append((alleleKey, useIKMCnotekey, mgiPrefix + str(mgiKey)))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
@@ -740,7 +740,7 @@ def processFile():
 
     if not DEBUG:
         db.sql('select * from ACC_setMax(%d)' % (lineNum), None)
-	db.commit()
+        db.commit()
 
 
 #
@@ -753,17 +753,17 @@ def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
     mutantCellLineKey = 0
 
     results = db.sql('''
-	select _CellLine_key from ALL_CellLine
-	where isMutant = 1 and _Derivation_key is not null
-	and cellLine = '%s'
-       	''' % (mutantCellLine) , 'auto')
+        select _CellLine_key from ALL_CellLine
+        where isMutant = 1 and _Derivation_key is not null
+        and cellLine = '%s'
+        ''' % (mutantCellLine) , 'auto')
 
     for r in results:
-       	mutantCellLineKey = r['_CellLine_key']
+        mutantCellLineKey = r['_CellLine_key']
 
     mutantFile.write('%d|%s|%s|%s|%s|%s|%s\n' \
-          	% (mutantKey, alleleKey, mutantCellLineKey, \
-              	createdByKey, createdByKey, loaddate, loaddate))
+                % (mutantKey, alleleKey, mutantCellLineKey, \
+                createdByKey, createdByKey, loaddate, loaddate))
 
     mutantKey = mutantKey + 1
 
@@ -773,11 +773,10 @@ def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
 
 if __name__ == '__main__':
 
-	initialize()
+        initialize()
 
-	setPrimaryKeys()
+        setPrimaryKeys()
 
-	processFile()
+        processFile()
 
-	bcpFiles()
-
+        bcpFiles()

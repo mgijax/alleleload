@@ -70,7 +70,7 @@ touch ${LOG}
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Make the Allele bcp files (makeAllele.sh)" | tee -a ${LOG}
-./makeAllele.py 2>&1 >> ${LOG}
+${PYTHON} ./makeAllele.py 2>&1 >> ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
