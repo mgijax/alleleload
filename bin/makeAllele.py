@@ -149,6 +149,7 @@ errorFileName = ''	# error file name
 newAlleleFileName = ''	# output file with new accession ids
 
 alleleKey = 0           # ALL_Allele._Allele_key
+mutantionKey = 0 	# ALL_Allele_Mutation.bcp._Assoc_key
 mutantKey = 0  		# ALL_Allele_CellLine._Assoc_key
 refAssocKey = 0		# MGI_Reference_Assoc._Assoc_key
 accKey = 0              # ACC_Accession._Accession_key
@@ -310,7 +311,7 @@ def closeFiles():
 #
 def setPrimaryKeys():
 
-    global alleleKey, refAssocKey, accKey, noteKey, mgiKey, mutantKey, annotKey
+    global alleleKey, refAssocKey, accKey, noteKey, mgiKey, mutationKey, mutantKey, annotKey
 
     results = db.sql(''' select nextval('all_allele_seq') as maxKey ''', 'auto')
     alleleKey = results[0]['maxKey']
@@ -327,6 +328,9 @@ def setPrimaryKeys():
     results = db.sql(''' select max(maxNumericPart) + 1 as maxKey from ACC_AccessionMax 
         where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
+
+    results = db.sql(''' select nextval('all_allele_mutation_seq') as maxKey ''', 'auto')
+    mutationKey = results[0]['maxKey']
 
     results = db.sql(''' select nextval('all_allele_cellline_seq') as maxKey ''', 'auto')
     mutantKey = results[0]['maxKey']
@@ -374,6 +378,8 @@ def bcpFiles():
     db.sql(''' select setval('all_allele_seq', (select max(_Allele_key) from ALL_Allele)) ''', None)
     # update mgi_reference_assoc_seq auto-sequence
     db.sql(''' select setval('mgi_reference_assoc_seq', (select max(_Assoc_key) from MGI_Reference_Assoc)) ''', None)
+    # update all_allele_mutation_seq auto-sequence
+    db.sql(''' select setval('all_allele_mutation_seq', (select max(_Assoc_key) from ALL_Allele_Mutation)) ''', None)
     # update all_allele_cellline_seq auto-sequence
     db.sql(''' select setval('all_allele_cellline_seq', (select max(_Assoc_key) from ALL_Allele_CellLine)) ''', None)
     # update voc_annot_seq auto-sequence
@@ -496,7 +502,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 #
 def processFile():
 
-    global alleleKey, refAssocKey, accKey, noteKey, mgiKey, annotKey
+    global alleleKey, refAssocKey, accKey, noteKey, mgiKey, annotKey, mutationKey
     global alleleLookup
 
     lineNum = 0
@@ -608,9 +614,10 @@ def processFile():
 
         # molecular mutation
         for mutation in allMutations:
-                mutationKey = loadlib.verifyTerm('', 36, mutation, lineNum, errorFile)
-                mutationFile.write('%s|%s|%s|%s\n' \
-                % (alleleKey, mutationKey, loaddate, loaddate))
+                mutationTermKey = loadlib.verifyTerm('', 36, mutation, lineNum, errorFile)
+                mutationFile.write('%s|%s|%s|%s|%s\n' \
+                % (mutationKey, alleleKey, mutationTermKey, loaddate, loaddate))
+                mutationKey = mutationKey + 1
 
         #
         # allele references
