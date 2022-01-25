@@ -315,11 +315,10 @@ def setPrimaryKeys():
     results = db.sql('select max(_Accession_key) + 1 as maxKey from ACC_Accession', 'auto')
     accKey = results[0]['maxKey']
 
-    results = db.sql('select max(_Note_key) + 1 as maxKey from MGI_Note', 'auto')
+    results = db.sql(''' select nextval('mgi_note_seq') as maxKey ''', 'auto')
     noteKey = results[0]['maxKey']
 
-    results = db.sql(''' select max(maxNumericPart) + 1 as maxKey from ACC_AccessionMax 
-        where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
+    results = db.sql(''' select max(maxNumericPart) + 1 as maxKey from ACC_AccessionMax where prefixPart = '%s' ''' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
 
     results = db.sql(''' select nextval('all_allele_mutation_seq') as maxKey ''', 'auto')
@@ -370,6 +369,8 @@ def bcpFiles():
     db.sql(''' select setval('all_allele_seq', (select max(_Allele_key) from ALL_Allele)) ''', None)
     # update mgi_reference_assoc_seq auto-sequence
     db.sql(''' select setval('mgi_reference_assoc_seq', (select max(_Assoc_key) from MGI_Reference_Assoc)) ''', None)
+    # update mgi_note_seq auto-sequence
+    db.sql(''' select setval('mgi_note_seq', (select max(_Note_key) from MGI_Note)) ''', None)
     # update all_allele_mutation_seq auto-sequence
     db.sql(''' select setval('all_allele_mutation_seq', (select max(_Assoc_key) from ALL_Allele_Mutation)) ''', None)
     # update all_allele_cellline_seq auto-sequence
