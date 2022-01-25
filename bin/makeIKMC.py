@@ -82,6 +82,9 @@
 #      3) Morph the IKMC input file into a general-Allele input file
 #      4) Close files.
 #
+# 01/25/2022    sc
+#       - wts2-767 remove mgi_notechunk, note now in mgi_note
+#
 #  01/27/2014	lec
 #	- TR11515/IKMC/allele derivation load
 #
@@ -328,10 +331,9 @@ def initialize():
     #
     print('quering for ikmc notes')
     results = db.sql('''
-        select n._Note_key, n._Object_key, rtrim(c.note) as note
-        from MGI_Note n, MGI_NoteChunk c
+        select n._Note_key, n._Object_key, rtrim(n.note) as note
+        from MGI_Note n
         where n._NoteType_key = %s
-        and n._Note_key = c._Note_key
         ''' % (mgiIKMCNoteTypeKey), 'auto')
     for r in results:
         key = r['_Object_key']

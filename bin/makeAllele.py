@@ -52,7 +52,7 @@
 #       ALL_Allele_CellLine.bcp
 #
 #       MGI_Reference_Assoc             allele/reference associations (all types)
-#       MGI_Note/MGI_NoteChunk          allele notes (all types)
+#       MGI_Note                        allele notes (all types)
 #
 #       ACC_Accession.bcp               Accession records
 #       ACC_AccessionReference.bcp      Accession Reference records
@@ -72,6 +72,9 @@
 # Implementation:
 #
 # History
+#
+# 01/25/2022    sc
+#       - wts2-767 remove mgi_notechunk, note now in mgi_note
 #
 # 11/20/2017	lec
 # 	driver notes
@@ -120,7 +123,6 @@ refFile = ''            # file descriptor
 accFile = ''            # file descriptor
 accRefFile = ''         # file descriptor
 noteFile = ''		# file descriptor
-noteChunkFile = ''	# file descriptor
 annotFile = ''		# file descriptor
 newAlleleFile = ''      # file descriptor
 
@@ -131,7 +133,6 @@ refTable = 'MGI_Reference_Assoc'
 accTable = 'ACC_Accession'
 accRefTable = 'ACC_AccessionReference'
 noteTable = 'MGI_Note'
-noteChunkTable = 'MGI_NoteChunk'
 annotTable = 'VOC_Annot'
 
 alleleFileName = outputDir + '/' + alleleTable + '.bcp'
@@ -141,7 +142,6 @@ refFileName = outputDir + '/' + refTable + '.bcp'
 accFileName = outputDir + '/' + accTable + '.bcp'
 accRefFileName = outputDir + '/' + accRefTable + '.bcp'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
-noteChunkFileName = outputDir + '/' + noteChunkTable + '.bcp'
 annotFileName = outputDir + '/' + annotTable + '.bcp'
 
 diagFileName = ''	# diagnostic file name
@@ -157,7 +157,6 @@ noteKey = 0		# MGI_Note._Note_key
 mgiKey = 0              # ACC_AccessionMax.maxNumericPart
 annotKey = 0		# VOC_Annot._Annot_key
 mgiNoteObjectKey = 11   # MGI_Note._MGIType_key
-mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
 mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
 mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
@@ -204,7 +203,7 @@ def exit(
 def initialize():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global alleleFile, mutationFile, mutantFile, refFile
-    global accFile, accRefFile, noteFile, noteChunkFile, annotFile
+    global accFile, accRefFile, noteFile, annotFile
     global newAlleleFile
  
     db.useOneConnection(1)
@@ -273,11 +272,6 @@ def initialize():
         exit(1, 'Could not open file %s\n' % noteFileName)
 
     try:
-        noteChunkFile = open(noteChunkFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % noteChunkFileName)
-
-    try:
         annotFile = open(annotFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % annotFileName)
@@ -303,7 +297,6 @@ def closeFiles():
     accFile.close()
     accRefFile.close()
     noteFile.close()
-    noteChunkFile.close()
     annotFile.close()
 
 #
@@ -360,12 +353,11 @@ def bcpFiles():
     bcp5 = '%s %s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
     bcp6 = '%s %s "/" %s %s' % (bcpI, accRefTable, accRefFileName, bcpII)
     bcp7 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    bcp8 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
-    bcp9 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
+    bcp8 = '%s %s "/" %s %s' % (bcpI, annotTable, annotFileName, bcpII)
 
     db.commit()
 
-    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8, bcp9]:
+    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6, bcp7, bcp8]:
         diagFile.write('%s\n' % bcpCmd)
         os.system(bcpCmd)
 
@@ -448,7 +440,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
             if int(aKey) == 0:
                 nKey = alleleLookup[symbol][0][1]
                 note = tokens[1]
-                ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
+                ikmcSQLs.append('''update MGI_Note set note = '%s' where _Note_key = %s;''' % (note, nKey))
                         
             # child exists, note does not exist : add note to existing child
             else:
@@ -457,14 +449,11 @@ def processFileIKMC(createMCL, createNote, setStatus, \
 
                 if symbol in alleleLookup:
                         nKey = alleleLookup[symbol][0][1]
-                        ikmcSQLs.append('''update MGI_NoteChunk set note = rtrim(note) || '|%s' where _Note_key = %s;''' % (note, nKey))
+                        ikmcSQLs.append('''update MGI_Note set note = rtrim(note) || '|%s' where _Note_key = %s;''' % (note, nKey))
                 else:
-                        noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                        noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                         % (noteKey, aKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
-                        createdByKey, createdByKey, loaddate, loaddate))
-
-                        noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-                        % (noteKey, 1, note, createdByKey, createdByKey, loaddate, loaddate))
+                        note, createdByKey, createdByKey, loaddate, loaddate))
 
                         # save symbol/aKey/ikmc note key/allele id
                         alleleLookup[symbol] = []
@@ -480,7 +469,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
             tokens = createNote.split('||')
             nKey = tokens[0]
             note = tokens[1] + '|' + ikmcNotes
-            ikmcSQLs.append('''update MGI_NoteChunk set note = '%s' where _Note_key = %s;''' % (note, nKey))
+            ikmcSQLs.append('''update MGI_Note set note = '%s' where _Note_key = %s;''' % (note, nKey))
                         
     # 
     # print out the proper allele id
@@ -665,18 +654,15 @@ def processFile():
             % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, alleleKey, mgiTypeKey, \
                createdByKey, createdByKey, loaddate, loaddate))
 
-        # storing data in MGI_Note/MGI_NoteChunk
+        # storing data in MGI_Note
         # molecular notes
 
         mgiNoteSeqNum = 1
         if len(molecularNotes) > 0:
 
-            noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+            noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                 % (noteKey, alleleKey, mgiNoteObjectKey, mgiMolecularNoteTypeKey, \
-                   createdByKey, createdByKey, loaddate, loaddate))
-
-            noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-                % (noteKey, mgiNoteSeqNum, molecularNotes, createdByKey, createdByKey, loaddate, loaddate))
+                   molecularNotes, createdByKey, createdByKey, loaddate, loaddate))
 
             noteKey = noteKey + 1
 
@@ -694,10 +680,7 @@ def processFile():
 
             noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
                 % (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
-                   createdByKey, createdByKey, loaddate, loaddate))
-
-            noteChunkFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-                % (noteKey, 1, ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
+                   ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
 
             useIKMCnotekey = noteKey
             noteKey = noteKey + 1
