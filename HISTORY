@@ -1,3 +1,9 @@
+TAG: alleleload-6-0-21-1
+DATE: 07/18/2022
+STAFF: lec
+wts2-937/driver note type 1034 is obsolete
+removed: mgiDriverNoteTypeKey = 1034      # MGI_Note._NoteType_key
+
 TAG: alleleload-6-0-18-1
 DATE: 02/21/2022
 STAFF: sc

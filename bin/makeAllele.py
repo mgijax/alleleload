@@ -158,7 +158,6 @@ mgiKey = 0              # ACC_AccessionMax.maxNumericPart
 annotKey = 0		# VOC_Annot._Annot_key
 mgiNoteObjectKey = 11   # MGI_Note._MGIType_key
 mgiMolecularNoteTypeKey = 1021   # MGI_Note._NoteType_key
-mgiDriverNoteTypeKey = 1034   	 # MGI_Note._NoteType_key
 mgiIKMCNoteTypeKey = 1041   	 # MGI_Note._NoteType_key
 ikmcSQLs = []
 
