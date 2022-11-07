@@ -65,8 +65,9 @@ CREATEDBY=ikmc_alleleload
 JNUMBER=J:204739
 export CREATEDBY JNUMBER
 
-IKMC_FTP=${FTPROOT}/pub/IKMC
-export IKMC_FTP
+# wts2-1030;11/07/2022;per Cindy, no longer needed at this time
+#IKMC_FTP=${FTPROOT}/pub/IKMC
+#export IKMC_FTP
 
 ###########################################################################
 #

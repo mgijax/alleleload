@@ -131,20 +131,20 @@ echo "Create the Alleles (makeAllele.sh)" | tee -a ${LOG}
 STAT=$?
 checkStatus ${STAT} 'Create the Alleles (makeAllele.sh)'
 
-#
+# wts2-1030;11/07/2022;per Cindy, no longer needed at this time
 # copy ${OUTPUTDIR}/mgi_allele_ikmc.txt.new to ${IKMC_FTP} directory
 #
-echo "" >> ${LOG}
-date >> ${LOG}
-echo "Copying IKMC output file to ftp directory..." | tee -a ${LOG}
-useDate=`date '+%m%d%Y'`
-cd ${IKMC_FTP}
-rm -rf mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
-rm -rf mgi_allele_ikmc.txt.current | tee -a ${LOG}
-cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
-ln -s mgi_allele_ikmc.txt.${useDate} mgi_allele_ikmc.txt.current | tee -a ${LOG}
-STAT=0
-checkStatus ${STAT} 'Copying IKMC output file to ftp directory'
+#echo "" >> ${LOG}
+#date >> ${LOG}
+#echo "Copying IKMC output file to ftp directory..." | tee -a ${LOG}
+#useDate=`date '+%m%d%Y'`
+#cd ${IKMC_FTP}
+#rm -rf mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
+#rm -rf mgi_allele_ikmc.txt.current | tee -a ${LOG}
+#cp ${OUTPUTDIR}/mgi_allele_ikmc.txt.new mgi_allele_ikmc.txt.${useDate} | tee -a ${LOG}
+#ln -s mgi_allele_ikmc.txt.${useDate} mgi_allele_ikmc.txt.current | tee -a ${LOG}
+#STAT=0
+#checkStatus ${STAT} 'Copying IKMC output file to ftp directory'
 
 #
 # curator log
