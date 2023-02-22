@@ -4,7 +4,7 @@
 
 <H3>Inputs/Outputs</H3>
 <UL>
-<LI><A HREF="/data/loads/mgi/alleleload/ikmc/input/mgi_modification_allele_report.tsv">IKMC input file</A>
+<LI><A HREF="/data/loads/mgi/alleleload/ikmc/input/mgi_modification_current">IKMC input file</A>
 <LI><A HREF="/data/loads/mgi/alleleload/ikmc/input/mgi_allele_ikmc.txt">MGI-format: Allele</A>
 </UL>
 
