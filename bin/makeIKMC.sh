@@ -107,7 +107,7 @@ cp ${IKMC_INPUT_FILE} ${IKMC_COPY_INPUT_FILE} | tee -a ${LOG}
 
 if [ ! -r ${IKMC_COPY_INPUT_FILE} ]
 then
-    echo "Error: IKMC input file did not get created proporly." | tee -a ${LOG}
+    echo "Error: IKMC input file did not get created properly." | tee -a ${LOG}
     exit 1
 fi
 
