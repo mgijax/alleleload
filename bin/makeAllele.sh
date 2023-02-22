@@ -61,8 +61,8 @@ fi
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
-rm -rf ${LOG}
-touch ${LOG}
+#rm -rf ${LOG}
+#touch ${LOG}
 
 #
 # Call the Python script to generate the Allele bcp files.

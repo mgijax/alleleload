@@ -204,7 +204,7 @@ def initialize():
     global alleleFile, mutationFile, mutantFile, refFile
     global accFile, accRefFile, noteFile, annotFile
     global newAlleleFile
- 
+    
     db.useOneConnection(1)
     db.set_sqlUser(user)
     db.set_sqlPasswordFromFile(passwordFileName)
@@ -678,7 +678,7 @@ def processFile():
         useIKMCnotekey = 0
         if len(ikmcNotes) > 0:
 
-            noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s\n' \
+            noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                 % (noteKey, alleleKey, mgiNoteObjectKey, mgiIKMCNoteTypeKey, \
                    ikmcNotes, createdByKey, createdByKey, loaddate, loaddate))
 
@@ -762,11 +762,11 @@ def addMutantCellLine(alleleKey, mutantCellLine, createdByKey):
 #
 
 if __name__ == '__main__':
-
+        print('initialize')
         initialize()
-
+        print('setPrimaryKeys')
         setPrimaryKeys()
-
+        print('processFile')
         processFile()
-
+        print('bcpFiles')
         bcpFiles()
