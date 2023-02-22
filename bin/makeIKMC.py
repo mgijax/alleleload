@@ -18,26 +18,27 @@
 #
 #  Inputs:
 #
-#      IKMC file ($IKMC_COPY_INPUT_FILE)
+#      IKMC file ($IKMC_COPY_INPUT_FILE) from GenTar
 #
 #       field 1: Marker Symbol
 #       field 2: MGI Marker ID
-#       field 3: Mi Attempt Colony Name  
-#	field 4: Mi Attempt Colony Background Strain     
-#	field 5: Mi Attempt Production Centre    
-#	field 6: Mi Attempt Allele Symbol        
-#	field 7: Mi Attempt Es Cell Allele Symbol        
-#	field 8: Mi Attempt Es Cell MGI Allele Accession 
-#	field 9: Mi Attempt Es Cell Name 
-#	field 10: Mi Attempt Es Cell Line 
-#	field 11: Colony Name     
+#       field 3: Production Plan Colony Name  
+#	field 4: Production Plan  Colony Background Strain     
+#	field 5: Production Work Unit  (formerly IMITs Production Centre)
+#	field 6: Production Mutation Allele Symbol (full symbol now)
+#	field 7: Es Cell Allele Symbol (full symbol now)
+#	field 8: ES Cell Name 
+#	field 9: ES Cell Allele Accession ID 
+#	field 10: ES Cell Parent 
+#	field 11: Modification Plan Colony Name 
 #	field 12: Excision Type   
 #	field 13: Tat Cre Phenotype Attempt Deleter Strain        
-#	field 14: Phenotype Attempt Deleter Strain
-#	field 15: Phenotype Attempt Colony Background StraiN
-#	field 16: Phenotype Attempt Production Centre     
-#	field 17: MGI Allele Accession    
-#	field 18: MGI Allele Name
+#	field 14: Deleter Strain
+#	field 15: Modification Plan Colony Background Strain
+#	field 16: Modification Work Unit 
+#	field 17: Modification Mutation Accession ID (MGI Allele Accession)
+#	field 18: Modification Mutation Symbol 
+#       field 19: Mutation Identifier
 #
 #  Outputs:
 #
@@ -82,6 +83,9 @@
 #      3) Morph the IKMC input file into a general-Allele input file
 #      4) Close files.
 #
+# 10/04/2022    sc
+#       - https://mgi-jira.atlassian.net/browse/WTS2-558 iMITS/GenTar (TR13439)
+#
 # 01/25/2022    sc
 #       - wts2-767 remove mgi_notechunk, note now in mgi_note
 #
@@ -102,6 +106,9 @@ logDiagFile = None
 logCurFile = None
 skipDiagFile = None
 existsDiagFile = None
+
+logitSkip = []
+logitExists = []
 
 # IKMC_COPY_INPUT_FILE
 ikmcFile = None
@@ -389,7 +396,7 @@ def openFiles():
     # Open the IKMC file
     #
     try:
-        fpIKMC = open(ikmcFile, 'r')
+        fpIKMC = open(ikmcFile, encoding='utf-8', errors='replace')
     except:
         print('Cannot open ikmc file: ' + ikmcFile)
         return 1
@@ -441,13 +448,14 @@ def closeFiles():
 #
 def createAlleleFile():
 
-    lineNum = 1
-
+    lineNum = 0
+    header = 1
     print('reading input file')
     for line in fpIKMC.readlines():
-
-        if lineNum == 1:
-                lineNum += 1
+        lineNum += 1
+        print('line: %s' % line)
+        if header == 1:
+                header += 1
                 continue
 
         error = 0
@@ -457,63 +465,62 @@ def createAlleleFile():
         ikmc_marker_id_2 = tokens[1]
         ikmc_allele_symbol_6 = tokens[5]
         ikmc_allele_escell_symbol_7 = tokens[6]
-        ikmc_allele_id_8 = tokens[7]
-        ikmc_escell_name_9 = tokens[8]
+        ikmc_allele_id_9 = tokens[8] # 8/9 swapped in in GenTar from IMITs
+        ikmc_escell_name_8 = tokens[7]
         ikmc_colony_11 = tokens[10]
         ikmc_iscre_12 = tokens[11].lower()
         ikmc_tatcre_13 = tokens[12]
         mgi_allele_id_17 = tokens[16]
 
         if len(mgi_allele_id_17) > 0:
-                logit = 'field 17: we have already processed this row\n'
+                logit = 'field 17 line %s: we have already processed this row: ' % lineNum
                 error = 1
 
         if ikmc_marker_id_2 not in markerByID:
-                logit = 'field 2 : marker is not in MGI\n'
+                logit = 'field 2 line %s : marker is not in MGI: ' % lineNum
                 error = 1
 
-        if ikmc_allele_id_8 not in alleleByID:
-                logit = 'field 8: allele is not in MGI or is not a tmX, tmXa, tmXe\n'
+        if ikmc_allele_id_9 not in alleleByID:
+                logit = 'field 9 line %s: allele is not in MGI or is not a tmX, tmXa, tmXe: ' % lineNum
                 error = 1
 
         else:
                 #
-                # if ikmc_escell_name_9 cell line is not associated with 
-                #		ikmc_allele_id_8, then skip
+                # if ikmc_escell_name_8 cell line is not associated with 
+                #		ikmc_allele_id_9, then skip
                 #
 
-                if ikmc_escell_name_9 not in cellLineBySymbol:
-                        logit = 'field 9: es cell line is not associated with *any* allele in MGI\n'
+                if ikmc_escell_name_8 not in cellLineBySymbol:
+                        logit = 'field 8 line %s: es cell line is not associated with *any* allele in MGI: '% lineNum
                         error = 1
                 else:
                         skipIt = 1
-                        aKey = alleleByID[ikmc_allele_id_8][0]['_Allele_key']
-                        cellLine = cellLineBySymbol[ikmc_escell_name_9]
+                        aKey = alleleByID[ikmc_allele_id_9][0]['_Allele_key']
+                        cellLine = cellLineBySymbol[ikmc_escell_name_8]
                         for c in cellLine:
                                 cKey = c['_Allele_key']
                                 if aKey == cKey:
                                         skipIt = 0
 
                         if skipIt:
-                                logit = 'ES Cell Name (field 9) is not associated with allele ID (field 8)\n'
+                                logit = 'ES Cell Name (field 9) is not associated with allele ID (field 8) line %s: ' % lineNum
                                 error = 1
 
         if ikmc_iscre_12 not in ('cre', 'flp'):
-                logit = 'Excision Type (field 12) is not "cre" or "flp"\n'
+                logit = 'Excision Type (field 12) is not "cre" or "flp" line %s: ' % lineNum
                 error = 1
 
-        if ikmc_tatcre_13 not in ('t', 'f'):
-                logit = 'TAT-Cre (field 13) is not "t" or "f"\n'
+        if ikmc_tatcre_13 not in ('true', 'false'):
+                logit = 'TAT-Cre (field 13) is not "true" or "false" line %s: ' % lineNum
                 error = 1
 
         if error:
-                fpSkipDiag.write(logit + '\t' + \
-                        ikmc_marker_symbol_1 + '\t' + \
+                logitSkip.append(logit + ikmc_marker_symbol_1 + '\t' + \
                         ikmc_marker_id_2 + '\t' + \
                         ikmc_allele_symbol_6 + '\t' + \
                         ikmc_allele_escell_symbol_7 + '\t' + \
-                        ikmc_allele_id_8 + '\t' + \
-                        ikmc_escell_name_9 + '\t' + \
+                        ikmc_allele_id_9 + '\t' + \
+                        ikmc_escell_name_8 + '\t' + \
                         ikmc_iscre_12 + '\t' + \
                         ikmc_tatcre_13 + '\t' + \
                         mgi_allele_id_17 + '\n')
@@ -526,14 +533,16 @@ def createAlleleFile():
         isCre = 0
         isFlp = 0
 
-        alleleSym = alleleByID[ikmc_allele_id_8][0]['symbol']
-        alleleName = alleleByID[ikmc_allele_id_8][0]['name']
-        alleleKey = alleleByID[ikmc_allele_id_8][0]['_Allele_key']
-        collectionKey = alleleByID[ikmc_allele_id_8][0]['_Collection_key']
-        strainOfOrigin = alleleByID[ikmc_allele_id_8][0]['strain']
-        markerSym = alleleByID[ikmc_allele_id_8][0]['markerSym']
+        alleleSym = alleleByID[ikmc_allele_id_9][0]['symbol']
+        print('alleleSym: %s' % alleleSym)
+        alleleName = alleleByID[ikmc_allele_id_9][0]['name']
+        alleleKey = alleleByID[ikmc_allele_id_9][0]['_Allele_key']
+        collectionKey = alleleByID[ikmc_allele_id_9][0]['_Collection_key']
+        strainOfOrigin = alleleByID[ikmc_allele_id_9][0]['strain']
+        markerSym = alleleByID[ikmc_allele_id_9][0]['markerSym']
 
-        alleleSym_6 = ikmc_marker_symbol_1 + '<' + ikmc_allele_symbol_6 + '>'
+        #alleleSym_6 = ikmc_marker_symbol_1 + '<' + ikmc_allele_symbol_6 + '>'
+        alleleSym_6 = ikmc_allele_symbol_6
 
         tokens1 = alleleSym.split('<')
         tokens2 = tokens1[1].split('(')
@@ -576,14 +585,13 @@ def createAlleleFile():
         # if tmXe is not Cre
         #
         if isXe and not isCre:
-                logit = 'This tmXe allele is not Cre.\n'
-                fpExistsDiag.write(logit + '\t' + \
-                        ikmc_marker_symbol_1 + '\t' + \
+                logit = 'This tmXe allele is not Cre line %s: ' % lineNum
+                logitExists.append(logit + ikmc_marker_symbol_1 + '\t' + \
                         ikmc_marker_id_2 + '\t' + \
                         ikmc_allele_symbol_6 + '\t' + \
                         ikmc_allele_escell_symbol_7 + '\t' + \
-                        ikmc_allele_id_8 + '\t' + \
-                        ikmc_escell_name_9 + '\t' + \
+                        ikmc_allele_id_9 + '\t' + \
+                        ikmc_escell_name_8 + '\t' + \
                         ikmc_iscre_12 + '\t' + \
                         ikmc_tatcre_13 + '\t' + \
                         mgi_allele_id_17 + '\t' + \
@@ -591,7 +599,7 @@ def createAlleleFile():
                 continue
 
         #
-        # if isXa and field 8 != field 6, then this requires some special handling
+        # if isXa and field 9 != field 6, then this requires some special handling
         # 
 
         elif isXa and alleleSym != alleleSym_6:
@@ -599,17 +607,16 @@ def createAlleleFile():
                 # special logging requested by Kim
                 #if len(ikmc_allele_symbol_6) > 4 and ikmc_allele_symbol_6[3] != "e":
                 if len(ikmc_allele_symbol_6) > 4 and ikmc_allele_symbol_6.find('e(') != -1:
-                        logit = "field 8 and field 6 symbols do not match"
+                        logit = "field 9 and field 6 symbols do not match line %s: " % lineNum
                 else:
-                        logit = 'Must handle special tmXa/tmXe case\n'
+                        logit = 'Must handle special tmXa/tmXe case line %s: ' % lineNum
 
-                fpSkipDiag.write(logit + '\t' + \
-                        ikmc_marker_symbol_1 + '\t' + \
+                logitSkip.append(logit + ikmc_marker_symbol_1 + '\t' + \
                         ikmc_marker_id_2 + '\t' + \
                         ikmc_allele_symbol_6 + '\t' + \
                         ikmc_allele_escell_symbol_7 + '\t' + \
-                        ikmc_allele_id_8 + '\t' + \
-                        ikmc_escell_name_9 + '\t' + \
+                        ikmc_allele_id_9 + '\t' + \
+                        ikmc_escell_name_8 + '\t' + \
                         ikmc_iscre_12 + '\t' + \
                         ikmc_tatcre_13 + '\t' + \
                         mgi_allele_id_17 + '\t' + \
@@ -650,7 +657,7 @@ def createAlleleFile():
 
                         if childKey in cellLineByKey:
                                 for c in cellLineByKey[childKey]:
-                                        if c['cellLine'] == ikmc_escell_name_9:
+                                        if c['cellLine'] == ikmc_escell_name_8:
                                                 cellLineExists = 1
 
                         if childKey in ikmcNotes:
@@ -665,21 +672,20 @@ def createAlleleFile():
                         # and the child's status is *not* reserved
                         #
                         if cellLineExists and colonyExists and not isReserved:
-                                logit = 'Child/Cell Line/Colony already exists in MGI'
-                                fpExistsDiag.write(logit + '\t' + \
-                                        ikmc_marker_symbol_1 + '\t' + \
+                                logit = 'Child/Cell Line/Colony already exists in MGI line %s: ' % lineNum
+                                logitExists.append(logit + ikmc_marker_symbol_1 + '\t' + \
                                         ikmc_marker_id_2 + '\t' + \
                                         ikmc_allele_symbol_6 + '\t' + \
                                         ikmc_allele_escell_symbol_7 + '\t' + \
-                                        ikmc_allele_id_8 + '\t' + \
-                                        ikmc_escell_name_9 + '\t' + \
+                                        ikmc_allele_id_9 + '\t' + \
+                                        ikmc_escell_name_8 + '\t' + \
                                         ikmc_iscre_12 + '\t' + \
                                         ikmc_tatcre_13 + '\t' + \
                                         mgi_allele_id_17 + '\t' + \
                                         alleleSym + '\t' + newAlleleSym + '\n')
                                 continue
                         #else:
-                        #	print alleleSym, ikmc_escell_name_9
+                        #	print alleleSym, ikmc_escell_name_8
                         # OK to go!
 
         #print alleleSym, ikmc_colony_11
@@ -744,14 +750,14 @@ def createAlleleFile():
 
         attachCellLine = 0
         attachColony = 0
-
+        print('newAlleleSym: %s' % newAlleleSym)
         if newAlleleSym in alleleAdded:
 
                 attachCellLine = 1
                 attachColony = 1
 
                 for a in alleleAdded[newAlleleSym]:
-                        if a == ikmc_escell_name_9:
+                        if a == ikmc_escell_name_8:
                                 attachCellLine = 0
 
                 for a in colonyAdded[newAlleleSym]:
@@ -759,27 +765,28 @@ def createAlleleFile():
                                 attachColony = 0
 
                 if not attachCellLine and not attachColony:
-                        logit = 'Duplicate: child already added by this load\n'
-                        fpExistsDiag.write(logit + '\t' + \
-                                ikmc_marker_symbol_1 + '\t' + \
+                        logit = 'Duplicate: child already added by this load line %s: ' % lineNum
+                        logitExists.append(logit + ikmc_marker_symbol_1 + '\t' + \
                                 ikmc_marker_id_2 + '\t' + \
                                 ikmc_allele_symbol_6 + '\t' + \
                                 ikmc_allele_escell_symbol_7 + '\t' + \
-                                ikmc_allele_id_8 + '\t' + \
-                                ikmc_escell_name_9 + '\t' + \
+                                ikmc_allele_id_9 + '\t' + \
+                                ikmc_escell_name_8 + '\t' + \
                                 ikmc_iscre_12 + '\t' + \
                                 ikmc_tatcre_13 + '\t' + \
                                 mgi_allele_id_17 + '\t' + \
                                 alleleSym + '\n')
                         continue
                 else:
-                        alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
+                        print('alleleAdded[%s].append(%s)' % (newAlleleSym, ikmc_escell_name_8))
+                        alleleAdded[newAlleleSym].append(ikmc_escell_name_8)
+                        print('colonyAdded[%s].append(%s)' % (newAlleleSym, ikmc_colony_11))
                         colonyAdded[newAlleleSym].append(ikmc_colony_11)
 
         # update the new allele list
         elif int(childKey) == 0:
                 alleleAdded[newAlleleSym] = []
-                alleleAdded[newAlleleSym].append(ikmc_escell_name_9)
+                alleleAdded[newAlleleSym].append(ikmc_escell_name_8)
                 colonyAdded[newAlleleSym] = []
                 colonyAdded[newAlleleSym].append(ikmc_colony_11)
 
@@ -787,6 +794,7 @@ def createAlleleFile():
         # ready to create the Allele
         #
 
+        print('ready to create the Allele')
         # Marker ID
         fpAllele.write(ikmc_marker_id_2 + '\t')
 
@@ -818,7 +826,7 @@ def createAlleleFile():
         fpAllele.write(strainOfOrigin + '\t')
 
         # Mutant Cell Line
-        fpAllele.write(ikmc_escell_name_9 + '\t')
+        fpAllele.write(ikmc_escell_name_8 + '\t')
 
         # Molecular Notes
         fpAllele.write(molecularNote + '\t')
@@ -910,10 +918,13 @@ def createAlleleFile():
         p2 = newAlleleSym.find('>')
         fpAllele.write(newAlleleSym[p1+1:p2] + '\n')
 
-        lineNum += 1
-
     return 0
 
+def writeReports():
+    logitSkip.sort()
+    fpSkipDiag.write('\n'.join(logitSkip))
+    fpExistsDiag.write('\n'.join(logitExists))
+    return 0
 #
 #  MAIN
 #
@@ -928,5 +939,6 @@ if createAlleleFile() != 0:
     closeFiles()
     sys.exit(1)
 
+writeReports()
 closeFiles()
 sys.exit(0)
