@@ -500,7 +500,7 @@ def processFile():
     for line in inputFile.readlines():
 
         error = 0
-        lineNum = lineNum + 1
+        lineNum  += 1
 
         # Split the line into tokens
         tokens = line[:-1].split('\t')
