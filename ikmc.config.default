@@ -43,8 +43,8 @@ export FILEDIR ARCHIVEDIR INPUTDIR OUTPUTDIR LOGDIR RPTDIR QCOUTPUTDIR
 
 # input file from the BioMart
 #
-IKMC_INPUT_FILE=${DATADOWNLOADS}/www.mousephenotype.org/mgi_modification_allele_report.tsv
-IKMC_COPY_INPUT_FILE=${INPUTDIR}/mgi_modification_allele_report.tsv
+IKMC_INPUT_FILE=${DATADOWNLOADS}/www.gentar.org/mgi_modification_current
+IKMC_COPY_INPUT_FILE=${INPUTDIR}/mgi_modification_current
 INPUTFILE=${INPUTDIR}/mgi_allele_ikmc.txt
 
 export IKMC_INPUT_FILE IKMC_COPY_INPUT_FILE INPUTFILE
