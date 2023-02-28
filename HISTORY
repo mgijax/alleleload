@@ -1,3 +1,17 @@
+TAG: alleleload-6-0-22-4
+DATE: 02/28/2023
+STAFF: sc
+While working on wts2-558 we noticed that the logging was a little messed
+up. I fixed so that 
+1) all logs/error/new/diagnostic files have start and end timestamp
+2) output/mgi_allele_ikmc.txt.new contains new AND updated alleles -
+*    updates include notes (mol and colony) and MCLs
+*    updated to prefix this file with 'New' or 'Updated'
+*    all other existing alleles are written to logs/ikmc.exist.log
+*    nothing changed with logs/ikmc.skip.log
+*    logs/ikmc.diag.log was being truncated by  makeAllele.sh after
+            being written to by makeIKMC.sh/py
+
 TAG: alleleload-6-0-22-3
 TAG: alleleload-6-0-22-2
 DATE: 02/22/2023

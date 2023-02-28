@@ -109,7 +109,7 @@ outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
 BCP_COMMAND = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
-DEBUG = 0		# if 0, not in debug mode
+DEBUG = 1		# if 0, not in debug mode
 
 bcpon = 1		# can the bcp files be bcp-ed into the database?  default is yes.
 
@@ -191,6 +191,7 @@ def exit(
         inputFile.close()
         newAlleleFile.close()
     except:
+        print('issued closing files from exit function')
         pass
 
     db.useOneConnection(0)
@@ -430,7 +431,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     if len(createNote) > 0:
 
         if DEBUG:
-                print('createNote: ', symbol)
+                print('createNote: %s' % symbol)
 
         try:
             tokens = createNote.split('::')
@@ -481,7 +482,7 @@ def processFileIKMC(createMCL, createNote, setStatus, \
     else:
         printAlleleID = 'missing allele id (2)'
 
-    newAlleleFile.write('%s\t%s\t%s\n' \
+    newAlleleFile.write('Updated\t%s\t%s\t%s\n' \
                 % (mgi_utils.prvalue(ikmcNotes), \
                         mgi_utils.prvalue(printAlleleID), \
                         mgi_utils.prvalue(ikmcSymbol)))
@@ -547,7 +548,7 @@ def processFile():
 
         # marker key
         markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
-
+        
         # hard-coded
         # _vocab_key = 73 (Marker-Allele Association Status)
         # _term_key = 4268545 (Curated)
@@ -688,7 +689,7 @@ def processFile():
         # Print out a new text file and attach the new MGI Allele IDs as the last field
 
         if createdBy == 'ikmc_alleleload':
-                newAlleleFile.write('%s\t%s%s\t%s\n' \
+                newAlleleFile.write('New\t%s\t%s%s\t%s\n' \
                 % (mgi_utils.prvalue(ikmcNotes), \
                         mgi_utils.prvalue(mgiPrefix), mgi_utils.prvalue(mgiKey), \
                         mgi_utils.prvalue(ikmcSymbol)))
@@ -770,3 +771,5 @@ if __name__ == '__main__':
         processFile()
         print('bcpFiles')
         bcpFiles()
+
+        exit(0)
