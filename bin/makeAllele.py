@@ -109,7 +109,7 @@ outputDir = os.environ['OUTPUTDIR']
 jnum = os.environ['JNUMBER']
 BCP_COMMAND = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
-DEBUG = 1		# if 0, not in debug mode
+DEBUG = 0		# if 0, not in debug mode
 
 bcpon = 1		# can the bcp files be bcp-ed into the database?  default is yes.
 
