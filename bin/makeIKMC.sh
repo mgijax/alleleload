@@ -117,7 +117,7 @@ fi
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create the IKMC/Allele input file (makeIKMC.sh)" | tee -a ${LOG}
-${PYTHON} ./makeIKMC.py 2>&1 >> ${LOG}
+${PYTHON} -W "ignore" ./makeIKMC.py 2>&1 >> ${LOG}
 STAT=$?
 checkStatus ${STAT} 'Create the IKMC/Allele input file (makeIKMC.sh)'
 
