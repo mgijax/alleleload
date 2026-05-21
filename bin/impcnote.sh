@@ -33,10 +33,10 @@ touch ${LOG}
 # the last time the gene model load was run. If this file exists and is more
 # recent than the gene model file, the load does not need to be run.
 #
-LASTRUN_FILE=${SGM_INPUTDIR}/lastrun
+LASTRUN_FILE=${INPUTDIR}/lastrun
 if [ -f ${LASTRUN_FILE} ]
 then
-    if test ${LASTRUN_FILE} -nt ${INPUT_MGI_GFF}
+    if test ${LASTRUN_FILE} -nt ${INPUTFILE}
     then
         echo "Input files have not been updated - skipping load" | tee -a ${LOG}
         exit 0
