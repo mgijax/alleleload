@@ -188,6 +188,7 @@ def processFile():
     totalSkipped = 0
     totalProcessed = 0
 
+    # save markerID:alleleID duplicate set
     allSet = []
     dupSet = []
     for line in inputFile.readlines():
