@@ -1,0 +1,76 @@
+#format: sh
+###########################################################################
+#
+# Configuration.default
+#
+###########################################################################
+
+###########################################################################
+#
+#  If the MGICONFIG environment variable does not have a local override,
+#  use the default "live" settings.
+#
+###########################################################################
+if [ "${MGICONFIG}" = "" ]
+then
+    MGICONFIG=/usr/local/mgi/live/mgiconfig
+    export MGICONFIG
+fi
+
+. ${MGICONFIG}/master.config.sh
+
+###########################################################################
+#
+# Directory paths
+#
+###########################################################################
+
+FILEDIR=${DATALOADSOUTPUT}/mgi/alleleload/impcnote
+ARCHIVEDIR=${FILEDIR}/archive
+INPUTDIR=${FILEDIR}/input
+OUTPUTDIR=${FILEDIR}/output
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+QCOUTPUTDIR=${RPTDIR}
+
+export FILEDIR ARCHIVEDIR INPUTDIR OUTPUTDIR LOGDIR RPTDIR QCOUTPUTDIR 
+
+###########################################################################
+#
+# Input/Output files
+#
+###########################################################################
+
+# input file
+#
+IMPC_INPUT_FILE=${DATADOWNLOADS}/www.gentar.org/mgi_allele_template_current
+INPUTFILE=${INPUTDIR}/impcnote.txt
+
+export IPMC_INPUT_FILE INPUTFILE
+
+# Log files
+#
+LOG_PROC=${LOGDIR}/ipmc.proc.log
+LOG_DIAG=${LOGDIR}/ipmc.diag.log
+LOG_CUR=${LOGDIR}/ipmc.cur.log
+
+export LOG_PROC LOG_DIAG LOG_CU
+
+###########################################################################
+#
+#  MISCELLANEOUS SETTINGS
+#
+###########################################################################
+
+#  The name of the job stream for the load
+JOBSTREAM=alleleload
+export JOBSTREAM
+
+#  The name of the load for the subject of an email notification
+MAIL_LOADNAME="IPMC-Allele Molecular Note Load"
+
+export MAIL_LOADNAME
+
+INSTALLDIR=${ALLELELOAD}
+export INSTALLDIR
+
