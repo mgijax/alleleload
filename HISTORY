@@ -2,8 +2,8 @@ TAG: alleleload-6-0-28-?
 DATE: 05/21/2026
 STAFF: lec
 wts2-1857/Allele Molecular IMPC Note Load
-        new file:   bin/impcnote.py
-        new file:   bin/impcnote.sh
+        new file:   bin/makeIMPCNote.py
+        new file:   bin/makeIMPCNote.sh
         new file:   impcnote.config.default
 
 TAG: alleleload-6-0-25-1
