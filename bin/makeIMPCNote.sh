@@ -45,6 +45,7 @@ fi
 
 #
 # copy file
+# create duplicate file based on marker|allele
 #
 rm -rf ${INPUTFILE}
 rm -rf ${IMPC_DUPLICATE}

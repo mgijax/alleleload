@@ -68,6 +68,8 @@ noteFileName = outputDir + '/' + noteTable + '.bcp'
 diagFileName = ''	# diagnostic file name
 errorFileName = ''	# error file name
 
+duplicateSet = []
+
 mgiTypeKey = 11
 noteTypeKey = 1053
 createdByKey = 1000
@@ -103,6 +105,7 @@ def exit(
 def initialize():
     global diagFile, errorFile, inputFile, duplicateFile, errorFileName, diagFileName
     global noteFile
+    global duplicateSet
     
     head, tail = os.path.split(inputFileName)
 
@@ -143,9 +146,18 @@ def initialize():
 
     errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
 
+    # duplicates
+    duplicateSet = []
+    for line in duplicateFile.readlines():
+        tokens = line[:-1].split('\t')
+        if tokens[1] == '':
+            continue
+        duplicateSet.append(tokens[0] + '|' + tokens[1])
+    duplicateFile.close()
+
     # delete existing note
-    #db.sql('delete from MGI_Note n where n._mgitype_key = 11 and n._notetype_key = 1053', None)
-    #db.commit()
+    db.sql('delete from MGI_Note n where n._mgitype_key = 11 and n._notetype_key = 1053', None)
+    db.commit()
 
 #
 # Purpose: Close files.
@@ -195,15 +207,6 @@ def processFile():
     totalSkipped = 0
     totalProcessed = 0
 
-    # dupliates
-    dupSet = []
-    for line in duplicateFile.readlines():
-        tokens = line[:-1].split('\t')
-        if tokens[1] == '':
-            continue
-        dupSet.append(tokens[0] + '|' + tokens[1])
-    duplicateFile.close()
-
     for line in inputFile.readlines():
 
         error = 0
@@ -231,7 +234,7 @@ def processFile():
 
         # skip if duplicate
         id = markerID + '|' + alleleID
-        if id in dupSet:
+        if id in duplicateSet:
             print('Duplicate Lines in input file: ', id)
             totalSkipped += 1
             continue
