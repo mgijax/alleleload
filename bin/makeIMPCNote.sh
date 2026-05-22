@@ -53,7 +53,7 @@ cp ${IMPC_INPUT_FILE} ${INPUTFILE}
 # process impc molecular note
 #
 date | tee -a ${LOG}
-${PYTHON} impcnote.py | tee -a ${LOG}
+${PYTHON} makeIMPCNote.py | tee -a ${LOG}
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
