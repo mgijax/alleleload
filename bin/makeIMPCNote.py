@@ -52,12 +52,14 @@ import mgi_utils
 import loadlib
 
 inputFileName = os.environ['INPUTFILE']
+duplicateFileName = os.environ['IMPC_DUPLICATE']
 outputDir = os.environ['OUTPUTDIR']
 BCP_COMMAND = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
 diagFile = ''		# diagnostic file descriptor
 errorFile = ''		# error file descriptor
 inputFile = ''		# file descriptor
+duplicateFile = ''	# file descriptor
 noteFile = ''		# file descriptor
 
 noteTable = 'MGI_Note'
@@ -99,7 +101,7 @@ def exit(
 # Purpose: process command line options
 #
 def initialize():
-    global diagFile, errorFile, inputFile, errorFileName, diagFileName
+    global diagFile, errorFile, inputFile, duplicateFile, errorFileName, diagFileName
     global noteFile
     
     head, tail = os.path.split(inputFileName)
@@ -123,6 +125,11 @@ def initialize():
         exit(1, 'Could not open file %s\n' % inputFileName)
 
     try:
+        duplicateFile = open(duplicateFileName, 'r')
+    except:
+        exit(1, 'Could not open file %s\n' % duplicateFileName)
+
+    try:
         noteFile = open(noteFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % noteFileName)
@@ -137,8 +144,8 @@ def initialize():
     errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
 
     # delete existing note
-    db.sql('delete from MGI_Note n where n._mgitype_key = 11 and n._notetype_key = 1053', None)
-    db.commit()
+    #db.sql('delete from MGI_Note n where n._mgitype_key = 11 and n._notetype_key = 1053', None)
+    #db.commit()
 
 #
 # Purpose: Close files.
@@ -188,30 +195,14 @@ def processFile():
     totalSkipped = 0
     totalProcessed = 0
 
-    # save markerID:alleleID duplicate set
-    allSet = []
+    # dupliates
     dupSet = []
-    for line in inputFile.readlines():
-
+    for line in duplicateFile.readlines():
         tokens = line[:-1].split('\t')
-
-        if tokens[0] == '' or tokens[0] == 'Gene Symbol':
+        if tokens[1] == '':
             continue
-
-        markerID = tokens[2]
-        alleleID = tokens[3]
-
-        if alleleID == '':
-            continue
-
-        id = markerID + '|' + alleleID
-        if id in allSet:
-            dupSet.append(id)
-        else:
-            allSet.append(id)
-
-    # reset pointer to the start
-    inputFile.seek(0)
+        dupSet.append(tokens[0] + '|' + tokens[1])
+    duplicateFile.close()
 
     for line in inputFile.readlines():
 
@@ -293,6 +284,6 @@ if __name__ == '__main__':
         print('processFile')
         processFile()
         print('bcpFiles')
-        bcpFiles()
+        #bcpFiles()
 
         exit(0)

@@ -47,7 +47,9 @@ fi
 # copy file
 #
 rm -rf ${INPUTFILE}
+rm -rf ${IMPC_DUPLICATE}
 cp ${IMPC_INPUT_FILE} ${INPUTFILE}
+cut -f3,4 ${INPUTFILE} | sort | uniq -d > ${IMPC_DUPLICATE}
 
 #
 # process impc molecular note
