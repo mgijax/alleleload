@@ -287,6 +287,6 @@ if __name__ == '__main__':
         print('processFile')
         processFile()
         print('bcpFiles')
-        #bcpFiles()
+        bcpFiles()
 
         exit(0)
