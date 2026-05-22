@@ -262,7 +262,7 @@ def processFile():
 
         # if no errors, process the allele
 
-        note += ' (<A href=https://www.informatics.jax.org/reference/J:384794>J:384794</A>)'
+        note += ' (<A href="https://www.informatics.jax.org/reference/J:384794">J:384794</A>)'
         noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (noteKey, alleleKey, mgiTypeKey, noteTypeKey, \
                note, createdByKey, createdByKey, loaddate, loaddate))
