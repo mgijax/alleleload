@@ -197,6 +197,8 @@ def processFile():
             ''' % (alleleKey, markerKey), 'auto')
         if len(results) == 0:
             print('The MGI Allele ID is not associated with the MGI Gene ID in the same row: ', markerID, alleleID)
+            totalSkipped += 1
+            continue
 
         # if no errors, process the allele
 
