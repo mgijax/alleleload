@@ -255,8 +255,8 @@ def processFile():
         totalProcessed += 1
 
         results = db.sql(''' 
-            select count(*) from all_allele where _allele_key = %s and _marker_key = %s 
-            ''' % (markerKey, alleleKey), 'auto')
+            select * from all_allele where _allele_key = %s and _marker_key = %s 
+            ''' % (alleleKey, markerKey), 'auto')
         if len(results) == 0:
             print('The MGI Allele ID is not associated with the MGI Gene ID in the same row: ', markerID, alleleID)
 
