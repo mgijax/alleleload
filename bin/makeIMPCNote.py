@@ -207,6 +207,7 @@ def processFile():
 
         noteKey = noteKey + 1
 
+    print('\n')
     print('rows input: ', str(totalRows))
     print('rows skipped: ', str(totalSkipped))
     print('rows processed: ', str(totalProcessed))
@@ -220,10 +221,10 @@ def processFile():
 #
 
 if __name__ == '__main__':
-        print('initialize')
+        print('\ninitialize')
         initialize()
-        print('processFile')
+        print('\nprocessFile')
         processFile()
-        print('bcpFiles')
+        print('\nbcpFiles')
         bcpFiles()
 
