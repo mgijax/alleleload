@@ -66,4 +66,6 @@ fi
 
 touch ${LASTRUN_FILE}
 
+date | tee -a ${LOG}
+
 exit 0

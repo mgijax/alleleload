@@ -39,7 +39,6 @@
 #       MGI_Note_IMPCMolecular.bcp
 #
 #       Diagnostics file of all input parameters and SQL commands
-#       Error file
 #
 # 05/21/2026    sc
 #       - wts2-1857/Allele Molecular Note Load
@@ -56,17 +55,12 @@ duplicateFileName = os.environ['IMPC_DUPLICATE']
 outputDir = os.environ['OUTPUTDIR']
 BCP_COMMAND = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
-diagFile = ''		# diagnostic file descriptor
-errorFile = ''		# error file descriptor
 inputFile = ''		# file descriptor
 duplicateFile = ''	# file descriptor
 noteFile = ''		# file descriptor
 
 noteTable = 'MGI_Note'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
-
-diagFileName = ''	# diagnostic file name
-errorFileName = ''	# error file name
 
 duplicateSet = []
 
@@ -77,51 +71,16 @@ createdByKey = 1000
 loaddate = loadlib.loaddate
 
 #
-# Purpose: prints error message and exits
-#
-def exit(
-    status,          # numeric exit status (integer)
-    message = None   # exit message (str.
-    ):
-
-    if message is not None:
-        sys.stderr.write('\n' + str(message) + '\n')
- 
-    try:
-        diagFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
-        errorFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
-        diagFile.close()
-        errorFile.close()
-        inputFile.close()
-    except:
-        print('issued closing files from exit function')
-        pass
-
-    sys.exit(status)
- 
-#
 # Purpose: process command line options
 #
 def initialize():
-    global diagFile, errorFile, inputFile, duplicateFile, errorFileName, diagFileName
+    global inputFile, duplicateFile
     global noteFile
+    global noteKey
     global duplicateSet
     
     head, tail = os.path.split(inputFileName)
 
-    diagFileName = outputDir + '/' + tail + '.diagnostics'
-    errorFileName = outputDir + '/' + tail + '.error'
-
-    try:
-        diagFile = open(diagFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % diagFileName)
-                
-    try:
-        errorFile = open(errorFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % errorFileName)
-                
     try:
         inputFile = open(inputFileName, 'r')
     except:
@@ -140,12 +99,6 @@ def initialize():
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)
 
-    diagFile.write('Start Date/Time: %s\n' % (mgi_utils.date()))
-    diagFile.write('Server: %s\n' % (db.get_sqlServer()))
-    diagFile.write('Database: %s\n' % (db.get_sqlDatabase()))
-
-    errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
-
     # duplicates
     duplicateSet = []
     for line in duplicateFile.readlines():
@@ -159,20 +112,7 @@ def initialize():
     db.sql('delete from MGI_Note n where n._mgitype_key = 11 and n._notetype_key = 1053', None)
     db.commit()
 
-#
-# Purpose: Close files.
-#
-def closeFiles():
-
-    noteFile.close()
-
-#
-# Purpose:  sets global primary key variables
-#
-def setPrimaryKeys():
-
-    global noteKey
-
+    # set max key
     results = db.sql(''' select nextval('mgi_note_seq') as maxKey ''', 'auto')
     noteKey = results[0]['maxKey']
 
@@ -181,12 +121,10 @@ def setPrimaryKeys():
 #
 def bcpFiles():
 
-    closeFiles()
-
     bcpI = '%s %s %s' % (BCP_COMMAND, db.get_sqlServer(), db.get_sqlDatabase())
     bcpII = '"|" "\\n" mgd'
     bcpCmd = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    diagFile.write('%s\n' % bcpCmd)
+    print('%s\n' % bcpCmd)
     os.system(bcpCmd)
 
     # update mgi_note_seq auto-sequence
@@ -239,8 +177,8 @@ def processFile():
             totalSkipped += 1
             continue
 
-        markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
-        alleleKey = loadlib.verifyObject(alleleID, 11, None, lineNum, errorFile)
+        markerKey = loadlib.verifyMarker(markerID, lineNum, None)
+        alleleKey = loadlib.verifyObject(alleleID, 11, None, lineNum, None)
         
         if markerKey == 0:
             print('The MGI Gene ID is not a valid MGI marker ID: ', markerID)
@@ -274,6 +212,8 @@ def processFile():
     print('rows processed: ', str(totalProcessed))
 
     #	end of "for line in inputFile.readlines():"
+    inputFile.close()
+    noteFile.close()
 
 #
 # Main
@@ -282,11 +222,8 @@ def processFile():
 if __name__ == '__main__':
         print('initialize')
         initialize()
-        print('setPrimaryKeys')
-        setPrimaryKeys()
         print('processFile')
         processFile()
         print('bcpFiles')
         bcpFiles()
 
-        exit(0)
