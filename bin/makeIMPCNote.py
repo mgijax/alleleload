@@ -36,7 +36,8 @@
 #
 #       BCP files:
 #
-#       MGI_Note_IMPCMolecular.bcp
+#       MGI_Note.bcp
+#       MGI_Reference_Assoc.bcp
 #
 #       Diagnostics file of all input parameters and SQL commands
 #
@@ -58,15 +59,22 @@ BCP_COMMAND = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 inputFile = ''		# file descriptor
 duplicateFile = ''	# file descriptor
 noteFile = ''		# file descriptor
+refFile = ''		# file descriptor
 
 noteTable = 'MGI_Note'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
+refTable = 'MGI_Reference_Assoc'
+refFileName = outputDir + '/' + refTable + '.bcp'
 
 duplicateSet = []
 
+# J:384794
+refKey = 818095
 mgiTypeKey = 11
 noteTypeKey = 1053
+refAssocTypeKey = 1012
 createdByKey = 1000
+
 
 loaddate = loadlib.loaddate
 
@@ -75,8 +83,8 @@ loaddate = loadlib.loaddate
 #
 def initialize():
     global inputFile, duplicateFile
-    global noteFile
-    global noteKey
+    global noteFile, refFile
+    global noteKey, refAssocKey
     global duplicateSet
     
     head, tail = os.path.split(inputFileName)
@@ -96,6 +104,11 @@ def initialize():
     except:
         exit(1, 'Could not open file %s\n' % noteFileName)
 
+    try:
+        refFile = open(refFileName, 'w')
+    except:
+        exit(1, 'Could not open file %s\n' % refFileName)
+
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)
 
@@ -111,10 +124,16 @@ def initialize():
     # delete existing note
     db.sql('delete from MGI_Note n where n._mgitype_key = 11 and n._notetype_key = 1053', None)
     db.commit()
+    # delete existing molecular reference
+    db.sql('delete from MGI_Reference_Assoc n where n._mgitype_key = 11 and n._refs_key = %s' % (refKey), None)
+    db.commit()
 
     # set max key
     results = db.sql(''' select nextval('mgi_note_seq') as maxKey ''', 'auto')
     noteKey = results[0]['maxKey']
+
+    results = db.sql(''' select nextval('mgi_reference_assoc_seq') as maxKey ''', 'auto')
+    refAssocKey = results[0]['maxKey']
 
 #
 # Purpose:  BCPs the data into the database
@@ -123,12 +142,19 @@ def bcpFiles():
 
     bcpI = '%s %s %s' % (BCP_COMMAND, db.get_sqlServer(), db.get_sqlDatabase())
     bcpII = '"|" "\\n" mgd'
+
     bcpCmd = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
+    print('%s\n' % bcpCmd)
+    os.system(bcpCmd)
+
+    bcpCmd = '%s %s "/" %s %s' % (bcpI, refTable, refFileName, bcpII)
     print('%s\n' % bcpCmd)
     os.system(bcpCmd)
 
     # update mgi_note_seq auto-sequence
     db.sql(''' select setval('mgi_note_seq', (select max(_Note_key) from MGI_Note)) ''', None)
+    # update mgi_reference_assoc_seq auto-sequence
+    db.sql(''' select setval('mgi_reference_assoc_seq', (select max(_Assoc_key) from MGI_Reference_Assoc)) ''', None)
     db.commit()
 
 #
@@ -136,7 +162,7 @@ def bcpFiles():
 #
 def processFile():
 
-    global noteKey
+    global noteKey, refAssocKey
 
     lineNum = 0
     # For each line in the input file
@@ -206,8 +232,12 @@ def processFile():
         noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
             % (noteKey, alleleKey, mgiTypeKey, noteTypeKey, \
                note, createdByKey, createdByKey, loaddate, loaddate))
-
         noteKey = noteKey + 1
+
+        refFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+            % (refAssocKey, refKey, alleleKey, mgiTypeKey, refAssocTypeKey, \
+                createdByKey, createdByKey, loaddate, loaddate))
+        refAssocKey = refAssocKey + 1
 
     print('\n')
     print('rows input: ', str(totalRows))
@@ -217,6 +247,7 @@ def processFile():
     #	end of "for line in inputFile.readlines():"
     inputFile.close()
     noteFile.close()
+    refFile.close()
 
 #
 # Main
