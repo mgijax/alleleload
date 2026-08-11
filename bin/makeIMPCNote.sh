@@ -29,9 +29,18 @@ rm -rf ${LOG}
 touch ${LOG}
 
 #
+# copy file
+# create duplicate file based on marker|allele
+#
+rm -rf ${INPUTFILE}
+rm -rf ${IMPC_DUPLICATE}
+cp ${IMPC_INPUT_FILE} ${INPUTFILE}
+cut -f3,4 ${INPUTFILE} | sort | uniq -d > ${IMPC_DUPLICATE}
+
+#
 # There should be a "lastrun" file in the input directory that was created
-# the last time the gene model load was run. If this file exists and is more
-# recent than the gene model file, the load does not need to be run.
+# the last time the load was run. If this file exists and is more
+# recent than the file, the load does not need to be run.
 #
 LASTRUN_FILE=${INPUTDIR}/lastrun
 if [ -f ${LASTRUN_FILE} ]
@@ -42,15 +51,6 @@ then
         exit 0
     fi
 fi
-
-#
-# copy file
-# create duplicate file based on marker|allele
-#
-rm -rf ${INPUTFILE}
-rm -rf ${IMPC_DUPLICATE}
-cp ${IMPC_INPUT_FILE} ${INPUTFILE}
-cut -f3,4 ${INPUTFILE} | sort | uniq -d > ${IMPC_DUPLICATE}
 
 #
 # process impc molecular note
