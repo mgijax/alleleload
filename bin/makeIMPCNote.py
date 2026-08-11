@@ -193,6 +193,7 @@ def processFile():
 
         # skip if there is no allele
         if alleleID == '':
+            print('Skipped: ', line)
             totalSkipped += 1
             continue
 
